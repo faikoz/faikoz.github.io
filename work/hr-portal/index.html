@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HR & Workforce Portal — Faik Öz</title>
+<meta name="description" content="Internal HR portal — contractor onboarding, time capture, payroll self-service, leave-accrual ledger. Firebase + Firestore.">
+<style>
+  :root { --bg:#0E1A2E; --bg-card:#16243B; --border:#243349; --text:#F0F4FA; --text-dim:#A0B0C8; --accent:#58A6FF; --accent-warm:#F2CB67; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 16px/1.6 -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+  .topnav { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+  .topnav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+  .topnav a:hover { text-decoration: underline; }
+  header { padding: 4rem 0 3rem; border-bottom: 1px solid var(--border); }
+  .kicker { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.18em; color: var(--accent); text-transform: uppercase; margin-bottom: 1rem; }
+  h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; line-height: 1.15; margin-bottom: 1.25rem; letter-spacing: -0.01em; }
+  .subtitle { font-size: 1.05rem; color: var(--text-dim); max-width: 880px; }
+  .meta { margin-top: 1.5rem; padding: 1.25rem 1.5rem; background: var(--bg-card); border-left: 3px solid var(--accent); border-radius: 4px; max-width: 880px; }
+  .meta .label { color: var(--accent-warm); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+  .meta .tech { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem; }
+  .meta .tech li { font-size: 0.72rem; color: var(--text-dim); padding: 0.25rem 0.6rem; background: rgba(255,255,255,0.04); border-radius: 3px; border: 1px solid var(--border); }
+  .banner { background: rgba(242, 203, 103, 0.08); color: var(--accent-warm); border: 1px solid rgba(242, 203, 103, 0.3); border-radius: 4px; padding: 0.75rem 1rem; font-size: 0.85rem; margin: 2rem 0; text-align: center; }
+  section { padding: 3rem 0; }
+  h2 { font-size: 1.5rem; font-weight: 600; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+  .section-desc { color: var(--text-dim); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 760px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+  .shot { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; transition: transform 0.2s ease, border-color 0.2s ease; }
+  .shot:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .shot img { width: 100%; height: auto; display: block; border-bottom: 1px solid var(--border); }
+  .shot .caption { padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-dim); }
+  footer { padding: 3rem 0 5rem; border-top: 1px solid var(--border); text-align: center; color: var(--text-dim); }
+  footer a { color: var(--accent); text-decoration: none; margin: 0 1rem; font-weight: 500; }
+  footer a:hover { text-decoration: underline; }
+  footer .copy { margin-top: 1.5rem; font-size: 0.82rem; opacity: 0.55; }
+  @media (max-width: 720px) { .container { padding: 0 1.25rem; } .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+<nav class="topnav"><a href="/">← Back to portfolio</a></nav>
+<header>
+  <div class="kicker">Project · Vic Air Supplies</div>
+  <h1>HR &amp; Workforce Portal</h1>
+  <p class="subtitle">Contractor onboarding, time capture, payroll self-service, and an auditable leave-accrual ledger with full transaction history. Firebase Authentication and Firestore Security Rules calibrated to organisational policy.</p>
+  <div class="meta">
+    <div class="label">Business Outcome</div>
+    <p>Replaces the workforce-management SaaS tier the business otherwise would have subscribed to.</p>
+    <ul class="tech">
+      <li>Firebase Authentication</li><li>Firestore</li><li>Firestore Security Rules</li><li>JavaScript</li><li>GitHub Pages</li>
+    </ul>
+  </div>
+  <p class="banner">Screenshots redacted — synthetic blur on employee names, times, balances, and identifying fields. Layout and design are unmodified.</p>
+</header>
+
+<section>
+  <h2>Dashboard</h2>
+  <p class="section-desc">Live snapshot of who's clocked in, who's on shift, leave in the next 7 days, and weekly team hours.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Dashboard1.jpg" alt="Dashboard 1"><div class="caption">Dashboard · 1</div></div>
+    <div class="shot"><img src="../../screenshots/hr-portal/Dashboard2.jpg" alt="Dashboard 2"><div class="caption">Dashboard · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Team</h2>
+  <p class="section-desc">Contractor list with role, opening leave balance, accrual start date, and per-user edit modal.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Team.jpg" alt="Team"><div class="caption">Team management</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Timesheets</h2>
+  <p class="section-desc">Clock-in / clock-out history with auditable timestamps.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Timesheets1.jpg" alt="Timesheets"><div class="caption">Timesheets</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Leave</h2>
+  <p class="section-desc">Leave-accrual ledger with full transaction history — request, approve, accrue, decrement.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Leave1.jpg" alt="Leave 1"><div class="caption">Leave · 1</div></div>
+    <div class="shot"><img src="../../screenshots/hr-portal/Leave2.jpg" alt="Leave 2"><div class="caption">Leave · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Analytics</h2>
+  <p class="section-desc">Hours, attendance trends, leave usage, and exception flags.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Analytics1.jpg" alt="Analytics 1"><div class="caption">Analytics · 1</div></div>
+    <div class="shot"><img src="../../screenshots/hr-portal/Analytics2.jpg" alt="Analytics 2"><div class="caption">Analytics · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Audit</h2>
+  <p class="section-desc">Full audit trail of every action that touches leave balances or workforce records.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/hr-portal/Audit.jpg" alt="Audit"><div class="caption">Audit trail</div></div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <a href="/">Portfolio</a>
+    <a href="https://linkedin.com/in/faikoz" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/faikoz" target="_blank" rel="noopener">GitHub</a>
+    <a href="mailto:faikoz@hotmail.com">Email</a>
+  </div>
+  <p class="copy">© 2026 Faik Öz · Built in Melbourne</p>
+</footer>
+</div>
+</body>
+</html>
