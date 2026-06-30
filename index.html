@@ -102,6 +102,19 @@
     font-size: 1.05rem; letter-spacing: 0.01em;
     line-height: 1.25;
   }
+  .placeholder-img {
+    padding: 0; overflow: hidden;
+    background: var(--bg-card);
+  }
+  .placeholder-img img {
+    width: 100%; height: 100%; object-fit: cover;
+    object-position: top center; display: block;
+  }
+  a.card-link { text-decoration: none; color: inherit; }
+  a.card-link h3 .more {
+    color: var(--accent); font-weight: 500; font-size: 0.85rem;
+    margin-left: 0.5rem; white-space: nowrap;
+  }
   .ph-1 { background: linear-gradient(135deg, #1E3A8A, #3B82F6); }
   .ph-2 { background: linear-gradient(135deg, #5B21B6, #8B5CF6); }
   .ph-3 { background: linear-gradient(135deg, #B45309, #F59E0B); }
@@ -192,17 +205,17 @@
   <h2>Selected work</h2>
   <div class="grid">
 
-  <article class="card">
-    <div class="placeholder ph-1">Sales Analytics Dashboard</div>
+  <a class="card card-link" href="work/sales-dashboard/">
+    <div class="placeholder placeholder-img"><img src="screenshots/sales-dashboard/Overview1.jpg" alt="Sales Analytics Dashboard"></div>
     <div class="card-body">
-      <h3>Sales Analytics Dashboard</h3>
+      <h3>Sales Analytics Dashboard <span class="more">View screens →</span></h3>
       <p>Live executive view of the sales ledger, built directly on Microsoft Dynamics 365 Business Central via OData v4. MSAL-secured, with runtime <code>$metadata</code> schema discovery so the application is immune to vendor entity-name drift across upgrades. Single-tenant, free-tier deployment.</p>
       <p class="outcome"><strong>Business outcome:</strong> replaces the Power BI + Azure data-warehouse + ETL pipeline that would otherwise be required to give the leadership team a live read on sales performance.</p>
       <ul class="tech">
         <li>JavaScript</li><li>MSAL OAuth 2.0</li><li>BC OData v4</li><li>Chart.js</li><li>XLSX.js</li><li>GitHub Pages</li>
       </ul>
     </div>
-  </article>
+  </a>
 
   <article class="card">
     <div class="placeholder ph-2">Item Demand &amp; Procurement Forecasting</div>

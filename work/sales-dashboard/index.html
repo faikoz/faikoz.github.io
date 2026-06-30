@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales Analytics Dashboard — Faik Öz</title>
+<meta name="description" content="Executive sales analytics built directly on Microsoft Dynamics 365 Business Central. Live ledger view with runtime $metadata schema discovery.">
+<style>
+  :root {
+    --bg: #0E1A2E;
+    --bg-card: #16243B;
+    --border: #243349;
+    --text: #F0F4FA;
+    --text-dim: #A0B0C8;
+    --accent: #58A6FF;
+    --accent-warm: #F2CB67;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .container { max-width: 1400px; margin: 0 auto; padding: 0 2rem; }
+
+  /* Top nav */
+  .topnav { padding: 1.5rem 0; border-bottom: 1px solid var(--border); }
+  .topnav a { color: var(--accent); text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+  .topnav a:hover { text-decoration: underline; }
+
+  /* Header */
+  header { padding: 4rem 0 3rem; border-bottom: 1px solid var(--border); }
+  .kicker {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.18em;
+    color: var(--accent); text-transform: uppercase; margin-bottom: 1rem;
+  }
+  h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700;
+    line-height: 1.15; margin-bottom: 1.25rem; letter-spacing: -0.01em;
+  }
+  .subtitle { font-size: 1.05rem; color: var(--text-dim); max-width: 880px; }
+  .meta {
+    margin-top: 1.5rem; padding: 1.25rem 1.5rem;
+    background: var(--bg-card); border-left: 3px solid var(--accent);
+    border-radius: 4px; max-width: 880px;
+  }
+  .meta .label {
+    color: var(--accent-warm); font-weight: 700; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 0.5rem;
+  }
+  .meta .tech {
+    list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem;
+    margin-top: 1rem;
+  }
+  .meta .tech li {
+    font-size: 0.72rem; color: var(--text-dim);
+    padding: 0.25rem 0.6rem; background: rgba(255,255,255,0.04);
+    border-radius: 3px; border: 1px solid var(--border);
+  }
+
+  /* Banner */
+  .banner {
+    background: rgba(242, 203, 103, 0.08); color: var(--accent-warm);
+    border: 1px solid rgba(242, 203, 103, 0.3); border-radius: 4px;
+    padding: 0.75rem 1rem; font-size: 0.85rem; margin: 2rem 0;
+    text-align: center;
+  }
+
+  /* Section headings */
+  section { padding: 3rem 0; }
+  h2 {
+    font-size: 1.5rem; font-weight: 600; color: var(--text);
+    margin-bottom: 0.5rem; letter-spacing: -0.01em;
+  }
+  .section-desc {
+    color: var(--text-dim); font-size: 0.95rem;
+    margin-bottom: 1.5rem; max-width: 760px;
+  }
+
+  /* Gallery grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .shot {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; overflow: hidden;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .shot:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .shot img {
+    width: 100%; height: auto; display: block;
+    border-bottom: 1px solid var(--border);
+  }
+  .shot .caption {
+    padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-dim);
+  }
+
+  /* Footer */
+  footer {
+    padding: 3rem 0 5rem; border-top: 1px solid var(--border);
+    text-align: center; color: var(--text-dim);
+  }
+  footer a { color: var(--accent); text-decoration: none; margin: 0 1rem; font-weight: 500; }
+  footer a:hover { text-decoration: underline; }
+  footer .copy { margin-top: 1.5rem; font-size: 0.82rem; opacity: 0.55; }
+
+  @media (max-width: 720px) {
+    .container { padding: 0 1.25rem; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<nav class="topnav">
+  <a href="/">← Back to portfolio</a>
+</nav>
+
+<header>
+  <div class="kicker">Project · Vic Air Supplies</div>
+  <h1>Sales Analytics Dashboard</h1>
+  <p class="subtitle">Live executive view of the sales ledger, built directly on Microsoft Dynamics 365 Business Central via OData v4. MSAL-secured, with runtime <code>$metadata</code> schema discovery so the application is immune to vendor entity-name drift across upgrades. Single-tenant, free-tier deployment.</p>
+  <div class="meta">
+    <div class="label">Business Outcome</div>
+    <p>Replaces the Power BI + Azure data-warehouse + ETL pipeline that would otherwise be required to give the leadership team a live read on sales performance.</p>
+    <ul class="tech">
+      <li>JavaScript</li><li>MSAL OAuth 2.0</li><li>BC OData v4</li>
+      <li>Runtime $metadata discovery</li><li>Chart.js</li><li>XLSX.js</li><li>GitHub Pages</li>
+    </ul>
+  </div>
+  <p class="banner">Screenshots redacted — synthetic blur on customer names, dollar values, and identifying fields. Layout and design are unmodified.</p>
+</header>
+
+<section>
+  <h2>Overview</h2>
+  <p class="section-desc">Top-line KPIs at the executive scan — sales, gross profit, margin, outstanding orders, shipped-not-invoiced, outstanding invoices — with a revenue-over-time chart split by configurable buckets.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Overview1.jpg" alt="Overview 1"><div class="caption">Overview · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Overview2.jpg" alt="Overview 2"><div class="caption">Overview · 2</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Overview3.jpg" alt="Overview 3"><div class="caption">Overview · 3</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Branch Sales</h2>
+  <p class="section-desc">Per-branch breakdown of sales, profit, and contribution.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Branch Sales 1.jpg" alt="Branch Sales 1"><div class="caption">Branch Sales · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Branch Sales 2.jpg" alt="Branch Sales 2"><div class="caption">Branch Sales · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Salesperson Sales</h2>
+  <p class="section-desc">Sales-rep-level performance with monthly stacked-column view and top-salespeople ranking.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Salesperson Sales1.jpg" alt="Salesperson Sales 1"><div class="caption">Salesperson Sales · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Salesperson Sales2.jpg" alt="Salesperson Sales 2"><div class="caption">Salesperson Sales · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales by Item</h2>
+  <p class="section-desc">Item-level sales analysis — quantities, revenue, margin per SKU.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales by Item1.jpg" alt="Sales by Item 1"><div class="caption">Sales by Item · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales by Item2.jpg" alt="Sales by Item 2"><div class="caption">Sales by Item · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Customer × Item</h2>
+  <p class="section-desc">Cross-tab of buyers vs non-buyers for a stocked-item universe — surfaces selling opportunity per customer.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/CustomerxItem1.jpg" alt="Customer × Item 1"><div class="caption">Customer × Item · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/CustomerxItem2.jpg" alt="Customer × Item 2"><div class="caption">Customer × Item · 2</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>EOM Report</h2>
+  <p class="section-desc">End-of-month line-level detail — invoice-by-invoice GP $ and GP % with filters for low and high margin slices.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/EOM Report1.jpg" alt="EOM Report 1"><div class="caption">EOM Report — line-level detail</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Quote Overview</h2>
+  <p class="section-desc">Outstanding quotes pipeline, conversion rates, quote-to-invoice cycle.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Quote Overview1.jpg" alt="Sales Quote Overview 1"><div class="caption">Sales Quote Overview · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Quote Overview2.jpg" alt="Sales Quote Overview 2"><div class="caption">Sales Quote Overview · 2</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Quote Overview3.jpg" alt="Sales Quote Overview 3"><div class="caption">Sales Quote Overview · 3</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Return Overview</h2>
+  <p class="section-desc">Credits / returns tracking against invoiced sales.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Return Overview.jpg" alt="Sales Return Overview"><div class="caption">Sales Return Overview</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Month-to-Date</h2>
+  <p class="section-desc">Live MTD snapshot vs prior-month MTD comparisons.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Month-to-Date.jpg" alt="Month-to-Date"><div class="caption">Month-to-Date</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Demographics</h2>
+  <p class="section-desc">Customer-demographic slicing of sales (segment, geography, age of relationship).</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Demographics.jpg" alt="Sales Demographics"><div class="caption">Sales Demographics</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Forecasting</h2>
+  <p class="section-desc">Statistically-anchored forward forecast off live ledger history. Two method choices; configurable horizon.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Forecasting.jpg" alt="Sales Forecasting"><div class="caption">Sales Forecasting</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Pareto (80/20)</h2>
+  <p class="section-desc">Concentration analysis — the customer/item curve and the 20% that drives 80% of revenue.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Pareto 1.jpg" alt="Sales Pareto 1"><div class="caption">Sales Pareto · 1</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Pareto 2.jpg" alt="Sales Pareto 2"><div class="caption">Sales Pareto · 2</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Pareto 3.jpg" alt="Sales Pareto 3"><div class="caption">Sales Pareto · 3</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Pareto 4.jpg" alt="Sales Pareto 4"><div class="caption">Sales Pareto · 4</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Sales Decomposition</h2>
+  <p class="section-desc">Period-over-period change decomposed into volume, price, and mix.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Sales Decomposition.jpg" alt="Sales Decomposition"><div class="caption">Sales Decomposition</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>Deep Insights</h2>
+  <p class="section-desc">Exploratory analytical views — each chart answers a different question about the sales base, drawing from the same ledger as the operational KPIs.</p>
+  <div class="grid">
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights1.jpg" alt="Deep Insights 1"><div class="caption">Deep Insights · 1 (Sankey: Salesperson → Category)</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights2.jpg" alt="Deep Insights 2"><div class="caption">Deep Insights · 2</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights3.jpg" alt="Deep Insights 3"><div class="caption">Deep Insights · 3</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights4.jpg" alt="Deep Insights 4"><div class="caption">Deep Insights · 4</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights5.jpg" alt="Deep Insights 5"><div class="caption">Deep Insights · 5</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights6.jpg" alt="Deep Insights 6"><div class="caption">Deep Insights · 6</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights7.jpg" alt="Deep Insights 7"><div class="caption">Deep Insights · 7</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights8.jpg" alt="Deep Insights 8"><div class="caption">Deep Insights · 8</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights9.jpg" alt="Deep Insights 9"><div class="caption">Deep Insights · 9</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights10.jpg" alt="Deep Insights 10"><div class="caption">Deep Insights · 10</div></div>
+    <div class="shot"><img src="../../screenshots/sales-dashboard/Deep Insights11.jpg" alt="Deep Insights 11"><div class="caption">Deep Insights · 11</div></div>
+  </div>
+</section>
+
+<footer>
+  <div>
+    <a href="/">Portfolio</a>
+    <a href="https://linkedin.com/in/faikoz" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/faikoz" target="_blank" rel="noopener">GitHub</a>
+    <a href="mailto:faikoz@hotmail.com">Email</a>
+  </div>
+  <p class="copy">© 2026 Faik Öz · Built in Melbourne</p>
+</footer>
+
+</div>
+</body>
+</html>
