@@ -1,0 +1,21 @@
+{
+  "companyInternalName": "YOUR COMPANY PTY LTD",
+  "totalRequests": 42,
+  "chunks": [
+    "captured-data-001.json.gz",
+    "captured-data-002.json.gz",
+    "captured-data-003.json.gz",
+    "captured-data-004.json.gz",
+    "captured-data-005.json.gz",
+    "captured-data-006.json.gz",
+    "captured-data-007.json.gz",
+    "captured-data-008.json.gz",
+    "captured-data-009.json.gz",
+    "captured-data-010.json.gz",
+    "captured-data-011.json.gz",
+    "captured-data-012.json.gz",
+    "captured-data-013.json.gz",
+    "captured-data-014.json.gz",
+    "captured-data-015.json.gz"
+  ]
+}

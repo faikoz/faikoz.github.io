@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+
+<meta charset="utf-8">
+<title>Users — HR Tool Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<header class="topbar"></header>
+
+<main>
+  <div class="card">
+    <div class="toolbar">
+      <h2>Contractors</h2>
+      <button id="addBtn">+ Add user</button>
+    </div>
+    <div id="listContainer">
+      <div class="empty">Loading…</div>
+    </div>
+  </div>
+</main>
+
+<!-- Add user modal -->
+<div class="modal-backdrop" id="addModal">
+  <div class="modal">
+    <h2>Add a contractor</h2>
+    <p class="muted" style="margin-top:-6px">You'll be shown a temporary password — send it to the contractor however you normally communicate (Slack, WhatsApp, etc.). They'll be forced to change it the first time they log in.</p>
+    <form id="addForm">
+      <label>Full name</label>
+      <input type="text" id="newName" required autocomplete="off">
+      <label>Email</label>
+      <input type="email" id="newEmail" required autocomplete="off">
+      <label>Role</label>
+      <select id="newRole" required>
+        <option value="contractor" selected>Contractor (clocks in / requests leave)</option>
+        <option value="viewer">Viewer (read-only admin panel)</option>
+        <option value="admin">Admin (full access)</option>
+      </select>
+      <div class="error" id="addErr"></div>
+      <div class="actions">
+        <button type="button" class="ghost" id="cancelBtn">Cancel</button>
+        <button type="submit" id="createBtn">Create user</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Show temp password modal -->
+<div class="modal-backdrop" id="tempPassModal">
+  <div class="modal">
+    <h2>User created ✓</h2>
+    <p>Send these credentials to the contractor:</p>
+    <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:14px; font-family:monospace; font-size:14px; margin:14px 0">
+      <div><span class="muted">Email:</span> <span id="tpEmail"></span></div>
+      <div style="margin-top:6px"><span class="muted">Password:</span> <span id="tpPass"></span></div>
+    </div>
+    <p class="muted" style="font-size:12px">They'll be prompted to set their own password the first time they sign in. This temporary one will stop working at that point.</p>
+    <div class="actions">
+      <button type="button" id="copyBtn" class="ghost">Copy</button>
+      <button type="button" id="tpDoneBtn">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Remove user modal -->
+<div class="modal-backdrop" id="removeModal">
+  <div class="modal">
+    <h2 style="color:#991B1B">Permanently remove user?</h2>
+    <p>This will delete <strong id="rmName">—</strong> and <strong>all their data</strong>:</p>
+    <ul style="font-size:13px; color:var(--muted); margin: 8px 0 14px 18px; line-height:1.7">
+      <li><span id="rmTeCount">…</span> time entries</li>
+      <li><span id="rmLrCount">…</span> leave requests</li>
+      <li><span id="rmErCount">…</span> fix requests</li>
+      <li>Their user profile</li>
+    </ul>
+    
+    <p class="muted" style="font-size:12px">If you just want to stop their access without losing history, use <strong>Deactivate</strong> instead.</p>
+    <label>Type <strong>DELETE</strong> to confirm</label>
+    <input type="text" id="rmConfirmInput" autocomplete="off" placeholder="DELETE">
+    <div class="error" id="rmErr"></div>
+    <div class="actions">
+      <button type="button" class="ghost" id="rmCancelBtn">Cancel</button>
+      <button type="button" class="danger" id="rmConfirmBtn" disabled>Permanently remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit user modal -->
+<div class="modal-backdrop" id="editModal">
+  <div class="modal">
+    <h2>Edit user</h2>
+    <form id="editForm">
+      <input type="hidden" id="editUid">
+      <label>Full name</label>
+      <input type="text" id="editName" required>
+      <label>Email <span class="muted" style="font-size:11px">(read-only)</span></label>
+      <input type="email" id="editEmail" readonly disabled>
+      <label>Role</label>
+      <select id="editRole">
+        <option value="contractor">Contractor (clocks in / requests leave)</option>
+        <option value="viewer">Viewer (read-only admin panel)</option>
+        <option value="admin">Admin (full access)</option>
+      </select>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:8px; align-items:end">
+        <div>
+          <label style="margin-bottom:0">Opening leave balance (days)</label>
+          <input type="number" id="editOpeningBalance" min="0" step="any" placeholder="0">
+        </div>
+        <div>
+          <label style="margin-bottom:0">Accrual start date</label>
+          <input type="date" id="editAccrualStart">
+        </div>
+      </div>
+      <div class="muted" style="font-size:11px; margin-top:6px">Leave the date blank for no accrual.</div>
+      <label style="display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:start; margin-top:14px; font-size:13px; color:var(--text); font-weight:500; line-height:1.4">
+        <input type="checkbox" id="editAccrueAllWeeks" style="width:auto; margin-top:3px">
+        <span>
+          Always accrue (don't check timesheets)
+          <span class="muted" style="font-size:11px; display:block; font-weight:400; margin-top:2px">Useful when older work history isn't tracked in this tool — accrues 2.92h per completed week from the start date no matter what.</span>
+        </span>
+      </label>
+      <label style="display:grid; grid-template-columns:auto 1fr; gap:10px; align-items:start; margin-top:14px; font-size:13px; color:var(--text); font-weight:500; line-height:1.4">
+        <input type="checkbox" id="editTestAccount" style="width:auto; margin-top:3px">
+        <span>
+          Test account
+          <span class="muted" style="font-size:11px; display:block; font-weight:400; margin-top:2px">Hidden from team totals, charts and queues — but still visible to admin.</span>
+        </span>
+      </label>
+      <div class="error" id="editErr"></div>
+      <div class="actions">
+        <button type="button" class="ghost" id="editCancelBtn">Cancel</button>
+        <button type="submit">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import {
+    getAuth, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { profile } = await requireRole(["admin", "viewer"]);
+  const canWrite = profile.role === "admin";
+  if (!canWrite) document.body.classList.add("viewer-mode");
+  renderAdminNav(profile, "users");
+
+  // ---- Helpers ----
+  function generateTempPassword() {
+    // 12 chars, no ambiguous (no I l O 0 1)
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let out = "";
+    const buf = new Uint32Array(12);
+    crypto.getRandomValues(buf);
+    for (let i = 0; i < 12; i++) out += chars[buf[i] % chars.length];
+    return out;
+  }
+
+  async function loadUsers() {
+    const listEl = document.getElementById("listContainer");
+    listEl.innerHTML = `<div class="empty">Loading…</div>`;
+    // Show everyone but the admin themselves
+    const snap = await getDocs(collection(db, "users"));
+    const allRows = [];
+    snap.forEach(d => {
+      const u = d.data();
+      if (u.role === "admin") return; // hide admin from this list
+      allRows.push({ uid: d.id, ...u });
+    });
+    if (allRows.length === 0) {
+      listEl.innerHTML = `<div class="empty">No users yet. Click <strong>+ Add user</strong> to add one.</div>`;
+      return;
+    }
+    // Contractors first (alpha), then viewers
+    allRows.sort((a, b) => {
+      const r = (a.role === "viewer" ? 1 : 0) - (b.role === "viewer" ? 1 : 0);
+      if (r !== 0) return r;
+      return (a.name || "").localeCompare(b.name || "");
+    });
+    const rows = [];
+    allRows.forEach(u => {
+      const d = { id: u.uid };
+      const testBadge = u.testAccount ? ` <span class="badge test">TEST</span>` : "";
+      const viewerBadge = u.role === "viewer" ? ` <span class="badge test" style="background:#FFF1F2; color:#9F1239; border-color:#FECDD3">VIEWER</span>` : "";
+      const status = !u.active
+        ? `<span class="badge off">Deactivated</span>`
+        : u.mustChangePassword
+          ? `<span class="badge pending">Awaiting first login</span>`
+          : `<span class="badge ok">Active</span>`;
+      rows.push(`
+        <tr>
+          <td>${escapeHtml(u.name || "—")}${testBadge}${viewerBadge}</td>
+          <td>${escapeHtml(u.email)}</td>
+          <td>${status}</td>
+          <td>
+            <div class="actions">
+              <button class="ghost" data-act="edit" data-uid="${d.id}">Edit</button>
+              <button class="ghost" data-act="force-pw" data-uid="${d.id}" data-name="${escapeHtml(u.name || u.email)}">Force pw change</button>
+              <button class="ghost" data-act="reset" data-email="${escapeHtml(u.email)}">Reset email</button>
+              ${u.active
+                ? `<button class="ghost" data-act="deactivate" data-uid="${d.id}">Deactivate</button>`
+                : `<button class="ghost" data-act="activate" data-uid="${d.id}">Reactivate</button>`}
+              <button class="ghost danger" data-act="remove" data-uid="${d.id}" data-name="${escapeHtml(u.name || u.email)}">Remove…</button>
+            </div>
+          </td>
+        </tr>
+      `);
+    });
+    listEl.innerHTML = `
+      <table class="data">
+        <thead><tr><th>Name</th><th>Email</th><th>Status</th><th></th></tr></thead>
+        <tbody>${rows.join("")}</tbody>
+      </table>
+    `;
+    listEl.querySelectorAll("button[data-act]").forEach(btn => {
+      btn.addEventListener("click", () => handleUserAction(btn.dataset.act, btn.dataset));
+    });
+  }
+
+  async function handleUserAction(act, data) {
+    if (act === "edit") {
+      const snap = await getDoc(doc(db, "users", data.uid));
+      const u = snap.data();
+      document.getElementById("editUid").value = data.uid;
+      document.getElementById("editName").value = u.name || "";
+      document.getElementById("editEmail").value = u.email;
+      document.getElementById("editRole").value = u.role || "contractor";
+      document.getElementById("editOpeningBalance").value = u.openingBalanceDays ?? "";
+      document.getElementById("editAccrualStart").value = u.accrualStartDate || "";
+      document.getElementById("editAccrueAllWeeks").checked = !!u.accrueAllWeeks;
+      document.getElementById("editTestAccount").checked = !!u.testAccount;
+      document.getElementById("editErr").textContent = "";
+      document.getElementById("editModal").classList.add("open");
+    } else if (act === "reset") {
+      if (!confirm(`Send password reset email to ${data.email}?\n\nNote: example.com mail strips the reset link, so this rarely works for in-house contractors. Use "Force pw change" instead — the contractor sets a new one on next login.`)) return;
+      try {
+        await sendPasswordResetEmail(auth, data.email);
+        alert("Reset email sent.");
+      } catch (e) { alert("Failed: " + e.message); }
+    } else if (act === "force-pw") {
+      if (!confirm(`Force ${data.name} to set a new password on next login?\n\nThey'll still need their current password to sign in. After signing in they'll be sent straight to the "set new password" screen.`)) return;
+      try {
+        await updateDoc(doc(db, "users", data.uid), { mustChangePassword: true });
+        logAudit({ profile }, { action: "user.forcePwChange", targetType: "user", targetId: data.uid, targetUser: data.uid, note: `Forced ${data.name} to set a new password on next login` });
+        alert("Done — they'll set a new password next time they sign in.");
+        loadUsers();
+      } catch (e) { alert("Failed: " + e.message); }
+    } else if (act === "remove") {
+      openRemoveModal(data.uid, data.name);
+    } else if (act === "deactivate") {
+      if (!confirm("Deactivate this user? They'll be blocked from signing in until reactivated.")) return;
+      await updateDoc(doc(db, "users", data.uid), { active: false });
+      logAudit({ profile }, { action: "user.deactivate", targetType: "user", targetId: data.uid, targetUser: data.uid, note: `Deactivated ${data.name}` });
+      loadUsers();
+    } else if (act === "activate") {
+      await updateDoc(doc(db, "users", data.uid), { active: true });
+      logAudit({ profile }, { action: "user.activate", targetType: "user", targetId: data.uid, targetUser: data.uid, note: `Reactivated ${data.name}` });
+      loadUsers();
+    }
+  }
+
+  // ---- Add user (with secondary Firebase app so admin stays signed in) ----
+  document.getElementById("addBtn").addEventListener("click", () => {
+    document.getElementById("addForm").reset();
+    document.getElementById("addErr").textContent = "";
+    document.getElementById("addModal").classList.add("open");
+  });
+  document.getElementById("cancelBtn").addEventListener("click", () => {
+    document.getElementById("addModal").classList.remove("open");
+  });
+  document.getElementById("editCancelBtn").addEventListener("click", () => {
+    document.getElementById("editModal").classList.remove("open");
+  });
+
+  document.getElementById("addForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("newName").value.trim();
+    const email = document.getElementById("newEmail").value.trim().toLowerCase();
+    const errEl = document.getElementById("addErr");
+    const createBtn = document.getElementById("createBtn");
+    errEl.textContent = "";
+    createBtn.disabled = true; createBtn.textContent = "Creating…";
+
+    const tempPass = generateTempPassword();
+    let tempApp;
+    try {
+      // Secondary app instance so admin's main session is untouched
+      tempApp = initializeApp(auth.app.options, "userCreator-" + Date.now());
+      const tempAuth = getAuth(tempApp);
+      const cred = await createUserWithEmailAndPassword(tempAuth, email, tempPass);
+      const newUid = cred.user.uid;
+      await signOut(tempAuth);
+
+      // Now write the profile doc using admin's main auth
+      const role = document.getElementById("newRole").value || "contractor";
+      await setDoc(doc(db, "users", newUid), {
+        email,
+        name,
+        role,
+        active: true,
+        mustChangePassword: true,
+        startDate: new Date().toISOString().slice(0, 10),
+        createdAt: serverTimestamp(),
+        createdBy: profile.email
+      });
+      logAudit({ profile }, { action: "user.create", targetType: "user", targetId: newUid, targetUser: newUid, after: { name, email, role }, note: `Created user ${name} (${email})` });
+
+      document.getElementById("addModal").classList.remove("open");
+      document.getElementById("tpEmail").textContent = email;
+      document.getElementById("tpPass").textContent = tempPass;
+      document.getElementById("tempPassModal").classList.add("open");
+      loadUsers();
+    } catch (ex) {
+      errEl.textContent = "Failed: " + (ex.message || ex.code);
+    } finally {
+      createBtn.disabled = false; createBtn.textContent = "Create user";
+      if (tempApp) { try { await deleteApp(tempApp); } catch {} }
+    }
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", async () => {
+    const text = `Email: ${document.getElementById("tpEmail").textContent}\nPassword: ${document.getElementById("tpPass").textContent}\nSign in at: https://vasdesign1.github.io/hr-tool/`;
+    try {
+      await navigator.clipboard.writeText(text);
+      document.getElementById("copyBtn").textContent = "Copied ✓";
+      setTimeout(() => document.getElementById("copyBtn").textContent = "Copy", 1500);
+    } catch { alert(text); }
+  });
+  document.getElementById("tpDoneBtn").addEventListener("click", () => {
+    document.getElementById("tempPassModal").classList.remove("open");
+  });
+
+  // ---- Remove user modal (full hard-delete of Firestore data) ----
+  let __rmTargetUid = null;
+  async function openRemoveModal(uid, name) {
+    __rmTargetUid = uid;
+    document.getElementById("rmName").textContent = name || "this user";
+    document.getElementById("rmConfirmInput").value = "";
+    document.getElementById("rmConfirmBtn").disabled = true;
+    document.getElementById("rmErr").textContent = "";
+    document.getElementById("rmTeCount").textContent = "…";
+    document.getElementById("rmLrCount").textContent = "…";
+    document.getElementById("rmErCount").textContent = "…";
+    document.getElementById("removeModal").classList.add("open");
+    try {
+      const [te, lr, er] = await Promise.all([
+        getDocs(query(collection(db, "timeEntries"),       where("uid", "==", uid))),
+        getDocs(query(collection(db, "leaveRequests"),     where("uid", "==", uid))),
+        getDocs(query(collection(db, "timeEditRequests"),  where("uid", "==", uid)))
+      ]);
+      document.getElementById("rmTeCount").textContent = te.size;
+      document.getElementById("rmLrCount").textContent = lr.size;
+      document.getElementById("rmErCount").textContent = er.size;
+    } catch (e) {
+      console.error("count for remove modal:", e);
+    }
+  }
+  document.getElementById("rmCancelBtn").addEventListener("click", () => {
+    document.getElementById("removeModal").classList.remove("open");
+    __rmTargetUid = null;
+  });
+  document.getElementById("rmConfirmInput").addEventListener("input", (e) => {
+    document.getElementById("rmConfirmBtn").disabled = e.target.value.trim() !== "DELETE";
+  });
+  document.getElementById("rmConfirmBtn").addEventListener("click", async () => {
+    if (!__rmTargetUid) return;
+    const btn = document.getElementById("rmConfirmBtn");
+    const errEl = document.getElementById("rmErr");
+    errEl.textContent = "";
+    btn.disabled = true; btn.textContent = "Removing…";
+    try {
+      // Delete all their owned data in chunks of 400 (Firestore batch limit is 500)
+      async function deleteOwned(collName) {
+        const snap = await getDocs(query(collection(db, collName), where("uid", "==", __rmTargetUid)));
+        const docs = snap.docs;
+        for (let i = 0; i < docs.length; i += 400) {
+          const batch = writeBatch(db);
+          docs.slice(i, i + 400).forEach(d => batch.delete(d.ref));
+          await batch.commit();
+        }
+      }
+      await deleteOwned("timeEntries");
+      await deleteOwned("leaveRequests");
+      await deleteOwned("timeEditRequests");
+      const rmSnap = await getDoc(doc(db, "users", __rmTargetUid));
+      const rmBefore = rmSnap.exists() ? { name: rmSnap.data().name, email: rmSnap.data().email, role: rmSnap.data().role } : null;
+      await deleteDoc(doc(db, "users", __rmTargetUid));
+      logAudit({ profile }, { action: "user.remove", targetType: "user", targetId: __rmTargetUid, targetUser: __rmTargetUid, before: rmBefore, note: `Permanently removed user ${rmBefore?.name || __rmTargetUid}` });
+      document.getElementById("removeModal").classList.remove("open");
+      __rmTargetUid = null;
+      loadUsers();
+    } catch (ex) {
+      errEl.textContent = "Failed: " + (ex.message || ex.code);
+      btn.disabled = false; btn.textContent = "Permanently remove";
+    }
+  });
+
+  document.getElementById("editForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const uid = document.getElementById("editUid").value;
+    const name = document.getElementById("editName").value.trim();
+    const role = document.getElementById("editRole").value || "contractor";
+    const obRaw = document.getElementById("editOpeningBalance").value.trim();
+    const openingBalanceDays = obRaw === "" ? 0 : Number(obRaw);
+    const accrualStartDate = document.getElementById("editAccrualStart").value || null;
+    const accrueAllWeeks = document.getElementById("editAccrueAllWeeks").checked;
+    const testAccount = document.getElementById("editTestAccount").checked;
+    try {
+      const beforeSnap = await getDoc(doc(db, "users", uid));
+      const before = beforeSnap.exists() ? { name: beforeSnap.data().name, role: beforeSnap.data().role, openingBalanceDays: beforeSnap.data().openingBalanceDays, accrualStartDate: beforeSnap.data().accrualStartDate, accrueAllWeeks: !!beforeSnap.data().accrueAllWeeks, testAccount: !!beforeSnap.data().testAccount } : null;
+      await updateDoc(doc(db, "users", uid), { name, role, openingBalanceDays, accrualStartDate, accrueAllWeeks, testAccount });
+      logAudit({ profile }, { action: "user.edit", targetType: "user", targetId: uid, targetUser: uid, before, after: { name, role, openingBalanceDays, accrualStartDate, accrueAllWeeks, testAccount }, note: `Edited user ${name}` });
+      document.getElementById("editModal").classList.remove("open");
+      loadUsers();
+    } catch (ex) {
+      document.getElementById("editErr").textContent = "Failed: " + (ex.message || ex.code);
+    }
+  });
+
+  loadUsers();
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>

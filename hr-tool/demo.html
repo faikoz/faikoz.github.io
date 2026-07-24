@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HR Tool Demo — split view</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --divider: #d1d5db; --header: #0f172a; --sub: #64748b; }
+  html, body { margin: 0; padding: 0; height: 100%; background: #f1f5f9; font-family: system-ui, sans-serif; }
+  .demo-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 16px; background: var(--header); color: white; font-size: 14px;
+  }
+  .demo-bar strong { font-weight: 600; }
+  .demo-bar .hint { color: #94a3b8; font-size: 12px; }
+  .demo-split {
+    display: grid; grid-template-columns: 70fr 6px 30fr;
+    height: calc(100vh - 40px); background: var(--divider);
+  }
+  .demo-frame {
+    display: flex; flex-direction: column; background: white; overflow: hidden;
+  }
+  .demo-frame-head {
+    padding: 6px 12px; font-size: 12px; font-weight: 600;
+    background: #e2e8f0; color: var(--sub); text-transform: uppercase; letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .demo-divider { background: var(--divider); }
+  iframe { flex: 1; width: 100%; border: 0; background: white; }
+</style>
+<link rel="stylesheet" href="tour/tour.css">
+<script src="tour/tour.js" defer></script>
+</head>
+<body>
+<div class="demo-bar">
+  <strong>HR Tool — Portfolio Demo</strong>
+  <span class="hint">Left = Admin view · Right = Contractor view · Writes are blocked</span>
+  <button id="restartTourBtn" style="background:#047857;color:#fff;border:0;padding:6px 12px;border-radius:6px;font:600 12px/1 system-ui,sans-serif;cursor:pointer">? Take the tour</button>
+</div>
+<div class="demo-split">
+  <div class="demo-frame">
+    <div class="demo-frame-head">Admin panel</div>
+    <iframe id="adminFrame" src="admin/index.html" title="Admin panel"></iframe>
+  </div>
+  <div class="demo-divider"></div>
+  <div class="demo-frame">
+    <div class="demo-frame-head">Contractor panel</div>
+    <iframe id="appFrame" src="app/index.html" title="Contractor panel"></iframe>
+  </div>
+</div>
+
+<!--
+  Split-view tour coordinator.
+  Each iframe loads ../../tour-hr-tool/tour.js. Inside iframes the tour
+  script defers auto-fire; instead it calls parent.__hrTourFrameReady()
+  when its page has loaded + settled. This coordinator runs the ADMIN
+  tour first (left iframe), then when it finishes runs the CONTRACTOR
+  tour (right iframe), giving the reader a top-to-bottom split-screen
+  walkthrough.
+-->
+<script>
+(function () {
+  var frames = { admin: null, app: null };
+  var readyKeys = {};
+
+  // Called by each iframe's tour.js when its page is armed and ready.
+  window.__hrTourFrameReady = function (pageKey, frameWindow) {
+    // pageKey is e.g. "admin/index" or "app/index"
+    var side = pageKey.split("/")[0];   // "admin" or "app"
+    frames[side] = frameWindow;
+    readyKeys[side] = pageKey;
+    maybeStartAdmin();
+  };
+
+  function maybeStartAdmin() {
+    if (!frames.admin || !frames.app) return;      // wait for both
+    if (window.__adminTourStarted) return;         // guard against re-fire
+    window.__adminTourStarted = true;
+    if (userDismissedAll()) return;                // user has seen it before
+    startAdmin();
+  }
+
+  function startAdmin() {
+    var f = frames.admin;
+    if (!f || typeof f.startHrTour !== "function") return;
+    f.hrTourOnComplete = function () {
+      // Small pause so the reader's eyes can move to the right panel.
+      setTimeout(startContractor, 400);
+    };
+    try { f.startHrTour(readyKeys.admin, { force: true, resume: true }); } catch (e) {}
+  }
+
+  function startContractor() {
+    var f = frames.app;
+    if (!f || typeof f.startHrTour !== "function") return;
+    try { f.startHrTour(readyKeys.app, { force: true, resume: true }); } catch (e) {}
+  }
+
+  // Have we already run the split walkthrough at least once?
+  var SEEN_KEY = "hrTour_demoSplit_v1";
+  function userDismissedAll() {
+    try { return localStorage.getItem(SEEN_KEY) === "1"; } catch (e) { return false; }
+  }
+  function markDismissedAll() {
+    try { localStorage.setItem(SEEN_KEY, "1"); } catch (e) {}
+  }
+
+  // Header button — replays the whole split walkthrough from scratch.
+  var btn = document.getElementById("restartTourBtn");
+  if (btn) {
+    btn.addEventListener("click", function () {
+      window.__adminTourStarted = false;
+      // Clear both iframes' seen flags so the tours run fresh.
+      try {
+        Object.keys(localStorage).forEach(function (k) {
+          if (/^hrTour_/.test(k)) localStorage.removeItem(k);
+        });
+      } catch (e) {}
+      // Re-arm both iframes.
+      Object.values(frames).forEach(function (f) {
+        if (f && f.location) try { f.location.reload(); } catch (e) {}
+      });
+      // frames map will be repopulated as they signal ready again.
+      frames = { admin: null, app: null };
+    });
+  }
+
+  // Mark seen when both tours have run at least once so the auto-run
+  // only happens on the visitor's first load of demo.html.
+  window.addEventListener("beforeunload", function () {
+    if (window.__adminTourStarted) markDismissedAll();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+/* ============================================================
+   Guided tour styling for the forecast-tool demo.
+   Single fixed palette matching the tool's indigo theme.
+   ============================================================ */
+
+:root {
+    --fct-bg: #ffffff;
+    --fct-fg: #2c2f4a;
+    --fct-muted: #6b6f8f;
+    --fct-title: #1a237e;
+    --fct-accent: #1a237e;
+    --fct-accent-hover: #283593;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: #e8eaf6;
+    --fct-secondary-fg: #1a237e;
+    --fct-border: rgba(26, 35, 126, 0.10);
+    --fct-shadow: 0 24px 60px rgba(26, 35, 126, 0.20), 0 4px 14px rgba(26, 35, 126, 0.10);
+    --fct-close-bg: rgba(26, 35, 126, 0.06);
+    --fct-close-fg: #1a237e;
+    --fct-close-hover: rgba(26, 35, 126, 0.14);
+    --fct-fab-bg: #ffca28;
+    --fct-fab-fg: #1a237e;
+    --fct-fab-hover: #ffd54f;
+    --fct-stage-outline: rgba(26, 35, 126, 0.35);
+}
+
+/* --- Header "Take the tour" button --- */
+.fc-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px 7px 10px;
+    background: var(--fct-fab-bg);
+    color: var(--fct-fab-fg);
+    border: 0;
+    border-radius: 999px;
+    font: 600 12px/1 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
+    transition: transform 0.08s, filter 0.15s;
+}
+.fc-tour-btn:hover  { background: var(--fct-fab-hover); filter: brightness(1.02); }
+.fc-tour-btn:active { transform: translateY(1px); }
+.fc-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.14);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+}
+.fc-tour-btn-in-header {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    z-index: 20;
+}
+.fc-tour-btn-floating {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/* --- Driver.js popover --- */
+.driver-popover.fc-tour-popover {
+    background: var(--fct-bg);
+    color: var(--fct-fg);
+    border-radius: 14px;
+    box-shadow: var(--fct-shadow);
+    border: 1px solid var(--fct-border);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 380px;
+    padding: 22px 24px 18px;
+}
+.driver-popover.fc-tour-popover .driver-popover-title {
+    color: var(--fct-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0;
+}
+.driver-popover.fc-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--fct-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.fc-tour-popover .driver-popover-description b,
+.driver-popover.fc-tour-popover .driver-popover-description strong {
+    color: var(--fct-title);
+    font-weight: 700;
+}
+.driver-popover.fc-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--fct-border);
+    margin-top: 6px;
+}
+.driver-popover.fc-tour-popover .driver-popover-progress-text {
+    color: var(--fct-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+.driver-popover.fc-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.fc-tour-popover .driver-popover-next-btn,
+.driver-popover.fc-tour-popover .driver-popover-prev-btn {
+    background: var(--fct-accent);
+    color: var(--fct-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 inherit;
+    text-shadow: none;
+    cursor: pointer;
+    transition: filter 0.12s, transform 0.06s;
+}
+.driver-popover.fc-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.fc-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--fct-accent-hover);
+}
+.driver-popover.fc-tour-popover .driver-popover-prev-btn {
+    background: var(--fct-secondary-bg);
+    color: var(--fct-secondary-fg);
+}
+.driver-popover.fc-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fct-close-bg);
+    color: var(--fct-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: none;
+}
+.driver-popover.fc-tour-popover .driver-popover-close-btn:hover {
+    background: var(--fct-close-hover);
+}
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--fct-bg); }
+
+.driver-active-element {
+    outline: 3px solid var(--fct-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 6px;
+    /* Pulsing halo so small inline elements (like a table-cell link) are
+       easy to spot inside the dimmed page. */
+    box-shadow: 0 0 0 4px rgba(255, 202, 40, 0.35),
+                0 0 24px 6px rgba(255, 202, 40, 0.55);
+    animation: fct-tour-pulse 1.4s ease-in-out infinite;
+}
+@keyframes fct-tour-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(255, 202, 40, 0.30),
+                    0 0 22px 4px rgba(255, 202, 40, 0.45);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(255, 202, 40, 0.55),
+                    0 0 32px 10px rgba(255, 202, 40, 0.70);
+    }
+}

@@ -1,0 +1,3985 @@
+{
+  "generatedAt": "2026-07-06T09:15:00+00:00",
+  "collections": {
+    "users": [
+      {
+        "uid": "u-admin",
+        "name": "Dana Admin",
+        "email": "admin@example.com",
+        "role": "admin",
+        "active": true,
+        "mustChangePassword": false,
+        "startDate": "2024-01-15",
+        "accrualStartDate": "2024-01-15",
+        "openingBalanceDays": 0,
+        "team": "Operations",
+        "phone": "0400 000 001"
+      },
+      {
+        "uid": "u-c01",
+        "name": "Alex Chen",
+        "email": "alex.chen@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": false,
+        "startDate": "2026-04-07",
+        "accrualStartDate": "2026-04-07",
+        "openingBalanceDays": 0.34,
+        "team": "Field Crew A",
+        "phone": "0426 943 892",
+        "_demoStatus": "active",
+        "currentEntryId": "te-u-c01-live",
+        "clockedInAt": {
+          "_offset_ms": -12000000
+        }
+      },
+      {
+        "uid": "u-c02",
+        "name": "Priya Patel",
+        "email": "priya.patel@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": false,
+        "startDate": "2026-01-07",
+        "accrualStartDate": "2026-01-07",
+        "openingBalanceDays": 0.3,
+        "team": "Field Crew A",
+        "phone": "0427 152 841",
+        "_demoStatus": "active",
+        "currentEntryId": "te-u-c02-live",
+        "clockedInAt": {
+          "_offset_ms": -15600000
+        },
+        "currentBreakStartAt": {
+          "_offset_ms": -900000
+        }
+      },
+      {
+        "uid": "u-c03",
+        "name": "Marcus Kelly",
+        "email": "marcus.kelly@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": false,
+        "startDate": "2025-10-09",
+        "accrualStartDate": "2025-10-09",
+        "openingBalanceDays": 4.49,
+        "team": "Workshop",
+        "phone": "0414 875 591",
+        "_demoStatus": "active",
+        "currentEntryId": "te-u-c03-live",
+        "clockedInAt": {
+          "_offset_ms": -18900000
+        }
+      },
+      {
+        "uid": "u-c04",
+        "name": "Jordan Nguyen",
+        "email": "jordan.nguyen@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": false,
+        "startDate": "2025-07-11",
+        "accrualStartDate": "2025-07-11",
+        "openingBalanceDays": 13.25,
+        "team": "Field Crew A",
+        "phone": "0438 288 963",
+        "_demoStatus": "active",
+        "currentEntryId": "te-u-c04-live",
+        "clockedInAt": {
+          "_offset_ms": -7500000
+        }
+      },
+      {
+        "uid": "u-c05",
+        "name": "Chloe Brooks",
+        "email": "chloe.brooks@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": true,
+        "startDate": "2025-04-12",
+        "accrualStartDate": "2025-04-12",
+        "openingBalanceDays": 0.97,
+        "team": "Field Crew A",
+        "phone": "0477 694 909",
+        "_demoStatus": "pending"
+      },
+      {
+        "uid": "u-c06",
+        "name": "Sam Rivera",
+        "email": "sam.rivera@example.com",
+        "role": "contractor",
+        "active": true,
+        "mustChangePassword": true,
+        "startDate": "2025-01-12",
+        "accrualStartDate": "2025-01-12",
+        "openingBalanceDays": 3.74,
+        "team": "Field Crew A",
+        "phone": "0415 598 702",
+        "_demoStatus": "pending"
+      },
+      {
+        "uid": "u-c07",
+        "name": "Leah Foster",
+        "email": "leah.foster@example.com",
+        "role": "contractor",
+        "active": false,
+        "mustChangePassword": false,
+        "startDate": "2024-10-14",
+        "accrualStartDate": "2024-10-14",
+        "openingBalanceDays": 6.0,
+        "team": "Field Crew B",
+        "phone": "0494 567 292",
+        "_demoStatus": "deactivated"
+      },
+      {
+        "uid": "u-c08",
+        "name": "Noah Kim",
+        "email": "noah.kim@example.com",
+        "role": "contractor",
+        "active": false,
+        "mustChangePassword": false,
+        "startDate": "2024-07-16",
+        "accrualStartDate": "2024-07-16",
+        "openingBalanceDays": 10.74,
+        "team": "Field Crew B",
+        "phone": "0496 724 380",
+        "_demoStatus": "deactivated"
+      }
+    ],
+    "timeEntries": [
+      {
+        "id": "te-u-c01-2026-04-13",
+        "uid": "u-c01",
+        "date": "2026-04-13",
+        "clockInUTC": {
+          "_ts_ms": 1776067200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776101400000
+        },
+        "hoursWorked": 8.87,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-14",
+        "uid": "u-c01",
+        "date": "2026-04-14",
+        "clockInUTC": {
+          "_ts_ms": 1776153600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776183300000
+        },
+        "hoursWorked": 7.65,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-15",
+        "uid": "u-c01",
+        "date": "2026-04-15",
+        "clockInUTC": {
+          "_ts_ms": 1776239100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776269700000
+        },
+        "hoursWorked": 7.87,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-16",
+        "uid": "u-c01",
+        "date": "2026-04-16",
+        "clockInUTC": {
+          "_ts_ms": 1776326400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776355200000
+        },
+        "hoursWorked": 7.25,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-17",
+        "uid": "u-c01",
+        "date": "2026-04-17",
+        "clockInUTC": {
+          "_ts_ms": 1776411000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776442500000
+        },
+        "hoursWorked": 8.08,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-20",
+        "uid": "u-c01",
+        "date": "2026-04-20",
+        "clockInUTC": {
+          "_ts_ms": 1776673800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776704400000
+        },
+        "hoursWorked": 7.92,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-22",
+        "uid": "u-c01",
+        "date": "2026-04-22",
+        "clockInUTC": {
+          "_ts_ms": 1776843000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776879900000
+        },
+        "hoursWorked": 9.52,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-24",
+        "uid": "u-c01",
+        "date": "2026-04-24",
+        "clockInUTC": {
+          "_ts_ms": 1777018500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777046400000
+        },
+        "hoursWorked": 7.13,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-27",
+        "uid": "u-c01",
+        "date": "2026-04-27",
+        "clockInUTC": {
+          "_ts_ms": 1777275000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777303800000
+        },
+        "hoursWorked": 7.42,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-28",
+        "uid": "u-c01",
+        "date": "2026-04-28",
+        "clockInUTC": {
+          "_ts_ms": 1777365000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777394700000
+        },
+        "hoursWorked": 7.6,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-04-30",
+        "uid": "u-c01",
+        "date": "2026-04-30",
+        "clockInUTC": {
+          "_ts_ms": 1777536000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777569300000
+        },
+        "hoursWorked": 8.6,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-04",
+        "uid": "u-c01",
+        "date": "2026-05-04",
+        "clockInUTC": {
+          "_ts_ms": 1777879800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777914900000
+        },
+        "hoursWorked": 9.05,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-05",
+        "uid": "u-c01",
+        "date": "2026-05-05",
+        "clockInUTC": {
+          "_ts_ms": 1777969800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777996800000
+        },
+        "hoursWorked": 6.98,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-06",
+        "uid": "u-c01",
+        "date": "2026-05-06",
+        "clockInUTC": {
+          "_ts_ms": 1778056200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778084100000
+        },
+        "hoursWorked": 7.03,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-07",
+        "uid": "u-c01",
+        "date": "2026-05-07",
+        "clockInUTC": {
+          "_ts_ms": 1778143500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778173200000
+        },
+        "hoursWorked": 7.7,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-08",
+        "uid": "u-c01",
+        "date": "2026-05-08",
+        "clockInUTC": {
+          "_ts_ms": 1778223600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778261400000
+        },
+        "hoursWorked": 9.97,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-11",
+        "uid": "u-c01",
+        "date": "2026-05-11",
+        "clockInUTC": {
+          "_ts_ms": 1778488200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778512500000
+        },
+        "hoursWorked": 6.18,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-12",
+        "uid": "u-c01",
+        "date": "2026-05-12",
+        "clockInUTC": {
+          "_ts_ms": 1778573700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778598000000
+        },
+        "hoursWorked": 6.25,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-13",
+        "uid": "u-c01",
+        "date": "2026-05-13",
+        "clockInUTC": {
+          "_ts_ms": 1778658300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778688900000
+        },
+        "hoursWorked": 7.75,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-14",
+        "uid": "u-c01",
+        "date": "2026-05-14",
+        "clockInUTC": {
+          "_ts_ms": 1778744700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778778900000
+        },
+        "hoursWorked": 8.95,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-15",
+        "uid": "u-c01",
+        "date": "2026-05-15",
+        "clockInUTC": {
+          "_ts_ms": 1778829300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778866200000
+        },
+        "hoursWorked": 9.5,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-18",
+        "uid": "u-c01",
+        "date": "2026-05-18",
+        "clockInUTC": {
+          "_ts_ms": 1779090300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779118200000
+        },
+        "hoursWorked": 7.0,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-19",
+        "uid": "u-c01",
+        "date": "2026-05-19",
+        "clockInUTC": {
+          "_ts_ms": 1779179400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779203700000
+        },
+        "hoursWorked": 6.08,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-20",
+        "uid": "u-c01",
+        "date": "2026-05-20",
+        "clockInUTC": {
+          "_ts_ms": 1779266700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779291000000
+        },
+        "hoursWorked": 6.18,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-25",
+        "uid": "u-c01",
+        "date": "2026-05-25",
+        "clockInUTC": {
+          "_ts_ms": 1779694200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779727500000
+        },
+        "hoursWorked": 8.65,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-27",
+        "uid": "u-c01",
+        "date": "2026-05-27",
+        "clockInUTC": {
+          "_ts_ms": 1779867900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779900300000
+        },
+        "hoursWorked": 8.38,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-05-29",
+        "uid": "u-c01",
+        "date": "2026-05-29",
+        "clockInUTC": {
+          "_ts_ms": 1780040700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780069500000
+        },
+        "hoursWorked": 7.28,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-02",
+        "uid": "u-c01",
+        "date": "2026-06-02",
+        "clockInUTC": {
+          "_ts_ms": 1780387200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780416900000
+        },
+        "hoursWorked": 7.68,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-03",
+        "uid": "u-c01",
+        "date": "2026-06-03",
+        "clockInUTC": {
+          "_ts_ms": 1780476300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780498800000
+        },
+        "hoursWorked": 5.67,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-04",
+        "uid": "u-c01",
+        "date": "2026-06-04",
+        "clockInUTC": {
+          "_ts_ms": 1780559100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780587000000
+        },
+        "hoursWorked": 7.23,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-05",
+        "uid": "u-c01",
+        "date": "2026-06-05",
+        "clockInUTC": {
+          "_ts_ms": 1780649100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780671600000
+        },
+        "hoursWorked": 5.73,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-08",
+        "uid": "u-c01",
+        "date": "2026-06-08",
+        "clockInUTC": {
+          "_ts_ms": 1780904700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780934400000
+        },
+        "hoursWorked": 7.57,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-09",
+        "uid": "u-c01",
+        "date": "2026-06-09",
+        "clockInUTC": {
+          "_ts_ms": 1780990200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781022600000
+        },
+        "hoursWorked": 8.25,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-10",
+        "uid": "u-c01",
+        "date": "2026-06-10",
+        "clockInUTC": {
+          "_ts_ms": 1781080200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781112600000
+        },
+        "hoursWorked": 8.48,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-11",
+        "uid": "u-c01",
+        "date": "2026-06-11",
+        "clockInUTC": {
+          "_ts_ms": 1781165700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781195400000
+        },
+        "hoursWorked": 7.68,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-15",
+        "uid": "u-c01",
+        "date": "2026-06-15",
+        "clockInUTC": {
+          "_ts_ms": 1781513100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781536500000
+        },
+        "hoursWorked": 5.9,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-16",
+        "uid": "u-c01",
+        "date": "2026-06-16",
+        "clockInUTC": {
+          "_ts_ms": 1781594100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781622000000
+        },
+        "hoursWorked": 7.17,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-19",
+        "uid": "u-c01",
+        "date": "2026-06-19",
+        "clockInUTC": {
+          "_ts_ms": 1781855100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781887500000
+        },
+        "hoursWorked": 8.48,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-22",
+        "uid": "u-c01",
+        "date": "2026-06-22",
+        "clockInUTC": {
+          "_ts_ms": 1782112500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782144900000
+        },
+        "hoursWorked": 8.33,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-23",
+        "uid": "u-c01",
+        "date": "2026-06-23",
+        "clockInUTC": {
+          "_ts_ms": 1782198000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782236700000
+        },
+        "hoursWorked": 10.13,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-24",
+        "uid": "u-c01",
+        "date": "2026-06-24",
+        "clockInUTC": {
+          "_ts_ms": 1782287100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782317700000
+        },
+        "hoursWorked": 7.92,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-25",
+        "uid": "u-c01",
+        "date": "2026-06-25",
+        "clockInUTC": {
+          "_ts_ms": 1782370800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782408600000
+        },
+        "hoursWorked": 9.93,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-26",
+        "uid": "u-c01",
+        "date": "2026-06-26",
+        "clockInUTC": {
+          "_ts_ms": 1782459900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782486900000
+        },
+        "hoursWorked": 6.77,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-29",
+        "uid": "u-c01",
+        "date": "2026-06-29",
+        "clockInUTC": {
+          "_ts_ms": 1782722700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782755100000
+        },
+        "hoursWorked": 8.5,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-06-30",
+        "uid": "u-c01",
+        "date": "2026-06-30",
+        "clockInUTC": {
+          "_ts_ms": 1782809100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782839700000
+        },
+        "hoursWorked": 7.97,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-07-01",
+        "uid": "u-c01",
+        "date": "2026-07-01",
+        "clockInUTC": {
+          "_ts_ms": 1782889200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782924300000
+        },
+        "hoursWorked": 9.0,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-07-02",
+        "uid": "u-c01",
+        "date": "2026-07-02",
+        "clockInUTC": {
+          "_ts_ms": 1782978300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783007100000
+        },
+        "hoursWorked": 7.35,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c01-2026-07-03",
+        "uid": "u-c01",
+        "date": "2026-07-03",
+        "clockInUTC": {
+          "_ts_ms": 1783065600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783100700000
+        },
+        "hoursWorked": 9.17,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-13",
+        "uid": "u-c02",
+        "date": "2026-04-13",
+        "clockInUTC": {
+          "_ts_ms": 1776064500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776098700000
+        },
+        "hoursWorked": 8.97,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-14",
+        "uid": "u-c02",
+        "date": "2026-04-14",
+        "clockInUTC": {
+          "_ts_ms": 1776153600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776180600000
+        },
+        "hoursWorked": 6.92,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-16",
+        "uid": "u-c02",
+        "date": "2026-04-16",
+        "clockInUTC": {
+          "_ts_ms": 1776327300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776353400000
+        },
+        "hoursWorked": 6.75,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-17",
+        "uid": "u-c02",
+        "date": "2026-04-17",
+        "clockInUTC": {
+          "_ts_ms": 1776414600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776440700000
+        },
+        "hoursWorked": 6.75,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-20",
+        "uid": "u-c02",
+        "date": "2026-04-20",
+        "clockInUTC": {
+          "_ts_ms": 1776672900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776704400000
+        },
+        "hoursWorked": 8.07,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-22",
+        "uid": "u-c02",
+        "date": "2026-04-22",
+        "clockInUTC": {
+          "_ts_ms": 1776844800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776878100000
+        },
+        "hoursWorked": 8.67,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-27",
+        "uid": "u-c02",
+        "date": "2026-04-27",
+        "clockInUTC": {
+          "_ts_ms": 1777273200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777311900000
+        },
+        "hoursWorked": 10.1,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-04-29",
+        "uid": "u-c02",
+        "date": "2026-04-29",
+        "clockInUTC": {
+          "_ts_ms": 1777452300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777483800000
+        },
+        "hoursWorked": 8.15,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-01",
+        "uid": "u-c02",
+        "date": "2026-05-01",
+        "clockInUTC": {
+          "_ts_ms": 1777620600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777657500000
+        },
+        "hoursWorked": 9.62,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-04",
+        "uid": "u-c02",
+        "date": "2026-05-04",
+        "clockInUTC": {
+          "_ts_ms": 1777879800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777914900000
+        },
+        "hoursWorked": 9.0,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-05",
+        "uid": "u-c02",
+        "date": "2026-05-05",
+        "clockInUTC": {
+          "_ts_ms": 1777969800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778002200000
+        },
+        "hoursWorked": 8.4,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-06",
+        "uid": "u-c02",
+        "date": "2026-05-06",
+        "clockInUTC": {
+          "_ts_ms": 1778056200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778089500000
+        },
+        "hoursWorked": 8.67,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-07",
+        "uid": "u-c02",
+        "date": "2026-05-07",
+        "clockInUTC": {
+          "_ts_ms": 1778141700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778167800000
+        },
+        "hoursWorked": 6.57,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-08",
+        "uid": "u-c02",
+        "date": "2026-05-08",
+        "clockInUTC": {
+          "_ts_ms": 1778223600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778255100000
+        },
+        "hoursWorked": 8.25,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-12",
+        "uid": "u-c02",
+        "date": "2026-05-12",
+        "clockInUTC": {
+          "_ts_ms": 1778571000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778605200000
+        },
+        "hoursWorked": 8.83,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-13",
+        "uid": "u-c02",
+        "date": "2026-05-13",
+        "clockInUTC": {
+          "_ts_ms": 1778655600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778685300000
+        },
+        "hoursWorked": 7.5,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-14",
+        "uid": "u-c02",
+        "date": "2026-05-14",
+        "clockInUTC": {
+          "_ts_ms": 1778744700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778778900000
+        },
+        "hoursWorked": 8.75,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-18",
+        "uid": "u-c02",
+        "date": "2026-05-18",
+        "clockInUTC": {
+          "_ts_ms": 1779093000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779124500000
+        },
+        "hoursWorked": 8.02,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-19",
+        "uid": "u-c02",
+        "date": "2026-05-19",
+        "clockInUTC": {
+          "_ts_ms": 1779179400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779207300000
+        },
+        "hoursWorked": 7.22,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-20",
+        "uid": "u-c02",
+        "date": "2026-05-20",
+        "clockInUTC": {
+          "_ts_ms": 1779265800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779291900000
+        },
+        "hoursWorked": 6.53,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-21",
+        "uid": "u-c02",
+        "date": "2026-05-21",
+        "clockInUTC": {
+          "_ts_ms": 1779348600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779378300000
+        },
+        "hoursWorked": 7.58,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-22",
+        "uid": "u-c02",
+        "date": "2026-05-22",
+        "clockInUTC": {
+          "_ts_ms": 1779436800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779462000000
+        },
+        "hoursWorked": 6.43,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-25",
+        "uid": "u-c02",
+        "date": "2026-05-25",
+        "clockInUTC": {
+          "_ts_ms": 1779698700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779728400000
+        },
+        "hoursWorked": 7.67,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-26",
+        "uid": "u-c02",
+        "date": "2026-05-26",
+        "clockInUTC": {
+          "_ts_ms": 1779782400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779813000000
+        },
+        "hoursWorked": 7.8,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-27",
+        "uid": "u-c02",
+        "date": "2026-05-27",
+        "clockInUTC": {
+          "_ts_ms": 1779865200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779900300000
+        },
+        "hoursWorked": 9.03,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-28",
+        "uid": "u-c02",
+        "date": "2026-05-28",
+        "clockInUTC": {
+          "_ts_ms": 1779951600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779988500000
+        },
+        "hoursWorked": 9.65,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-05-29",
+        "uid": "u-c02",
+        "date": "2026-05-29",
+        "clockInUTC": {
+          "_ts_ms": 1780038000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780074900000
+        },
+        "hoursWorked": 9.55,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-01",
+        "uid": "u-c02",
+        "date": "2026-06-01",
+        "clockInUTC": {
+          "_ts_ms": 1780298100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780328700000
+        },
+        "hoursWorked": 7.95,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-03",
+        "uid": "u-c02",
+        "date": "2026-06-03",
+        "clockInUTC": {
+          "_ts_ms": 1780472700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780506900000
+        },
+        "hoursWorked": 8.88,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-04",
+        "uid": "u-c02",
+        "date": "2026-06-04",
+        "clockInUTC": {
+          "_ts_ms": 1780560000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780593300000
+        },
+        "hoursWorked": 8.55,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-05",
+        "uid": "u-c02",
+        "date": "2026-06-05",
+        "clockInUTC": {
+          "_ts_ms": 1780644600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780678800000
+        },
+        "hoursWorked": 8.83,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-08",
+        "uid": "u-c02",
+        "date": "2026-06-08",
+        "clockInUTC": {
+          "_ts_ms": 1780908300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780940700000
+        },
+        "hoursWorked": 8.37,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-09",
+        "uid": "u-c02",
+        "date": "2026-06-09",
+        "clockInUTC": {
+          "_ts_ms": 1780988400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781020800000
+        },
+        "hoursWorked": 8.25,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-10",
+        "uid": "u-c02",
+        "date": "2026-06-10",
+        "clockInUTC": {
+          "_ts_ms": 1781076600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781105400000
+        },
+        "hoursWorked": 7.48,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-11",
+        "uid": "u-c02",
+        "date": "2026-06-11",
+        "clockInUTC": {
+          "_ts_ms": 1781161200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781199900000
+        },
+        "hoursWorked": 10.17,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-12",
+        "uid": "u-c02",
+        "date": "2026-06-12",
+        "clockInUTC": {
+          "_ts_ms": 1781248500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781282700000
+        },
+        "hoursWorked": 8.78,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-15",
+        "uid": "u-c02",
+        "date": "2026-06-15",
+        "clockInUTC": {
+          "_ts_ms": 1781513100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781545500000
+        },
+        "hoursWorked": 8.42,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-16",
+        "uid": "u-c02",
+        "date": "2026-06-16",
+        "clockInUTC": {
+          "_ts_ms": 1781593200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781624700000
+        },
+        "hoursWorked": 8.15,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-17",
+        "uid": "u-c02",
+        "date": "2026-06-17",
+        "clockInUTC": {
+          "_ts_ms": 1781683200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781712900000
+        },
+        "hoursWorked": 7.72,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-18",
+        "uid": "u-c02",
+        "date": "2026-06-18",
+        "clockInUTC": {
+          "_ts_ms": 1781768700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781796600000
+        },
+        "hoursWorked": 7.17,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-19",
+        "uid": "u-c02",
+        "date": "2026-06-19",
+        "clockInUTC": {
+          "_ts_ms": 1781852400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781888400000
+        },
+        "hoursWorked": 9.4,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-24",
+        "uid": "u-c02",
+        "date": "2026-06-24",
+        "clockInUTC": {
+          "_ts_ms": 1782285300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782315000000
+        },
+        "hoursWorked": 7.58,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-25",
+        "uid": "u-c02",
+        "date": "2026-06-25",
+        "clockInUTC": {
+          "_ts_ms": 1782370800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782401400000
+        },
+        "hoursWorked": 7.88,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-26",
+        "uid": "u-c02",
+        "date": "2026-06-26",
+        "clockInUTC": {
+          "_ts_ms": 1782459000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782491400000
+        },
+        "hoursWorked": 8.38,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-29",
+        "uid": "u-c02",
+        "date": "2026-06-29",
+        "clockInUTC": {
+          "_ts_ms": 1782718200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782746100000
+        },
+        "hoursWorked": 7.02,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-06-30",
+        "uid": "u-c02",
+        "date": "2026-06-30",
+        "clockInUTC": {
+          "_ts_ms": 1782805500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782841500000
+        },
+        "hoursWorked": 9.33,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-07-01",
+        "uid": "u-c02",
+        "date": "2026-07-01",
+        "clockInUTC": {
+          "_ts_ms": 1782889200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782925200000
+        },
+        "hoursWorked": 9.37,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-07-02",
+        "uid": "u-c02",
+        "date": "2026-07-02",
+        "clockInUTC": {
+          "_ts_ms": 1782978300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783012500000
+        },
+        "hoursWorked": 8.9,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-2026-07-03",
+        "uid": "u-c02",
+        "date": "2026-07-03",
+        "clockInUTC": {
+          "_ts_ms": 1783062900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783090800000
+        },
+        "hoursWorked": 7.07,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-13",
+        "uid": "u-c03",
+        "date": "2026-04-13",
+        "clockInUTC": {
+          "_ts_ms": 1776064500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776101400000
+        },
+        "hoursWorked": 9.6,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-14",
+        "uid": "u-c03",
+        "date": "2026-04-14",
+        "clockInUTC": {
+          "_ts_ms": 1776150900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776186000000
+        },
+        "hoursWorked": 9.22,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-17",
+        "uid": "u-c03",
+        "date": "2026-04-17",
+        "clockInUTC": {
+          "_ts_ms": 1776412800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776438000000
+        },
+        "hoursWorked": 6.45,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-20",
+        "uid": "u-c03",
+        "date": "2026-04-20",
+        "clockInUTC": {
+          "_ts_ms": 1776669300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776700800000
+        },
+        "hoursWorked": 8.25,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-22",
+        "uid": "u-c03",
+        "date": "2026-04-22",
+        "clockInUTC": {
+          "_ts_ms": 1776847500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776875400000
+        },
+        "hoursWorked": 7.05,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-24",
+        "uid": "u-c03",
+        "date": "2026-04-24",
+        "clockInUTC": {
+          "_ts_ms": 1777019400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777051800000
+        },
+        "hoursWorked": 8.37,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-27",
+        "uid": "u-c03",
+        "date": "2026-04-27",
+        "clockInUTC": {
+          "_ts_ms": 1777274100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777309200000
+        },
+        "hoursWorked": 9.1,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-28",
+        "uid": "u-c03",
+        "date": "2026-04-28",
+        "clockInUTC": {
+          "_ts_ms": 1777362300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777396500000
+        },
+        "hoursWorked": 8.8,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-29",
+        "uid": "u-c03",
+        "date": "2026-04-29",
+        "clockInUTC": {
+          "_ts_ms": 1777449600000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777479300000
+        },
+        "hoursWorked": 7.7,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-04-30",
+        "uid": "u-c03",
+        "date": "2026-04-30",
+        "clockInUTC": {
+          "_ts_ms": 1777534200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777564800000
+        },
+        "hoursWorked": 7.78,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-01",
+        "uid": "u-c03",
+        "date": "2026-05-01",
+        "clockInUTC": {
+          "_ts_ms": 1777622400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777650300000
+        },
+        "hoursWorked": 7.13,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-04",
+        "uid": "u-c03",
+        "date": "2026-05-04",
+        "clockInUTC": {
+          "_ts_ms": 1777884300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777909500000
+        },
+        "hoursWorked": 6.47,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-05",
+        "uid": "u-c03",
+        "date": "2026-05-05",
+        "clockInUTC": {
+          "_ts_ms": 1777967100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777994100000
+        },
+        "hoursWorked": 6.97,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-06",
+        "uid": "u-c03",
+        "date": "2026-05-06",
+        "clockInUTC": {
+          "_ts_ms": 1778056200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778080500000
+        },
+        "hoursWorked": 6.0,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-07",
+        "uid": "u-c03",
+        "date": "2026-05-07",
+        "clockInUTC": {
+          "_ts_ms": 1778137200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778170500000
+        },
+        "hoursWorked": 8.75,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-08",
+        "uid": "u-c03",
+        "date": "2026-05-08",
+        "clockInUTC": {
+          "_ts_ms": 1778227200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778255100000
+        },
+        "hoursWorked": 7.13,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-11",
+        "uid": "u-c03",
+        "date": "2026-05-11",
+        "clockInUTC": {
+          "_ts_ms": 1778489100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778516100000
+        },
+        "hoursWorked": 6.88,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-13",
+        "uid": "u-c03",
+        "date": "2026-05-13",
+        "clockInUTC": {
+          "_ts_ms": 1778660100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778693400000
+        },
+        "hoursWorked": 8.68,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-14",
+        "uid": "u-c03",
+        "date": "2026-05-14",
+        "clockInUTC": {
+          "_ts_ms": 1778742900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778773500000
+        },
+        "hoursWorked": 7.8,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-15",
+        "uid": "u-c03",
+        "date": "2026-05-15",
+        "clockInUTC": {
+          "_ts_ms": 1778833800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778858100000
+        },
+        "hoursWorked": 6.12,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-18",
+        "uid": "u-c03",
+        "date": "2026-05-18",
+        "clockInUTC": {
+          "_ts_ms": 1779092100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779121800000
+        },
+        "hoursWorked": 7.55,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-20",
+        "uid": "u-c03",
+        "date": "2026-05-20",
+        "clockInUTC": {
+          "_ts_ms": 1779262200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779297300000
+        },
+        "hoursWorked": 9.25,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-21",
+        "uid": "u-c03",
+        "date": "2026-05-21",
+        "clockInUTC": {
+          "_ts_ms": 1779349500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779381900000
+        },
+        "hoursWorked": 8.3,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-22",
+        "uid": "u-c03",
+        "date": "2026-05-22",
+        "clockInUTC": {
+          "_ts_ms": 1779434100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779465600000
+        },
+        "hoursWorked": 8.2,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-25",
+        "uid": "u-c03",
+        "date": "2026-05-25",
+        "clockInUTC": {
+          "_ts_ms": 1779695100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779723000000
+        },
+        "hoursWorked": 7.08,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-26",
+        "uid": "u-c03",
+        "date": "2026-05-26",
+        "clockInUTC": {
+          "_ts_ms": 1779785100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779812100000
+        },
+        "hoursWorked": 6.85,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-27",
+        "uid": "u-c03",
+        "date": "2026-05-27",
+        "clockInUTC": {
+          "_ts_ms": 1779865200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779903900000
+        },
+        "hoursWorked": 10.1,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-05-29",
+        "uid": "u-c03",
+        "date": "2026-05-29",
+        "clockInUTC": {
+          "_ts_ms": 1780038000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780076700000
+        },
+        "hoursWorked": 10.03,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-01",
+        "uid": "u-c03",
+        "date": "2026-06-01",
+        "clockInUTC": {
+          "_ts_ms": 1780298100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780334100000
+        },
+        "hoursWorked": 9.4,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-02",
+        "uid": "u-c03",
+        "date": "2026-06-02",
+        "clockInUTC": {
+          "_ts_ms": 1780388100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780416900000
+        },
+        "hoursWorked": 7.45,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-03",
+        "uid": "u-c03",
+        "date": "2026-06-03",
+        "clockInUTC": {
+          "_ts_ms": 1780475400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780498800000
+        },
+        "hoursWorked": 5.87,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-04",
+        "uid": "u-c03",
+        "date": "2026-06-04",
+        "clockInUTC": {
+          "_ts_ms": 1780560000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780592400000
+        },
+        "hoursWorked": 8.47,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-05",
+        "uid": "u-c03",
+        "date": "2026-06-05",
+        "clockInUTC": {
+          "_ts_ms": 1780646400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780672500000
+        },
+        "hoursWorked": 6.52,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-08",
+        "uid": "u-c03",
+        "date": "2026-06-08",
+        "clockInUTC": {
+          "_ts_ms": 1780902000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780930800000
+        },
+        "hoursWorked": 7.47,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-09",
+        "uid": "u-c03",
+        "date": "2026-06-09",
+        "clockInUTC": {
+          "_ts_ms": 1780992000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781019900000
+        },
+        "hoursWorked": 7.05,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-12",
+        "uid": "u-c03",
+        "date": "2026-06-12",
+        "clockInUTC": {
+          "_ts_ms": 1781250300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781280000000
+        },
+        "hoursWorked": 7.58,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-16",
+        "uid": "u-c03",
+        "date": "2026-06-16",
+        "clockInUTC": {
+          "_ts_ms": 1781594100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781626500000
+        },
+        "hoursWorked": 8.42,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-17",
+        "uid": "u-c03",
+        "date": "2026-06-17",
+        "clockInUTC": {
+          "_ts_ms": 1781685900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781716500000
+        },
+        "hoursWorked": 7.83,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-19",
+        "uid": "u-c03",
+        "date": "2026-06-19",
+        "clockInUTC": {
+          "_ts_ms": 1781852400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781890200000
+        },
+        "hoursWorked": 10.0,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-23",
+        "uid": "u-c03",
+        "date": "2026-06-23",
+        "clockInUTC": {
+          "_ts_ms": 1782202500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782227700000
+        },
+        "hoursWorked": 6.5,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-24",
+        "uid": "u-c03",
+        "date": "2026-06-24",
+        "clockInUTC": {
+          "_ts_ms": 1782290700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782320400000
+        },
+        "hoursWorked": 7.65,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-25",
+        "uid": "u-c03",
+        "date": "2026-06-25",
+        "clockInUTC": {
+          "_ts_ms": 1782374400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782409500000
+        },
+        "hoursWorked": 9.07,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-26",
+        "uid": "u-c03",
+        "date": "2026-06-26",
+        "clockInUTC": {
+          "_ts_ms": 1782459900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782494100000
+        },
+        "hoursWorked": 8.77,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-06-30",
+        "uid": "u-c03",
+        "date": "2026-06-30",
+        "clockInUTC": {
+          "_ts_ms": 1782809100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782837000000
+        },
+        "hoursWorked": 7.07,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-07-01",
+        "uid": "u-c03",
+        "date": "2026-07-01",
+        "clockInUTC": {
+          "_ts_ms": 1782891000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782924300000
+        },
+        "hoursWorked": 8.53,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-07-02",
+        "uid": "u-c03",
+        "date": "2026-07-02",
+        "clockInUTC": {
+          "_ts_ms": 1782981000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783005300000
+        },
+        "hoursWorked": 6.02,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-2026-07-03",
+        "uid": "u-c03",
+        "date": "2026-07-03",
+        "clockInUTC": {
+          "_ts_ms": 1783063800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783094400000
+        },
+        "hoursWorked": 7.82,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-13",
+        "uid": "u-c04",
+        "date": "2026-04-13",
+        "clockInUTC": {
+          "_ts_ms": 1776065400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776097800000
+        },
+        "hoursWorked": 8.47,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-15",
+        "uid": "u-c04",
+        "date": "2026-04-15",
+        "clockInUTC": {
+          "_ts_ms": 1776241800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776275100000
+        },
+        "hoursWorked": 8.57,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-16",
+        "uid": "u-c04",
+        "date": "2026-04-16",
+        "clockInUTC": {
+          "_ts_ms": 1776325500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776357900000
+        },
+        "hoursWorked": 8.28,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-17",
+        "uid": "u-c04",
+        "date": "2026-04-17",
+        "clockInUTC": {
+          "_ts_ms": 1776412800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776444300000
+        },
+        "hoursWorked": 8.1,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-20",
+        "uid": "u-c04",
+        "date": "2026-04-20",
+        "clockInUTC": {
+          "_ts_ms": 1776669300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776698100000
+        },
+        "hoursWorked": 7.4,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-21",
+        "uid": "u-c04",
+        "date": "2026-04-21",
+        "clockInUTC": {
+          "_ts_ms": 1776759300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1776783600000
+        },
+        "hoursWorked": 6.23,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-24",
+        "uid": "u-c04",
+        "date": "2026-04-24",
+        "clockInUTC": {
+          "_ts_ms": 1777014000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777043700000
+        },
+        "hoursWorked": 7.67,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-27",
+        "uid": "u-c04",
+        "date": "2026-04-27",
+        "clockInUTC": {
+          "_ts_ms": 1777277700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777304700000
+        },
+        "hoursWorked": 6.98,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-29",
+        "uid": "u-c04",
+        "date": "2026-04-29",
+        "clockInUTC": {
+          "_ts_ms": 1777446900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777474800000
+        },
+        "hoursWorked": 7.22,
+        "breakMinutes": 32,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-04-30",
+        "uid": "u-c04",
+        "date": "2026-04-30",
+        "clockInUTC": {
+          "_ts_ms": 1777537800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777565700000
+        },
+        "hoursWorked": 7.08,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-01",
+        "uid": "u-c04",
+        "date": "2026-05-01",
+        "clockInUTC": {
+          "_ts_ms": 1777623300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777655700000
+        },
+        "hoursWorked": 8.37,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-04",
+        "uid": "u-c04",
+        "date": "2026-05-04",
+        "clockInUTC": {
+          "_ts_ms": 1777884300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1777916700000
+        },
+        "hoursWorked": 8.42,
+        "breakMinutes": 35,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-06",
+        "uid": "u-c04",
+        "date": "2026-05-06",
+        "clockInUTC": {
+          "_ts_ms": 1778051700000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778085900000
+        },
+        "hoursWorked": 8.82,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-07",
+        "uid": "u-c04",
+        "date": "2026-05-07",
+        "clockInUTC": {
+          "_ts_ms": 1778143500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778166900000
+        },
+        "hoursWorked": 5.9,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-11",
+        "uid": "u-c04",
+        "date": "2026-05-11",
+        "clockInUTC": {
+          "_ts_ms": 1778485500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778517000000
+        },
+        "hoursWorked": 8.0,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-12",
+        "uid": "u-c04",
+        "date": "2026-05-12",
+        "clockInUTC": {
+          "_ts_ms": 1778571000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778599800000
+        },
+        "hoursWorked": 7.38,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-13",
+        "uid": "u-c04",
+        "date": "2026-05-13",
+        "clockInUTC": {
+          "_ts_ms": 1778659200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778685300000
+        },
+        "hoursWorked": 6.75,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-14",
+        "uid": "u-c04",
+        "date": "2026-05-14",
+        "clockInUTC": {
+          "_ts_ms": 1778748300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1778772600000
+        },
+        "hoursWorked": 6.03,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-18",
+        "uid": "u-c04",
+        "date": "2026-05-18",
+        "clockInUTC": {
+          "_ts_ms": 1779088500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779122700000
+        },
+        "hoursWorked": 8.82,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-20",
+        "uid": "u-c04",
+        "date": "2026-05-20",
+        "clockInUTC": {
+          "_ts_ms": 1779262200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779297300000
+        },
+        "hoursWorked": 9.23,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-25",
+        "uid": "u-c04",
+        "date": "2026-05-25",
+        "clockInUTC": {
+          "_ts_ms": 1779695100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779723900000
+        },
+        "hoursWorked": 7.38,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-26",
+        "uid": "u-c04",
+        "date": "2026-05-26",
+        "clockInUTC": {
+          "_ts_ms": 1779781500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779810300000
+        },
+        "hoursWorked": 7.28,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-27",
+        "uid": "u-c04",
+        "date": "2026-05-27",
+        "clockInUTC": {
+          "_ts_ms": 1779865200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1779903000000
+        },
+        "hoursWorked": 9.8,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-05-29",
+        "uid": "u-c04",
+        "date": "2026-05-29",
+        "clockInUTC": {
+          "_ts_ms": 1780042500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780069500000
+        },
+        "hoursWorked": 6.78,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-01",
+        "uid": "u-c04",
+        "date": "2026-06-01",
+        "clockInUTC": {
+          "_ts_ms": 1780300800000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780331400000
+        },
+        "hoursWorked": 7.93,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-02",
+        "uid": "u-c04",
+        "date": "2026-06-02",
+        "clockInUTC": {
+          "_ts_ms": 1780387200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780415100000
+        },
+        "hoursWorked": 7.2,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-03",
+        "uid": "u-c04",
+        "date": "2026-06-03",
+        "clockInUTC": {
+          "_ts_ms": 1780476300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780501500000
+        },
+        "hoursWorked": 6.4,
+        "breakMinutes": 36,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-04",
+        "uid": "u-c04",
+        "date": "2026-06-04",
+        "clockInUTC": {
+          "_ts_ms": 1780558200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780590600000
+        },
+        "hoursWorked": 8.48,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-05",
+        "uid": "u-c04",
+        "date": "2026-06-05",
+        "clockInUTC": {
+          "_ts_ms": 1780648200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780676100000
+        },
+        "hoursWorked": 7.18,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-08",
+        "uid": "u-c04",
+        "date": "2026-06-08",
+        "clockInUTC": {
+          "_ts_ms": 1780902000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1780931700000
+        },
+        "hoursWorked": 7.57,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-09",
+        "uid": "u-c04",
+        "date": "2026-06-09",
+        "clockInUTC": {
+          "_ts_ms": 1780990200000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781022600000
+        },
+        "hoursWorked": 8.45,
+        "breakMinutes": 33,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-10",
+        "uid": "u-c04",
+        "date": "2026-06-10",
+        "clockInUTC": {
+          "_ts_ms": 1781077500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781107200000
+        },
+        "hoursWorked": 7.52,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-11",
+        "uid": "u-c04",
+        "date": "2026-06-11",
+        "clockInUTC": {
+          "_ts_ms": 1781163000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781190000000
+        },
+        "hoursWorked": 6.93,
+        "breakMinutes": 34,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-12",
+        "uid": "u-c04",
+        "date": "2026-06-12",
+        "clockInUTC": {
+          "_ts_ms": 1781253000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781276400000
+        },
+        "hoursWorked": 5.77,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-16",
+        "uid": "u-c04",
+        "date": "2026-06-16",
+        "clockInUTC": {
+          "_ts_ms": 1781594100000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781622900000
+        },
+        "hoursWorked": 7.32,
+        "breakMinutes": 41,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-17",
+        "uid": "u-c04",
+        "date": "2026-06-17",
+        "clockInUTC": {
+          "_ts_ms": 1781681400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781712900000
+        },
+        "hoursWorked": 8.08,
+        "breakMinutes": 40,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-18",
+        "uid": "u-c04",
+        "date": "2026-06-18",
+        "clockInUTC": {
+          "_ts_ms": 1781771400000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1781802000000
+        },
+        "hoursWorked": 7.87,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-22",
+        "uid": "u-c04",
+        "date": "2026-06-22",
+        "clockInUTC": {
+          "_ts_ms": 1782114300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782147600000
+        },
+        "hoursWorked": 8.73,
+        "breakMinutes": 31,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-23",
+        "uid": "u-c04",
+        "date": "2026-06-23",
+        "clockInUTC": {
+          "_ts_ms": 1782198900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782234000000
+        },
+        "hoursWorked": 9.03,
+        "breakMinutes": 43,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-24",
+        "uid": "u-c04",
+        "date": "2026-06-24",
+        "clockInUTC": {
+          "_ts_ms": 1782285300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782316800000
+        },
+        "hoursWorked": 8.13,
+        "breakMinutes": 37,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-25",
+        "uid": "u-c04",
+        "date": "2026-06-25",
+        "clockInUTC": {
+          "_ts_ms": 1782373500000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782405900000
+        },
+        "hoursWorked": 8.27,
+        "breakMinutes": 44,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-26",
+        "uid": "u-c04",
+        "date": "2026-06-26",
+        "clockInUTC": {
+          "_ts_ms": 1782459900000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782492300000
+        },
+        "hoursWorked": 8.5,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-06-29",
+        "uid": "u-c04",
+        "date": "2026-06-29",
+        "clockInUTC": {
+          "_ts_ms": 1782717300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1782746100000
+        },
+        "hoursWorked": 7.37,
+        "breakMinutes": 38,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-07-02",
+        "uid": "u-c04",
+        "date": "2026-07-02",
+        "clockInUTC": {
+          "_ts_ms": 1782978300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783008000000
+        },
+        "hoursWorked": 7.6,
+        "breakMinutes": 39,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-2026-07-03",
+        "uid": "u-c04",
+        "date": "2026-07-03",
+        "clockInUTC": {
+          "_ts_ms": 1783062000000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783093500000
+        },
+        "hoursWorked": 8.05,
+        "breakMinutes": 42,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-autoclose",
+        "uid": "u-c04",
+        "date": "2026-07-05",
+        "clockInUTC": {
+          "_ts_ms": 1783239300000
+        },
+        "clockOutUTC": {
+          "_ts_ms": 1783270800000
+        },
+        "hoursWorked": 8.25,
+        "breakMinutes": 30,
+        "autoClosed": true,
+        "notes": "Auto-closed at 5pm."
+      },
+      {
+        "id": "te-u-c01-live",
+        "uid": "u-c01",
+        "date": "2026-07-06",
+        "clockInUTC": {
+          "_offset_ms": -12000000
+        },
+        "clockOutUTC": null,
+        "hoursWorked": null,
+        "breakMinutes": 30,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c02-live",
+        "uid": "u-c02",
+        "date": "2026-07-06",
+        "clockInUTC": {
+          "_offset_ms": -15600000
+        },
+        "clockOutUTC": null,
+        "hoursWorked": null,
+        "breakMinutes": 15,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c03-live",
+        "uid": "u-c03",
+        "date": "2026-07-06",
+        "clockInUTC": {
+          "_offset_ms": -18900000
+        },
+        "clockOutUTC": null,
+        "hoursWorked": null,
+        "breakMinutes": 45,
+        "autoClosed": false,
+        "notes": ""
+      },
+      {
+        "id": "te-u-c04-live",
+        "uid": "u-c04",
+        "date": "2026-07-06",
+        "clockInUTC": {
+          "_offset_ms": -7500000
+        },
+        "clockOutUTC": null,
+        "hoursWorked": null,
+        "breakMinutes": 0,
+        "autoClosed": false,
+        "notes": ""
+      }
+    ],
+    "leaveRequests": [
+      {
+        "id": "lr-01",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-04-19",
+        "endDate": "2026-04-23",
+        "startKey": "2026-04-19",
+        "endKey": "2026-04-23",
+        "hours": 38.0,
+        "status": "approved",
+        "reason": "Family visit interstate.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1775553300000
+        }
+      },
+      {
+        "id": "lr-02",
+        "uid": "u-c02",
+        "contractorName": "Priya Patel",
+        "requesterName": "Priya Patel",
+        "startDate": "2026-05-03",
+        "endDate": "2026-05-04",
+        "startKey": "2026-05-03",
+        "endKey": "2026-05-04",
+        "hours": 15.2,
+        "status": "approved",
+        "reason": "Medical appointment.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1777281300000
+        }
+      },
+      {
+        "id": "lr-03",
+        "uid": "u-c03",
+        "contractorName": "Marcus Kelly",
+        "requesterName": "Marcus Kelly",
+        "startDate": "2026-05-12",
+        "endDate": "2026-05-16",
+        "startKey": "2026-05-12",
+        "endKey": "2026-05-16",
+        "hours": 30.4,
+        "status": "approved",
+        "reason": "Wedding out of town.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1776417300000
+        }
+      },
+      {
+        "id": "lr-04",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-05-25",
+        "endDate": "2026-05-25",
+        "startKey": "2026-05-25",
+        "endKey": "2026-05-25",
+        "hours": 7.6,
+        "status": "approved",
+        "reason": "Doctor visit.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1779354900000
+        }
+      },
+      {
+        "id": "lr-05",
+        "uid": "u-c04",
+        "contractorName": "Jordan Nguyen",
+        "requesterName": "Jordan Nguyen",
+        "startDate": "2026-05-29",
+        "endDate": "2026-06-02",
+        "startKey": "2026-05-29",
+        "endKey": "2026-06-02",
+        "hours": 38.0,
+        "status": "approved",
+        "reason": "School holidays with family.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1778145300000
+        }
+      },
+      {
+        "id": "lr-06",
+        "uid": "u-c03",
+        "contractorName": "Marcus Kelly",
+        "requesterName": "Marcus Kelly",
+        "startDate": "2026-06-06",
+        "endDate": "2026-06-07",
+        "startKey": "2026-06-06",
+        "endKey": "2026-06-07",
+        "hours": 15.2,
+        "status": "approved",
+        "reason": "Personal matters.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1780305300000
+        }
+      },
+      {
+        "id": "lr-07",
+        "uid": "u-c02",
+        "contractorName": "Priya Patel",
+        "requesterName": "Priya Patel",
+        "startDate": "2026-06-14",
+        "endDate": "2026-06-18",
+        "startKey": "2026-06-14",
+        "endKey": "2026-06-18",
+        "hours": 30.4,
+        "status": "approved",
+        "reason": "Diving trip.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1779873300000
+        }
+      },
+      {
+        "id": "lr-08",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-06-22",
+        "endDate": "2026-06-26",
+        "startKey": "2026-06-22",
+        "endKey": "2026-06-26",
+        "hours": 30.4,
+        "status": "approved",
+        "reason": "Home renovation supervision.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1780737300000
+        }
+      },
+      {
+        "id": "lr-09",
+        "uid": "u-c04",
+        "contractorName": "Jordan Nguyen",
+        "requesterName": "Jordan Nguyen",
+        "startDate": "2026-04-27",
+        "endDate": "2026-05-01",
+        "startKey": "2026-04-27",
+        "endKey": "2026-05-01",
+        "hours": 38.0,
+        "status": "rejected",
+        "reason": "Overlaps peak project week.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1775726100000
+        }
+      },
+      {
+        "id": "lr-10",
+        "uid": "u-c03",
+        "contractorName": "Marcus Kelly",
+        "requesterName": "Marcus Kelly",
+        "startDate": "2026-06-11",
+        "endDate": "2026-06-12",
+        "startKey": "2026-06-11",
+        "endKey": "2026-06-12",
+        "hours": 15.2,
+        "status": "rejected",
+        "reason": "Requested too close to submission date.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1780996500000
+        }
+      },
+      {
+        "id": "lr-11",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-06-28",
+        "endDate": "2026-06-28",
+        "startKey": "2026-06-28",
+        "endKey": "2026-06-28",
+        "hours": 7.6,
+        "status": "rejected",
+        "reason": "Team already short-staffed that day.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1782465300000
+        }
+      },
+      {
+        "id": "lr-12",
+        "uid": "u-c02",
+        "contractorName": "Priya Patel",
+        "requesterName": "Priya Patel",
+        "startDate": "2026-07-05",
+        "endDate": "2026-07-09",
+        "startKey": "2026-07-05",
+        "endKey": "2026-07-09",
+        "hours": 30.4,
+        "status": "approved",
+        "reason": "Currently on annual leave.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1781601300000
+        }
+      },
+      {
+        "id": "lr-13",
+        "uid": "u-c03",
+        "contractorName": "Marcus Kelly",
+        "requesterName": "Marcus Kelly",
+        "startDate": "2026-07-10",
+        "endDate": "2026-07-14",
+        "startKey": "2026-07-10",
+        "endKey": "2026-07-14",
+        "hours": 38.0,
+        "status": "pending",
+        "reason": "Winter holidays.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1783070100000
+        }
+      },
+      {
+        "id": "lr-14",
+        "uid": "u-c04",
+        "contractorName": "Jordan Nguyen",
+        "requesterName": "Jordan Nguyen",
+        "startDate": "2026-07-20",
+        "endDate": "2026-07-20",
+        "startKey": "2026-07-20",
+        "endKey": "2026-07-20",
+        "hours": 7.6,
+        "status": "pending",
+        "reason": "Family commitment.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1783156500000
+        }
+      },
+      {
+        "id": "lr-15",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-07-27",
+        "endDate": "2026-07-31",
+        "startKey": "2026-07-27",
+        "endKey": "2026-07-31",
+        "hours": 38.0,
+        "status": "pending",
+        "reason": "Long weekend trip.",
+        "type": "annual",
+        "halfDayStart": false,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1783242900000
+        }
+      },
+      {
+        "id": "lr-16",
+        "uid": "u-c04",
+        "contractorName": "Jordan Nguyen",
+        "requesterName": "Jordan Nguyen",
+        "startDate": "2026-07-08",
+        "endDate": "2026-07-08",
+        "startKey": "2026-07-08",
+        "endKey": "2026-07-08",
+        "hours": 3.8,
+        "status": "pending",
+        "reason": "Half-day off — afternoon appointment.",
+        "type": "personal",
+        "halfDayStart": true,
+        "halfDayEnd": false,
+        "submittedAt": {
+          "_ts_ms": 1783242900000
+        }
+      },
+      {
+        "id": "lr-17",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "requesterName": "Alex Chen",
+        "startDate": "2026-08-20",
+        "endDate": "2026-08-20",
+        "startKey": "2026-08-20",
+        "endKey": "2026-08-20",
+        "hours": 3.8,
+        "status": "approved",
+        "reason": "Half-day AM off for kids' school event.",
+        "type": "personal",
+        "halfDayStart": false,
+        "halfDayEnd": true,
+        "submittedAt": {
+          "_ts_ms": 1782033300000
+        }
+      }
+    ],
+    "announcements": [
+      {
+        "id": "ann-01",
+        "message": "Payroll cut-off is 5pm Friday — please submit all outstanding timesheets before then to be included in this pay run.",
+        "severity": "info",
+        "createdAt": {
+          "_ts_ms": 1783070100000
+        },
+        "createdBy": "u-admin",
+        "expires": null,
+        "paused": false
+      },
+      {
+        "id": "ann-02",
+        "message": "Site-safety policy update takes effect Monday — please review the PDF sent to your email and confirm read receipt.",
+        "severity": "warn",
+        "createdAt": {
+          "_ts_ms": 1782724500000
+        },
+        "createdBy": "u-admin",
+        "expires": null,
+        "paused": false
+      },
+      {
+        "id": "ann-03",
+        "message": "URGENT: Vehicle #12 has a suspected brake fault — do not use until inspected. Alternate vehicle assignments have been emailed to affected crew.",
+        "severity": "alert",
+        "createdAt": {
+          "_ts_ms": 1783307700000
+        },
+        "createdBy": "u-admin",
+        "expires": {
+          "_ts_ms": 1783502100000
+        },
+        "paused": false
+      }
+    ],
+    "auditLog": [
+      {
+        "id": "au-01",
+        "at": {
+          "_ts_ms": 1783302660000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c02",
+        "note": "Approved annual leave (5 days) — currently in progress.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-02",
+        "at": {
+          "_ts_ms": 1783214100000
+        },
+        "action": "timeEntry.edit",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c01",
+        "note": "Adjusted clock-out time for auto-closed shift.",
+        "before": {
+          "clockOutMs": null
+        },
+        "after": {
+          "clockOutMs": 1783270800000
+        }
+      },
+      {
+        "id": "au-03",
+        "at": {
+          "_ts_ms": 1783239300000
+        },
+        "action": "announcement.post",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": null,
+        "note": "Posted announcement: Payroll cut-off Friday 5pm."
+      },
+      {
+        "id": "au-04",
+        "at": {
+          "_ts_ms": 1783152900000
+        },
+        "action": "leaveRequest.reject",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c01",
+        "note": "Rejected — team already short-staffed that day.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "rejected"
+        }
+      },
+      {
+        "id": "au-05",
+        "at": {
+          "_ts_ms": 1783044900000
+        },
+        "action": "user.edit",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c03",
+        "note": "Updated phone number on contractor profile.",
+        "before": {
+          "phone": "0400 000 000"
+        },
+        "after": {
+          "phone": "0414 875 591"
+        }
+      },
+      {
+        "id": "au-06",
+        "at": {
+          "_ts_ms": 1782962100000
+        },
+        "action": "timeEditRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c01",
+        "note": "Approved contractor-submitted clock-out correction."
+      },
+      {
+        "id": "au-07",
+        "at": {
+          "_ts_ms": 1782897300000
+        },
+        "action": "announcement.post",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": null,
+        "note": "Posted announcement: Site-safety policy update."
+      },
+      {
+        "id": "au-08",
+        "at": {
+          "_ts_ms": 1782803700000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c04",
+        "note": "Approved personal leave (1 day).",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-09",
+        "at": {
+          "_ts_ms": 1782270900000
+        },
+        "action": "user.create",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c05",
+        "note": "Created contractor account and sent onboarding email."
+      },
+      {
+        "id": "au-10",
+        "at": {
+          "_ts_ms": 1782108900000
+        },
+        "action": "user.setActive",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c07",
+        "note": "Deactivated contractor account.",
+        "before": {
+          "active": true
+        },
+        "after": {
+          "active": false
+        }
+      },
+      {
+        "id": "au-11",
+        "at": {
+          "_ts_ms": 1781759700000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c03",
+        "note": "Approved annual leave (2 days).",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-12",
+        "at": {
+          "_ts_ms": 1781399700000
+        },
+        "action": "timeEntry.edit",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c02",
+        "note": "Adjusted break minutes after contractor query.",
+        "before": {
+          "breakMinutes": 60
+        },
+        "after": {
+          "breakMinutes": 30
+        }
+      },
+      {
+        "id": "au-13",
+        "at": {
+          "_ts_ms": 1781064900000
+        },
+        "action": "user.forcePasswordChange",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c06",
+        "note": "Forced next-login password change."
+      },
+      {
+        "id": "au-14",
+        "at": {
+          "_ts_ms": 1780715700000
+        },
+        "action": "leaveRequest.reject",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c03",
+        "note": "Rejected — submitted too close to leave start.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "rejected"
+        }
+      },
+      {
+        "id": "au-15",
+        "at": {
+          "_ts_ms": 1780460100000
+        },
+        "action": "user.edit",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c02",
+        "note": "Updated team assignment.",
+        "before": {
+          "team": "Field Crew A"
+        },
+        "after": {
+          "team": "Field Crew A"
+        }
+      },
+      {
+        "id": "au-16",
+        "at": {
+          "_ts_ms": 1779869700000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c01",
+        "note": "Approved doctor visit (1 day).",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-17",
+        "at": {
+          "_ts_ms": 1779336900000
+        },
+        "action": "user.create",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c04",
+        "note": "Created contractor account and assigned Field Crew A."
+      },
+      {
+        "id": "au-18",
+        "at": {
+          "_ts_ms": 1778577300000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c03",
+        "note": "Approved annual leave (5 days) for wedding.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-19",
+        "at": {
+          "_ts_ms": 1778134500000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c04",
+        "note": "Approved annual leave (5 days) for school holidays.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-20",
+        "at": {
+          "_ts_ms": 1777619700000
+        },
+        "action": "timeEditRequest.reject",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c02",
+        "note": "Rejected clock-in correction — submitted too late per policy."
+      },
+      {
+        "id": "au-21",
+        "at": {
+          "_ts_ms": 1777263300000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c02",
+        "note": "Approved medical appointment (2 days).",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-22",
+        "at": {
+          "_ts_ms": 1776845700000
+        },
+        "action": "user.setActive",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c08",
+        "note": "Deactivated contractor account.",
+        "before": {
+          "active": true
+        },
+        "after": {
+          "active": false
+        }
+      },
+      {
+        "id": "au-23",
+        "at": {
+          "_ts_ms": 1776413700000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c03",
+        "note": "Approved annual leave (5 days) for interstate wedding.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      },
+      {
+        "id": "au-24",
+        "at": {
+          "_ts_ms": 1776230100000
+        },
+        "action": "announcement.delete",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": null,
+        "note": "Deleted stale announcement about old procedure."
+      },
+      {
+        "id": "au-25",
+        "at": {
+          "_ts_ms": 1775697300000
+        },
+        "action": "leaveRequest.reject",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c04",
+        "note": "Rejected — overlaps peak project week.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "rejected"
+        }
+      },
+      {
+        "id": "au-26",
+        "at": {
+          "_ts_ms": 1775546100000
+        },
+        "action": "leaveRequest.approve",
+        "who": {
+          "uid": "u-admin",
+          "name": "Dana Admin",
+          "email": "admin@example.com",
+          "role": "admin"
+        },
+        "targetUser": "u-c01",
+        "note": "Approved annual leave (5 days) for family visit.",
+        "before": {
+          "status": "pending"
+        },
+        "after": {
+          "status": "approved"
+        }
+      }
+    ],
+    "timeEditRequests": [
+      {
+        "id": "ter-01",
+        "uid": "u-c01",
+        "contractorName": "Alex Chen",
+        "status": "pending",
+        "date": "2026-07-03",
+        "requestedClockOutMs": 1783099800000,
+        "reason": "Forgot to clock off — actually left at 5:30pm.",
+        "submittedAt": {
+          "_ts_ms": 1783307700000
+        }
+      },
+      {
+        "id": "ter-02",
+        "uid": "u-c02",
+        "contractorName": "Priya Patel",
+        "status": "pending",
+        "date": "2026-06-30",
+        "requestedClockInMs": 1782805500000,
+        "reason": "Wrong clock-in time.",
+        "submittedAt": {
+          "_ts_ms": 1783264500000
+        }
+      }
+    ]
+  },
+  "holidays": [
+    {
+      "date": "2026-01-01",
+      "name": "New Year's Day"
+    },
+    {
+      "date": "2026-01-26",
+      "name": "Australia Day"
+    },
+    {
+      "date": "2026-03-09",
+      "name": "Labour Day (VIC)"
+    },
+    {
+      "date": "2026-04-03",
+      "name": "Good Friday"
+    },
+    {
+      "date": "2026-04-06",
+      "name": "Easter Monday"
+    },
+    {
+      "date": "2026-04-25",
+      "name": "ANZAC Day"
+    },
+    {
+      "date": "2026-06-08",
+      "name": "King's Birthday"
+    },
+    {
+      "date": "2026-11-03",
+      "name": "Cup Day"
+    },
+    {
+      "date": "2026-12-25",
+      "name": "Christmas Day"
+    },
+    {
+      "date": "2026-12-28",
+      "name": "Boxing Day (obs.)"
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+/* ============================================================
+   Guided tour styling for the productivity-tracker demo.
+   Teal + gold palette matching the tool.
+   ============================================================ */
+
+:root {
+    --ptt-bg: #ffffff;
+    --ptt-fg: #1c2f2b;
+    --ptt-muted: #6b7c78;
+    --ptt-title: #13614F;
+    --ptt-accent: #17786B;
+    --ptt-accent-hover: #13614F;
+    --ptt-accent-fg: #ffffff;
+    --ptt-secondary-bg: #e6f0ee;
+    --ptt-secondary-fg: #13614F;
+    --ptt-border: rgba(23, 120, 107, 0.14);
+    --ptt-shadow: 0 24px 60px rgba(23, 120, 107, 0.20), 0 4px 14px rgba(23, 120, 107, 0.10);
+    --ptt-close-bg: rgba(23, 120, 107, 0.08);
+    --ptt-close-fg: #13614F;
+    --ptt-close-hover: rgba(23, 120, 107, 0.18);
+    --ptt-fab-bg: #E8A83E;
+    --ptt-fab-fg: #1c2f2b;
+    --ptt-fab-hover: #efb658;
+    --ptt-stage-outline: rgba(23, 120, 107, 0.45);
+}
+
+/* --- Header "Take the tour" button --- */
+.pt-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px 7px 10px;
+    background: var(--ptt-fab-bg);
+    color: var(--ptt-fab-fg);
+    border: 0;
+    border-radius: 999px;
+    font: 600 12px/1 -apple-system, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.20);
+    transition: transform 0.08s, filter 0.15s;
+}
+.pt-tour-btn:hover  { background: var(--ptt-fab-hover); }
+.pt-tour-btn:active { transform: translateY(1px); }
+.pt-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.16);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+}
+.pt-tour-btn-in-header {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    z-index: 20;
+}
+.pt-tour-btn-floating {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/* --- Popover --- */
+.driver-popover.pt-tour-popover {
+    background: var(--ptt-bg);
+    color: var(--ptt-fg);
+    border-radius: 14px;
+    box-shadow: var(--ptt-shadow);
+    border: 1px solid var(--ptt-border);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    max-width: 380px;
+    padding: 22px 24px 18px;
+}
+.driver-popover.pt-tour-popover .driver-popover-title {
+    color: var(--ptt-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0;
+}
+.driver-popover.pt-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ptt-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.pt-tour-popover .driver-popover-description b,
+.driver-popover.pt-tour-popover .driver-popover-description strong {
+    color: var(--ptt-title);
+    font-weight: 700;
+}
+.driver-popover.pt-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--ptt-border);
+    margin-top: 6px;
+}
+.driver-popover.pt-tour-popover .driver-popover-progress-text {
+    color: var(--ptt-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+.driver-popover.pt-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.pt-tour-popover .driver-popover-next-btn,
+.driver-popover.pt-tour-popover .driver-popover-prev-btn {
+    background: var(--ptt-accent);
+    color: var(--ptt-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 inherit;
+    text-shadow: none;
+    cursor: pointer;
+}
+.driver-popover.pt-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.pt-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--ptt-accent-hover);
+}
+.driver-popover.pt-tour-popover .driver-popover-prev-btn {
+    background: var(--ptt-secondary-bg);
+    color: var(--ptt-secondary-fg);
+}
+.driver-popover.pt-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ptt-close-bg);
+    color: var(--ptt-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: none;
+}
+.driver-popover.pt-tour-popover .driver-popover-close-btn:hover {
+    background: var(--ptt-close-hover);
+}
+.driver-popover.pt-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--ptt-bg); }
+.driver-popover.pt-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--ptt-bg); }
+.driver-popover.pt-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--ptt-bg); }
+.driver-popover.pt-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--ptt-bg); }
+
+.driver-active-element {
+    outline: 2px solid var(--ptt-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 6px;
+}

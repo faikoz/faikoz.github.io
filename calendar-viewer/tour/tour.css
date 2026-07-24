@@ -1,0 +1,168 @@
+/* ============================================================
+   Guided tour styling for the calendar-viewer demo.
+   Palette based on the tool's green (Team 1) + orange (Team 2)
+   accents on a neutral slate background.
+   ============================================================ */
+
+:root {
+    --cvt-bg: #ffffff;
+    --cvt-fg: #1f2933;
+    --cvt-muted: #64748b;
+    --cvt-title: #14532d;         /* deep green — Team 1 */
+    --cvt-accent: #16794c;
+    --cvt-accent-hover: #1c8f5c;
+    --cvt-accent-fg: #ffffff;
+    --cvt-secondary-bg: #e7f5ee;
+    --cvt-secondary-fg: #14532d;
+    --cvt-border: rgba(20, 83, 45, 0.14);
+    --cvt-shadow: 0 24px 60px rgba(20, 83, 45, 0.18), 0 4px 14px rgba(20, 83, 45, 0.10);
+    --cvt-close-bg: rgba(20, 83, 45, 0.06);
+    --cvt-close-fg: #14532d;
+    --cvt-close-hover: rgba(20, 83, 45, 0.16);
+    --cvt-fab-bg: #f4b183;        /* orange — Team 2 */
+    --cvt-fab-fg: #4a2b0f;
+    --cvt-fab-hover: #f7c299;
+    --cvt-stage-outline: rgba(20, 83, 45, 0.45);
+}
+
+/* --- Floating "Take the tour" button (bottom-right) --- */
+.cv-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px 7px 10px;
+    background: var(--cvt-fab-bg);
+    color: var(--cvt-fab-fg);
+    border: 0;
+    border-radius: 999px;
+    font: 600 12px/1 -apple-system, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(74, 43, 15, 0.24);
+    transition: transform 0.08s, filter 0.15s;
+}
+.cv-tour-btn:hover  { background: var(--cvt-fab-hover); }
+.cv-tour-btn:active { transform: translateY(1px); }
+.cv-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(74, 43, 15, 0.18);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+}
+.cv-tour-btn-floating {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/* --- Popover --- */
+.driver-popover.cv-tour-popover {
+    background: var(--cvt-bg);
+    color: var(--cvt-fg);
+    border-radius: 14px;
+    box-shadow: var(--cvt-shadow);
+    border: 1px solid var(--cvt-border);
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    max-width: 380px;
+    padding: 22px 24px 18px;
+}
+.driver-popover.cv-tour-popover .driver-popover-title {
+    color: var(--cvt-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0;
+}
+.driver-popover.cv-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--cvt-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.cv-tour-popover .driver-popover-description b,
+.driver-popover.cv-tour-popover .driver-popover-description strong {
+    color: var(--cvt-title);
+    font-weight: 700;
+}
+.driver-popover.cv-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--cvt-border);
+    margin-top: 6px;
+}
+.driver-popover.cv-tour-popover .driver-popover-progress-text {
+    color: var(--cvt-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+.driver-popover.cv-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.cv-tour-popover .driver-popover-next-btn,
+.driver-popover.cv-tour-popover .driver-popover-prev-btn {
+    background: var(--cvt-accent);
+    color: var(--cvt-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 inherit;
+    text-shadow: none;
+    cursor: pointer;
+}
+.driver-popover.cv-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.cv-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--cvt-accent-hover);
+}
+.driver-popover.cv-tour-popover .driver-popover-prev-btn {
+    background: var(--cvt-secondary-bg);
+    color: var(--cvt-secondary-fg);
+}
+.driver-popover.cv-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--cvt-close-bg);
+    color: var(--cvt-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: none;
+}
+.driver-popover.cv-tour-popover .driver-popover-close-btn:hover {
+    background: var(--cvt-close-hover);
+}
+.driver-popover.cv-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--cvt-bg); }
+.driver-popover.cv-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--cvt-bg); }
+.driver-popover.cv-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--cvt-bg); }
+.driver-popover.cv-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--cvt-bg); }
+
+.driver-active-element {
+    outline: 2px solid var(--cvt-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 6px;
+}

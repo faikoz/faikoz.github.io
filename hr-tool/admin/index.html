@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+
+<meta charset="utf-8">
+<title>Dashboard — YOUR COMPANY HR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<header class="topbar"></header>
+
+<main>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Dashboard</h1>
+      <div class="page-subtitle" id="todaySub">—</div>
+    </div>
+  </div>
+
+  <!-- Stat tiles -->
+  <div class="stat-grid">
+    <div class="stat brand">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div class="label">Active contractors</div>
+      </div>
+      <div class="value" id="statActive">—</div>
+      <div class="sub">total on team</div>
+      <div class="tile-tip" id="tipActive"></div>
+    </div>
+    <div class="stat indigo">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div class="label">On shift now</div>
+      </div>
+      <div class="value" id="statOnShift">—</div>
+      <div class="sub">clocked in</div>
+      <div class="tile-tip" id="tipOnShift"></div>
+    </div>
+    <div class="stat violet">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg></div>
+        <div class="label">On break now</div>
+      </div>
+      <div class="value" id="statOnBreak">—</div>
+      <div class="sub">taking a break</div>
+      <div class="tile-tip" id="tipOnBreak"></div>
+    </div>
+    <div class="stat cyan">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17l4-4 4 4 6-6"/></svg></div>
+        <div class="label">Team hours · week</div>
+      </div>
+      <div class="value" id="statWeekHours">—</div>
+      <div class="sub" id="statWeekSub">Mon → today</div>
+      <div class="tile-tip" id="tipWeekHours"></div>
+    </div>
+  </div>
+
+  <!-- Leave today + next 7 days -->
+  <div class="card">
+    <div class="toolbar"><h2>Leave today &amp; next 7 days<span class="live-dot" title="Live"></span></h2><a href="leave.html" style="font-size:13px">Manage leave →</a></div>
+    <div id="leaveSoonList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Live board -->
+  <div class="card">
+    <div class="toolbar"><h2>Who's clocked in<span class="live-dot" title="Live"></span></h2></div>
+    <div id="liveList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Announcements (admin only) -->
+  <div class="card">
+    <div class="toolbar"><h2>Announcements<span class="live-dot" title="Live"></span></h2></div>
+    <form id="annForm" style="display:grid; grid-template-columns: 1fr auto auto auto; gap:10px; align-items:end">
+      <div>
+        <label style="margin-bottom:0">Message</label>
+        <input type="text" id="annMessage" placeholder="One-line message every contractor will see" required>
+      </div>
+      <div>
+        <label style="margin-bottom:0">Severity</label>
+        <select id="annSeverity" style="min-width:110px">
+          <option value="info">Info</option>
+          <option value="warn">Warning</option>
+          <option value="alert">Alert</option>
+        </select>
+      </div>
+      <div>
+        <label style="margin-bottom:0">Expires</label>
+        <input type="date" id="annExpires" style="max-width:160px">
+      </div>
+      <button type="submit" id="annPostBtn">Post</button>
+    </form>
+    <div id="annList" style="margin-top:14px"></div>
+  </div>
+
+  <!-- Recently auto-closed shifts (forgot to clock off) -->
+  <div class="card" id="autoCloseCard" style="display:none">
+    <div class="toolbar"><h2>Recently auto-closed shifts<span class="live-dot" title="Live"></span></h2><span class="muted" style="font-size:12px">Contractor forgot to clock off — verify and edit if wrong</span></div>
+    <div id="autoCloseList"></div>
+  </div>
+
+  <!-- Today's team activity timeline -->
+  <div class="card">
+    <div class="toolbar"><h2>Today's activity<span class="live-dot" title="Live"></span></h2><span class="muted" style="font-size:12px">All contractor events · Melbourne</span></div>
+    <div id="teamActivityTimeline" class="empty">Loading…</div>
+  </div>
+
+  <!-- Hours-this-week chart -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Hours this week<span class="live-dot" title="Live"></span></h2>
+      <div class="row">
+        <span class="muted" style="font-size:12px">per contractor</span>
+        <span id="weekChartToggle"></span>
+      </div>
+    </div>
+    <div style="position:relative; height:280px">
+      <canvas id="weekChart"></canvas>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+  import { db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml, getInitials } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { melTimeShort, fmtHours, melDateKey, fmtDateShort, fmtDay, fmtAU, fmtAUDow, fmtAUShort } from "../assets/time.js";
+  import { fmtLeave } from "../assets/leave.js";
+  import { collection, query, where, getDocs, getDoc, doc, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { user, profile } = await requireRole(["admin", "viewer"]);
+  if (profile.role === "viewer") document.body.classList.add("viewer-mode");
+  renderAdminNav(profile, "dashboard");
+
+  document.getElementById("todaySub").textContent =
+    new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Melbourne", weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  const liveEl = document.getElementById("liveList");
+
+  // ----- Stats + live board -----
+  let allContractors = [];
+
+  function startLive() {
+    onSnapshot(
+      query(collection(db, "users"), where("role", "==", "contractor"), where("active", "==", true)),
+      async (snap) => {
+        allContractors = [];
+        const active = [];
+        snap.forEach(d => {
+          const u = d.data();
+          if (u.testAccount) return; // exclude test accounts from dashboard aggregates
+          allContractors.push({ uid: d.id, ...u });
+          if (u.currentEntryId && u.clockedInAt) {
+            active.push({
+              uid: d.id,
+              name: u.name || u.email,
+              start: u.clockedInAt.toDate(),
+              breakStart: u.currentBreakStartAt?.toDate?.() || null,
+              currentEntryId: u.currentEntryId
+            });
+          }
+        });
+
+        // Fetch each active user's open entry to pick up closed-break minutes for the day.
+        await Promise.all(active.map(async (a) => {
+          try {
+            const eSnap = await getDoc(doc(db, "timeEntries", a.currentEntryId));
+            a.closedBreakMins = eSnap.exists() ? (eSnap.data().breakMinutes || 0) : 0;
+          } catch (e) { a.closedBreakMins = 0; }
+        }));
+
+        document.getElementById("statActive").textContent = allContractors.length;
+        // "On shift" = currently working (NOT on break)  —  mutually exclusive with "On break"
+        const workingNow = active.filter(a => !a.breakStart);
+        const onBreakNow = active.filter(a =>  a.breakStart);
+        document.getElementById("statOnShift").textContent = workingNow.length;
+        document.getElementById("statOnBreak").textContent = onBreakNow.length;
+
+        // Tile tooltips: contractor lists (defensive — old cached HTML may lack tip divs)
+        const setTip = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+        const namesAll = allContractors.map(c => c.name || c.email).sort();
+        setTip("tipActive", namesAll.length
+          ? `<span class="head">Active contractors</span><ul>${namesAll.map(n => `<li>${escapeHtml(n)}</li>`).join("")}</ul>`
+          : "");
+        setTip("tipOnShift", workingNow.length
+          ? `<span class="head">Currently working</span><ul>${workingNow.map(a => `<li>${escapeHtml(a.name)}<span class="right">since ${melTimeShort(a.start)}</span></li>`).join("")}</ul>`
+          : `<span class="head">Currently working</span><span class="none">Nobody is working right now.</span>`);
+        setTip("tipOnBreak", onBreakNow.length
+          ? `<span class="head">On break</span><ul>${onBreakNow.map(a => `<li>${escapeHtml(a.name)}<span class="right">since ${melTimeShort(a.breakStart)}</span></li>`).join("")}</ul>`
+          : `<span class="head">On break</span><span class="none">Nobody is on break.</span>`);
+
+        if (active.length === 0) {
+          liveEl.classList.add("empty");
+          liveEl.innerHTML = "Nobody is clocked in right now.";
+          return;
+        }
+        liveEl.classList.remove("empty");
+        liveEl.innerHTML = `<div class="live-list">${active.map(a => {
+          const initials = getInitials(a.name);
+          const onBreak = !!a.breakStart;
+          const sinceLabel = onBreak
+            ? `On break since ${melTimeShort(a.breakStart)} Melbourne`
+            : `Working since ${melTimeShort(a.start)} Melbourne`;
+          const pill = onBreak
+            ? `<span class="status-pill break"><span class="dot"></span>On break</span>`
+            : `<span class="status-pill working"><span class="dot"></span>Working</span>`;
+          const stampMs = onBreak ? a.breakStart.getTime() : a.start.getTime();
+          const shiftTotalMs = Date.now() - a.start.getTime();
+          // Total break time today = closed-break minutes from open entry + in-progress break (if any)
+          const closedBreakMs = (a.closedBreakMins || 0) * 60_000;
+          const liveBreakMs = onBreak ? (Date.now() - a.breakStart.getTime()) : 0;
+          const totalBreakMs = closedBreakMs + liveBreakMs;
+          const tipHtml = `
+            <strong>${escapeHtml(a.name)}</strong>
+            <div style="margin-top:4px">Clocked in at ${melTimeShort(a.start)}</div>
+            ${onBreak ? `<div>On break since ${melTimeShort(a.breakStart)}</div>` : ""}
+            <div class="muted" style="margin-top:4px">Total shift time: ${fmtHours(shiftTotalMs / 3_600_000)}</div>
+            <div class="muted">Total break time: ${totalBreakMs > 0 ? fmtHours(totalBreakMs / 3_600_000) : "—"}</div>
+          `;
+          return `
+          <div class="live-row" data-stamp="${stampMs}" data-mode="${onBreak ? "break" : "work"}">
+            <div class="who">
+              <div class="avatar">${initials}</div>
+              <div>
+                <div class="name">${escapeHtml(a.name)}</div>
+                <div class="since">${sinceLabel}</div>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:14px">
+              ${pill}
+              <div class="elapsed" data-elapsed>—</div>
+            </div>
+            <div class="row-tip">${tipHtml}</div>
+          </div>`;
+        }).join("")}</div>`;
+        tickElapsed();
+      },
+      (err) => console.error("Live board:", err)
+    );
+  }
+
+  function fmtElapsed(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    const h = String(Math.floor(totalSec / 3600)).padStart(2, "0");
+    const m = String(Math.floor((totalSec % 3600) / 60)).padStart(2, "0");
+    const s = String(totalSec % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  }
+  function tickElapsed() {
+    const now = Date.now();
+    liveEl.querySelectorAll(".live-row").forEach(row => {
+      const stamp = Number(row.dataset.stamp);
+      row.querySelector("[data-elapsed]").textContent = fmtElapsed(now - stamp);
+    });
+  }
+
+  startLive();
+  setInterval(tickElapsed, 1000);
+
+  // ----- Week hours chart -----
+  function startOfWeekKey() {
+    // Monday of current Melbourne week
+    const todayKey = melDateKey();
+    const [y, m, d] = todayKey.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    const dow = (dt.getUTCDay() + 6) % 7;     // Mon=0
+    const mon = new Date(dt.getTime() - dow * 86_400_000);
+    return `${mon.getUTCFullYear()}-${String(mon.getUTCMonth()+1).padStart(2,"0")}-${String(mon.getUTCDate()).padStart(2,"0")}`;
+  }
+
+  async function loadWeekChart() {
+    const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor"), where("active", "==", true)));
+    const contractors = [];
+    usnap.forEach(d => {
+      const u = { uid: d.id, ...d.data() };
+      if (!u.testAccount) contractors.push(u);  // exclude test accounts
+    });
+    contractors.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+
+    const monKey = startOfWeekKey();
+    const todayKey = melDateKey();
+
+    // Build a day-keys list Mon → today
+    const weekKeys = [];
+    {
+      const [sy, sm, sd] = monKey.split("-").map(Number);
+      const [ey, em, ed] = todayKey.split("-").map(Number);
+      let cur = Date.UTC(sy, sm - 1, sd);
+      const end = Date.UTC(ey, em - 1, ed);
+      while (cur <= end) {
+        const dt = new Date(cur);
+        weekKeys.push(`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`);
+        cur += 86_400_000;
+      }
+    }
+
+    const { VIVID_PALETTE: PALETTE, vividChartOptions, chartToPieData, vividPieOptions, makeChartToggle } = await import("../assets/chart-style.js");
+    const nowMs = Date.now();
+    const perUserDaily = await Promise.all(contractors.map(async (c) => {
+      const teSnap = await getDocs(query(collection(db, "timeEntries"), where("uid", "==", c.uid)));
+      const map = Object.fromEntries(weekKeys.map(k => [k, 0]));
+      let total = 0;
+      teSnap.forEach(d => {
+        const e = d.data();
+        if (e.date < monKey || e.date > todayKey) return;
+        // Closed shift uses stored hoursWorked
+        if (e.clockOutUTC && e.hoursWorked) {
+          map[e.date] = (map[e.date] || 0) + e.hoursWorked;
+          total += e.hoursWorked;
+          return;
+        }
+        // Open shift on today — compute live worked hours (now − clockIn − breaks)
+        if (!e.clockOutUTC && e.date === todayKey && e.clockInUTC?.toDate) {
+          const startMs = e.clockInUTC.toDate().getTime();
+          const closedBreakMs = (e.breakMinutes || 0) * 60_000;
+          let openBreakMs = 0;
+          if (c.currentEntryId === d.id && c.currentBreakStartAt?.toDate) {
+            openBreakMs = nowMs - c.currentBreakStartAt.toDate().getTime();
+          }
+          const liveH = Math.max(0, (nowMs - startMs - closedBreakMs - openBreakMs) / 3_600_000);
+          map[e.date] = (map[e.date] || 0) + liveH;
+          total += liveH;
+        }
+      });
+      return { user: c, map, total };
+    }));
+
+    const teamTotal = perUserDaily.reduce((s, r) => s + r.total, 0);
+    document.getElementById("statWeekHours").textContent = fmtHours(teamTotal);
+    document.getElementById("statWeekSub").textContent = `${fmtAU(monKey)} → ${fmtAU(todayKey)}`;
+
+    const breakdownRows = perUserDaily
+      .map(r => ({ name: r.user.name || r.user.email, hours: r.total }))
+      .filter(r => r.hours > 0)
+      .sort((a, b) => b.hours - a.hours);
+    const setTip2 = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    setTip2("tipWeekHours", breakdownRows.length
+      ? `<span class="head">Team hours · this week</span><ul>${breakdownRows.map(r => `<li>${escapeHtml(r.name)}<span class="right">${fmtHours(r.hours)}</span></li>`).join("")}</ul>`
+      : `<span class="head">Team hours · this week</span><span class="none">No hours yet this week.</span>`);
+
+    const datasets = perUserDaily.map((row, i) => {
+      const c = PALETTE[i % PALETTE.length];
+      return {
+        label: `${(row.user.name || row.user.email).split(" ")[0]} · ${fmtHours(row.total)}`,
+        data: weekKeys.map(k => Number((row.map[k] || 0).toFixed(2))),
+        backgroundColor: c, borderColor: c, borderWidth: 0, borderRadius: 2, maxBarThickness: 22
+      };
+    });
+
+    const ctx = document.getElementById("weekChart");
+    if (window._wkChart) window._wkChart.destroy();
+    window._wkChart = new Chart(ctx, {
+      type: "bar",
+      data: { labels: weekKeys.map(k => fmtAUDow(k)), datasets },
+      options: vividChartOptions({ yLabel: "Hours", titleLookup: (idx) => fmtAUDow(weekKeys[idx]) })
+    });
+  }
+  // Initial load + live re-render whenever this-week timeEntries change.
+  let __wkUnsub = null;
+  function subscribeWeekChart() {
+    if (__wkUnsub) __wkUnsub();
+    const monKey = startOfWeekKey();
+    __wkUnsub = onSnapshot(
+      query(collection(db, "timeEntries"), where("date", ">=", monKey)),
+      () => loadWeekChart().catch(e => console.error("week chart live:", e)),
+      (err) => console.error("week chart subscription:", err)
+    );
+  }
+  subscribeWeekChart();
+
+  // ----- Today's team activity — one column per contractor side-by-side -----
+  // Use the shared VIVID_PALETTE so avatar colours match every chart in the app.
+  const { VIVID_PALETTE: ACTIVITY_PALETTE } = await import("../assets/chart-style.js");
+
+  async function loadTeamActivity() {
+    const todayKey = melDateKey();
+    const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor"), where("active", "==", true)));
+    const userList = [];
+    usnap.forEach(d => {
+      const u = { uid: d.id, ...d.data() };
+      if (!u.testAccount) userList.push(u);  // exclude test accounts
+    });
+    // Real contractors first (alpha), test accounts last so Test always sits at the end of the row.
+    userList.sort((a, b) => {
+      const t = (a.testAccount ? 1 : 0) - (b.testAccount ? 1 : 0);
+      if (t !== 0) return t;
+      return (a.name || "").localeCompare(b.name || "");
+    });
+
+    const teSnap = await getDocs(query(collection(db, "timeEntries"), where("date", "==", todayKey)));
+    const blocksByUid = Object.fromEntries(userList.map(u => [u.uid, []]));
+
+    teSnap.forEach(d => {
+      const e = d.data();
+      const u = userList.find(x => x.uid === e.uid);
+      if (!u) return;
+      const start = e.clockInUTC?.toDate?.();
+      const end   = e.clockOutUTC?.toDate?.();
+      if (!start) return;
+
+      const sessionBreaks = (e.breaks || [])
+        .map(b => ({ start: b.startUTC?.toDate?.(), end: b.endUTC?.toDate?.(), minutes: b.minutes }))
+        .filter(b => b.start && b.end)
+        .sort((a, b) => a.start - b.start);
+
+      // Build segments for THIS entry first so we can flag the first/last work block.
+      const entryBlocks = [];
+      let cursor = start;
+      sessionBreaks.forEach(b => {
+        if (b.start > cursor) entryBlocks.push({ kind: "work", start: cursor, end: b.start });
+        entryBlocks.push({ kind: "brk", start: b.start, end: b.end });
+        cursor = b.end;
+      });
+      if (end) {
+        if (end > cursor) entryBlocks.push({ kind: "work", start: cursor, end });
+      } else {
+        if (u.currentBreakStartAt?.toDate) {
+          const brkStart = u.currentBreakStartAt.toDate();
+          if (brkStart > cursor) entryBlocks.push({ kind: "work", start: cursor, end: brkStart });
+          entryBlocks.push({ kind: "brk", start: brkStart, end: null, ongoing: true });
+        } else {
+          entryBlocks.push({ kind: "work", start: cursor, end: null, ongoing: true });
+        }
+      }
+
+      // Tag the first work block as "Shift started" and (if the entry is closed) the last as "Shift ended".
+      const workIdxs = entryBlocks.map((b, i) => b.kind === "work" ? i : -1).filter(i => i >= 0);
+      if (workIdxs.length) entryBlocks[workIdxs[0]].marker = "start";
+      if (end && workIdxs.length) entryBlocks[workIdxs[workIdxs.length - 1]].marker = "end";
+
+      entryBlocks.forEach(b => blocksByUid[e.uid].push(b));
+    });
+
+    const el = document.getElementById("teamActivityTimeline");
+    if (userList.length === 0) {
+      el.classList.add("empty");
+      el.innerHTML = "No active contractors.";
+      return;
+    }
+    el.classList.remove("empty");
+    el.innerHTML = `<div class="activity-grid">${userList.map((u, i) => {
+      const c = ACTIVITY_PALETTE[i % ACTIVITY_PALETTE.length];
+      const blocks = blocksByUid[u.uid].slice().sort((a, b) => b.start - a.start);
+      const initials = getInitials(u.name || u.email);
+      const headerHtml = `
+        <div class="activity-col-header">
+          <div class="avatar" style="background:${c}">${initials}</div>
+          <div class="name">${escapeHtml(u.name || u.email)}</div>
+        </div>`;
+      const colCls = u.testAccount ? "activity-col is-test" : "activity-col";
+      if (blocks.length === 0) {
+        return `<div class="${colCls}">${headerHtml}<div class="empty-state">No activity today.</div></div>`;
+      }
+      return `<div class="${colCls}">
+        ${headerHtml}
+        <div class="timeline">${blocks.map(b => {
+          const startTxt = melTimeShort(b.start);
+          const endTxt   = b.end ? melTimeShort(b.end) : "now";
+          const durMs    = (b.end ? b.end.getTime() : Date.now()) - b.start.getTime();
+          const durTxt   = b.kind === "work" ? fmtHours(durMs / 3_600_000) : Math.round(durMs / 60_000) + "m";
+          const label    = b.kind === "brk"
+                          ? "On break"
+                          : b.marker === "start" ? "Shift started"
+                          : b.marker === "end"   ? "Shift ended"
+                          : "Worked";
+          const explanation = b.kind === "brk"
+                            ? `on break from ${startTxt} until ${endTxt}`
+                            : b.marker === "start" ? `clocked in at ${startTxt}, worked until ${endTxt}`
+                            : b.marker === "end"   ? `worked from ${startTxt}, clocked out at ${endTxt}`
+                            : `worked from ${startTxt} until ${endTxt}`;
+          const cls      = b.kind === "work" ? "start" : "brk";
+          const ongoing  = b.ongoing ? ` <span class="meta">· in progress</span>` : "";
+          return `
+            <div class="timeline-row ${cls}">
+              <div class="ts">${startTxt} → ${endTxt}</div>
+              <div class="dot-col"><div class="dot"></div></div>
+              <div class="who-line" style="flex-wrap:wrap">
+                <span class="act">${label}</span>
+                <span class="meta">· ${durTxt}</span>${ongoing}
+                <div class="meta" style="flex-basis:100%; margin-top:2px; font-size:11.5px">${explanation}</div>
+              </div>
+            </div>
+          `;
+        }).join("")}</div>
+      </div>`;
+    }).join("")}</div>`;
+  }
+  // Live activity: re-fire whenever today's timeEntries OR users docs change.
+  let __actUnsubA = null, __actUnsubB = null;
+  function subscribeTeamActivity() {
+    if (__actUnsubA) __actUnsubA();
+    if (__actUnsubB) __actUnsubB();
+    const todayKey = melDateKey();
+    __actUnsubA = onSnapshot(
+      query(collection(db, "timeEntries"), where("date", "==", todayKey)),
+      () => loadTeamActivity().catch(e => console.error("activity entries:", e)),
+      (err) => console.error("activity entries sub:", err)
+    );
+    __actUnsubB = onSnapshot(
+      query(collection(db, "users"), where("role", "==", "contractor")),
+      () => loadTeamActivity().catch(e => console.error("activity users:", e)),
+      (err) => console.error("activity users sub:", err)
+    );
+  }
+  loadTeamActivity();
+  subscribeTeamActivity();
+
+  // ----- Recently auto-closed shifts (last 7 days) -----
+  async function loadAutoClosed() {
+    const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor")));
+    const usersByUid = {};
+    usnap.forEach(d => usersByUid[d.id] = d.data());
+
+    // Look back 7 days
+    const recentKeys = [];
+    {
+      const t = melDateKey();
+      const [y, m, d] = t.split("-").map(Number);
+      for (let i = 0; i < 7; i++) {
+        const dt = new Date(Date.UTC(y, m - 1, d - i));
+        recentKeys.push(`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`);
+      }
+    }
+    const oldestKey = recentKeys[recentKeys.length - 1];
+
+    const teSnap = await getDocs(collection(db, "timeEntries"));
+    const entries = [];
+    teSnap.forEach(d => {
+      const e = { id: d.id, ...d.data() };
+      if (usersByUid[e.uid]?.testAccount) return;  // skip test accounts
+      if (e.autoClosed && e.date >= oldestKey) entries.push(e);
+    });
+
+    const cardEl = document.getElementById("autoCloseCard");
+    const listEl = document.getElementById("autoCloseList");
+    if (entries.length === 0) { cardEl.style.display = "none"; return; }
+    cardEl.style.display = "block";
+
+    entries.sort((a, b) => (b.autoClosedAt?.toMillis?.() || 0) - (a.autoClosedAt?.toMillis?.() || 0));
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Date</th><th>Clock-in</th><th>Auto-closed at</th><th>Hours</th><th>Detected</th></tr></thead>
+      <tbody>${entries.map(e => {
+        const u = usersByUid[e.uid];
+        const detected = e.autoClosedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+        const clockInTxt  = e.clockInUTC  ? melTimeShort(e.clockInUTC.toDate())  : "—";
+        const clockOutTxt = e.clockOutUTC ? melTimeShort(e.clockOutUTC.toDate()) : "—";
+        const breakTxt = e.breakMinutes ? `${Math.round(e.breakMinutes)} min` : "none";
+        const tipLines = [
+          `${u?.name || "—"} — auto-closed shift`,
+          `Clocked in:  ${clockInTxt}  (${fmtAU(e.date)})`,
+          `Auto-closed: ${clockOutTxt} → ${fmtHours(e.hoursWorked)} worked, break ${breakTxt}`,
+          `Detected:    ${detected}`,
+          e.autoCloseNote ? `Reason: ${e.autoCloseNote}` : null,
+          "Contractor forgot to clock off — verify the time and edit if wrong."
+        ].filter(Boolean).join("\n");
+        return `<tr title="${escapeHtml(tipLines)}">
+          <td>${escapeHtml(u?.name || "—")}</td>
+          <td>${fmtAU(e.date)}</td>
+          <td>${clockInTxt}</td>
+          <td>${clockOutTxt}</td>
+          <td><strong>${fmtHours(e.hoursWorked)}</strong></td>
+          <td class="muted" style="font-size:12px">${detected}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+  }
+  // Live auto-closed shifts (last 7 days)
+  let __acUnsub = null;
+  function subscribeAutoClosed() {
+    if (__acUnsub) __acUnsub();
+    __acUnsub = onSnapshot(
+      query(collection(db, "timeEntries"), where("autoClosed", "==", true)),
+      () => loadAutoClosed().catch(e => console.error("auto-closed live:", e)),
+      (err) => console.error("auto-closed sub:", err)
+    );
+  }
+  loadAutoClosed();
+  subscribeAutoClosed();
+
+  // ----- Announcements (admin posting + live list) -----
+  const annForm = document.getElementById("annForm");
+  const annList = document.getElementById("annList");
+  annForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById("annMessage").value.trim();
+    if (!msg) return;
+    const severity = document.getElementById("annSeverity").value;
+    const expiresStr = document.getElementById("annExpires").value;
+    const btn = document.getElementById("annPostBtn");
+    btn.disabled = true; btn.textContent = "Posting…";
+    try {
+      const expiresAt = expiresStr
+        ? Timestamp.fromMillis(new Date(expiresStr + "T23:59:59").getTime())
+        : null;
+      const ref = await addDoc(collection(db, "announcements"), {
+        message: msg,
+        severity,
+        paused: false,
+        startAt: serverTimestamp(),
+        expiresAt,
+        createdBy: profile.email,
+        createdAt: serverTimestamp()
+      });
+      logAudit({ profile, user }, { action: "announcement.post", targetType: "announcement", targetId: ref.id, after: { message: msg, severity, expiresAt: expiresStr || null }, note: msg });
+      annForm.reset();
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); }
+    finally { btn.disabled = false; btn.textContent = "Post"; }
+  });
+
+  onSnapshot(collection(db, "announcements"), (snap) => {
+    const items = [];
+    snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+    items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+    if (items.length === 0) { annList.innerHTML = `<div class="empty">No announcements posted.</div>`; return; }
+    const nowMs = Date.now();
+    annList.innerHTML = `<table class="data">
+      <thead><tr><th>Message</th><th>Severity</th><th>Posted</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+      <tbody>${items.map(a => {
+        const expiresMs = a.expiresAt?.toMillis?.() ?? Infinity;
+        const startsMs  = a.startAt?.toMillis?.() ?? 0;
+        const isPaused  = !!a.paused;
+        const isExpired = nowMs > expiresMs;
+        const isPending = nowMs < startsMs;
+        const status = isPaused  ? `<span class="badge off">Paused</span>`
+                     : isExpired ? `<span class="badge off">Expired</span>`
+                     : isPending ? `<span class="badge pending">Pending</span>`
+                     : `<span class="badge ok">Active</span>`;
+        const posted = a.createdAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+        const expires = a.expiresAt?.toDate?.()?.toLocaleDateString("en-AU", { day: "2-digit", month: "2-digit", year: "numeric" }) || "—";
+        const pauseLabel = isPaused ? "Resume" : "Pause";
+        return `<tr${isPaused ? ' style="opacity:.7"' : ""}>
+          <td>${escapeHtml(a.message)}</td>
+          <td><span class="badge ${a.severity === "alert" ? "bad" : a.severity === "warn" ? "pending" : "ok"}">${(a.severity || "info").toUpperCase()}</span></td>
+          <td class="muted" style="font-size:12px">${posted}</td>
+          <td class="muted" style="font-size:12px">${expires}</td>
+          <td>${status}</td>
+          <td><div class="actions">
+            <button class="ghost" data-ann-pause="${a.id}" data-paused="${isPaused ? 1 : 0}">${pauseLabel}</button>
+            <button class="ghost danger" data-ann-delete="${a.id}" title="Permanently remove (history will be lost). Pause is usually what you want.">Delete</button>
+          </div></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+    annList.querySelectorAll("button[data-ann-pause]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.annPause;
+        const wasPaused = btn.dataset.paused === "1";
+        const a = items.find(x => x.id === id);
+        try {
+          await updateDoc(doc(db, "announcements", id), { paused: !wasPaused });
+          logAudit({ profile, user }, {
+            action: wasPaused ? "announcement.resume" : "announcement.pause",
+            targetType: "announcement", targetId: id,
+            note: a?.message || ""
+          });
+        } catch (e) { alert("Failed: " + (e.message || e.code)); }
+      });
+    });
+    annList.querySelectorAll("button[data-ann-delete]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.annDelete;
+        const a = items.find(x => x.id === id);
+        if (!confirm("Permanently delete this announcement?\n\nThe record will be lost. Use Pause if you just want to hide it from contractors.")) return;
+        try {
+          await deleteDoc(doc(db, "announcements", id));
+          logAudit({ profile, user }, { action: "announcement.delete", targetType: "announcement", targetId: id, before: { message: a?.message, severity: a?.severity }, note: a?.message || "" });
+        }
+        catch (e) { alert("Failed: " + (e.message || e.code)); }
+      });
+    });
+  });
+
+  // ----- Leave today + next 7 days -----
+  async function loadLeaveSoon() {
+    const listEl = document.getElementById("leaveSoonList");
+    const todayKey = melDateKey();
+    const [y, m, d] = todayKey.split("-").map(Number);
+    const horizon = new Date(Date.UTC(y, m - 1, d) + 7 * 86_400_000);
+    const horizonKey = `${horizon.getUTCFullYear()}-${String(horizon.getUTCMonth()+1).padStart(2,"0")}-${String(horizon.getUTCDate()).padStart(2,"0")}`;
+
+    const [lrSnap, usnap] = await Promise.all([
+      getDocs(query(collection(db, "leaveRequests"), where("status", "in", ["approved", "pending"]))),
+      getDocs(query(collection(db, "users"), where("role", "==", "contractor")))
+    ]);
+    const usersByUid = {};
+    usnap.forEach(d => usersByUid[d.id] = d.data());
+
+    const soon = [];
+    lrSnap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (usersByUid[r.uid]?.testAccount) return;  // skip test accounts
+      if (r.startDate <= horizonKey && r.endDate >= todayKey) soon.push(r);
+    });
+    if (soon.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "Nobody is on leave today or in the next 7 days.";
+      return;
+    }
+    soon.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Dates</th><th>Hours</th><th>Status</th><th>When</th></tr></thead>
+      <tbody>${soon.map(r => {
+        const u = usersByUid[r.uid];
+        const range = r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+        const onToday = r.startDate <= todayKey && r.endDate >= todayKey;
+        const whenLbl = onToday ? `<span class="badge ok" style="background:rgba(239,68,68,.12); color:#991B1B">Today</span>`
+                                 : `<span class="muted" style="font-size:12px">in ${Math.max(0, Math.ceil((Date.parse(r.startDate+"T00:00:00Z") - Date.parse(todayKey+"T00:00:00Z")) / 86_400_000))} day(s)</span>`;
+        const badge = r.status === "approved" ? `<span class="badge ok">Approved</span>` : `<span class="badge pending">Pending</span>`;
+        const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+        const tipLines = [
+          `${u?.name || r.requesterName || "—"} — ${r.status.toUpperCase()}`,
+          `${range} · ${fmtLeave(r.hours)}`,
+          `Submitted: ${submitted}`,
+          r.reason ? `Reason: ${r.reason}` : "No reason given",
+          r.adminNote ? `Admin note: ${r.adminNote}` : null
+        ].filter(Boolean).join("\n");
+        return `<tr title="${escapeHtml(tipLines)}">
+          <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+          <td>${range}</td>
+          <td>${fmtLeave(r.hours)}</td>
+          <td>${badge}</td>
+          <td>${whenLbl}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+  }
+  // Live leave-soon: subscribe to all approved/pending leave requests.
+  let __leaveSoonUnsub = null;
+  function subscribeLeaveSoon() {
+    if (__leaveSoonUnsub) __leaveSoonUnsub();
+    __leaveSoonUnsub = onSnapshot(
+      query(collection(db, "leaveRequests"), where("status", "in", ["approved", "pending"])),
+      () => loadLeaveSoon().catch(e => console.error("leave-soon live:", e)),
+      (err) => console.error("leave-soon sub:", err)
+    );
+  }
+  loadLeaveSoon();
+  subscribeLeaveSoon();
+</script>
+<script type="module">
+  // Shared chart defaults — luxury feel
+  window.chartOptions = (yLabel) => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: "#0B1220", padding: 10, cornerRadius: 8,
+        titleFont: { family: "Inter", weight: "600" },
+        bodyFont: { family: "Inter" },
+        callbacks: { label: (ctx) => `${ctx.parsed.y} ${yLabel.toLowerCase()}` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: "#64748B", font: { family: "Inter", size: 12 } } },
+      y: { beginAtZero: true, grid: { color: "#E6E8EE", drawBorder: false }, ticks: { color: "#64748B", font: { family: "Inter", size: 12 } }, title: { display: true, text: yLabel, color: "#64748B", font: { family: "Inter", size: 12 } } }
+    }
+  });
+
+  // h/m formatter — local to chart script
+  function fmtHM(hours) {
+    if (hours == null || isNaN(hours)) return "—";
+    const totalMins = Math.round(Math.abs(hours) * 60);
+    const sign = hours < 0 ? "-" : "";
+    const h = Math.floor(totalMins / 60), m = totalMins % 60;
+    if (h === 0 && m === 0) return "0m";
+    if (h === 0) return `${sign}${m}m`;
+    if (m === 0) return `${sign}${h}h`;
+    return `${sign}${h}h ${m}m`;
+  }
+
+  // Grouped variant — multiple datasets (Worked vs Break)
+  window.chartOptionsGrouped = (yLabel) => ({
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: "index" },
+    plugins: {
+      legend: {
+        display: true, position: "top", align: "end",
+        labels: {
+          boxWidth: 12, boxHeight: 12, padding: 14, usePointStyle: true,
+          color: "#1F2937", font: { family: "Inter", size: 12, weight: "500" }
+        }
+      },
+      tooltip: {
+        backgroundColor: "#0B1220", padding: 12, cornerRadius: 8,
+        titleFont: { family: "Inter", weight: "600", size: 13 }, bodyFont: { family: "Inter", size: 12 },
+        callbacks: { label: (ctx) => `${ctx.dataset.label.split(" · ")[0]}: ${fmtHM(ctx.parsed.y)}` }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: "#64748B", font: { family: "Inter", size: 12 } } },
+      y: {
+        beginAtZero: true,
+        grid: { color: "#E6E8EE", drawBorder: false },
+        ticks: { color: "#64748B", font: { family: "Inter", size: 12 }, callback: (v) => fmtHours(v) },
+        title: { display: true, text: yLabel, color: "#64748B", font: { family: "Inter", size: 12 } }
+      }
+    }
+  });
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>

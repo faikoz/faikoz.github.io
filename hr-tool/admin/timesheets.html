@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+
+<meta charset="utf-8">
+<title>Timesheets — HR Tool Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<header class="topbar"></header>
+
+<main>
+  <!-- Pending edit requests from contractors -->
+  <div class="card" id="editRequestsCard" style="display:none">
+    <div class="toolbar">
+      <h2>Pending edit requests</h2>
+      <span class="muted" style="font-size:12px" id="editReqCount"></span>
+    </div>
+    <div id="editRequestsList"></div>
+  </div>
+
+  <!-- Daily view -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Daily view</h2>
+      <div class="row">
+        <button class="ghost" id="prevDay">‹ Prev</button>
+        <input type="date" id="dayPick" style="max-width:170px">
+        <button class="ghost" id="nextDay">Next ›</button>
+        <button class="ghost" id="todayBtn">Today</button>
+      </div>
+    </div>
+    <div id="dayLabel" class="muted" style="font-size:13px; margin-bottom:10px"></div>
+    <div id="dayList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Period summary with charts -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Period summary<span class="live-dot" title="Live"></span></h2>
+      <div class="row" style="flex-wrap:wrap; gap:8px">
+        <span id="periodChartToggle"></span>
+        <select id="periodPick" style="min-width:140px">
+          <option value="day">Daily</option>
+          <option value="week" selected>This week</option>
+          <option value="month">This month</option>
+          <option value="quarter">Last 90 days</option>
+          <option value="custom">Custom range…</option>
+        </select>
+        <span id="periodCustomWrap" style="display:none; gap:8px; align-items:center">
+          <input type="date" id="periodCustomStart" style="max-width:160px">
+          <span class="muted">→</span>
+          <input type="date" id="periodCustomEnd" style="max-width:160px">
+        </span>
+      </div>
+    </div>
+    <div id="periodMeta" class="muted" style="font-size:13px; margin-bottom:10px">—</div>
+    <div style="position:relative; height:280px"><canvas id="periodChart"></canvas></div>
+  </div>
+
+  <!-- History drill-down -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Contractor history</h2>
+      <div class="row" style="flex-wrap:wrap; gap:8px">
+        <select id="userPick" style="min-width:200px"><option value="">— select contractor —</option></select>
+        <select id="rangePick" style="min-width:140px">
+          <option value="7">Last 7 days</option>
+          <option value="14">Last 14 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="60">Last 60 days</option>
+          <option value="custom">Custom range…</option>
+        </select>
+        <span id="historyCustomWrap" style="display:none; gap:8px; align-items:center">
+          <input type="date" id="historyCustomStart" style="max-width:160px">
+          <span class="muted">→</span>
+          <input type="date" id="historyCustomEnd" style="max-width:160px">
+        </span>
+      </div>
+    </div>
+    <div id="summary" class="row" style="gap:24px; margin-bottom:16px; color:var(--muted)"></div>
+    <div id="historyList" class="empty">Pick a contractor above, or click a name in the daily view.</div>
+  </div>
+</main>
+
+<!-- Edit / Add time entry modal -->
+<div class="modal-backdrop" id="entryModal">
+  <div class="modal">
+    <h2 id="entryModalTitle">Edit entry</h2>
+    <form id="entryForm">
+      <input type="hidden" id="entryId">
+      <input type="hidden" id="entryUid">
+      <div id="entryContractorName" style="margin-bottom:10px; font-weight:600"></div>
+      <label>Date</label>
+      <input type="date" id="entryDate" required>
+      <div style="display:flex; gap:10px">
+        <div style="flex:1">
+          <label>Clock in <span class="muted" style="font-size:11px">(Melbourne)</span></label>
+          <input type="time" id="entryStart" required>
+        </div>
+        <div style="flex:1">
+          <label>Clock out <span class="muted" style="font-size:11px">(blank = still open)</span></label>
+          <input type="time" id="entryEnd">
+        </div>
+      </div>
+      <div id="entryHoursPreview" class="muted" style="margin-top:8px; font-size:13px"></div>
+      <div class="error" id="entryErr"></div>
+      <div class="actions" style="justify-content: space-between">
+        <button type="button" class="danger" id="entryDeleteBtn" style="display:none">Delete</button>
+        <div class="actions" style="margin-top:0">
+          <button type="button" class="ghost" id="entryCancelBtn">Cancel</button>
+          <button type="submit">Save</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Resolve edit-request modal -->
+<div class="modal-backdrop" id="resolveModal">
+  <div class="modal">
+    <h2>Edit request</h2>
+    <div id="resolveDetails" style="margin-bottom:12px"></div>
+    <label>Note <span class="muted" style="font-size:11px">(optional, visible to contractor)</span></label>
+    <textarea id="resolveNote" rows="2"></textarea>
+    <div class="error" id="resolveErr"></div>
+    <div class="actions">
+      <button type="button" class="ghost" id="resolveCancelBtn">Cancel</button>
+      <button type="button" class="ghost" id="resolveDismissBtn">Dismiss</button>
+      <button type="button" id="resolveDoneBtn">Mark resolved</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { fmtHours, fmtDay, lastNDateKeys, melTimeShort, melDateKey, hoursBetween, MEL_TZ, fmtAU, fmtAUDow, fmtAUShort } from "../assets/time.js";
+  import {
+    collection, query, where, getDocs, orderBy, doc, addDoc, updateDoc, deleteDoc, serverTimestamp, Timestamp, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { profile } = await requireRole(["admin", "viewer"]);
+  const canWrite = profile.role === "admin";
+  if (!canWrite) document.body.classList.add("viewer-mode");
+  renderAdminNav(profile, "timesheets");
+
+  const dayPick   = document.getElementById("dayPick");
+  const dayList   = document.getElementById("dayList");
+  const dayLabel  = document.getElementById("dayLabel");
+  const userPick  = document.getElementById("userPick");
+  const rangePick = document.getElementById("rangePick");
+  const historyList = document.getElementById("historyList");
+  const summaryEl = document.getElementById("summary");
+
+  // ---- Load contractors once ----
+  const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor")));
+  const allUsers = [];                                              // every contractor (incl. test)
+  usnap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
+  allUsers.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  const users = allUsers.filter(u => !u.testAccount);               // real contractors (for aggregates)
+  const usersByUid = Object.fromEntries(allUsers.map(u => [u.uid, u]));
+
+  // User picker still includes test accounts (with badge) so admin can drill into them.
+  userPick.innerHTML = `<option value="">— select contractor —</option>` +
+    allUsers.map(u => `<option value="${u.uid}">${escapeHtml(u.name || u.email)}${u.testAccount ? " (TEST)" : ""}</option>`).join("");
+
+  // ===================================================================
+  // PENDING EDIT REQUESTS
+  // ===================================================================
+  async function loadEditRequests() {
+    const cardEl = document.getElementById("editRequestsCard");
+    const listEl = document.getElementById("editRequestsList");
+    const snap = await getDocs(query(collection(db, "timeEditRequests"), where("status", "==", "pending")));
+    const reqs = [];
+    snap.forEach(d => reqs.push({ id: d.id, ...d.data() }));
+    if (reqs.length === 0) { cardEl.style.display = "none"; return; }
+    cardEl.style.display = "block";
+    document.getElementById("editReqCount").textContent = `${reqs.length} waiting`;
+    reqs.sort((a, b) => (a.submittedAt?.toMillis?.() || 0) - (b.submittedAt?.toMillis?.() || 0));
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Date</th><th>Description</th><th>Submitted</th><th></th></tr></thead>
+      <tbody>${reqs.map(r => {
+        const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: MEL_TZ, hour12: false }) || "—";
+        return `<tr>
+          <td>${escapeHtml(usersByUid[r.uid]?.name || r.contractorName || "—")}</td>
+          <td>${escapeHtml(r.date)}</td>
+          <td class="muted" style="font-size:13px; max-width:340px">${escapeHtml(r.description)}</td>
+          <td class="muted" style="font-size:12px">${submitted}</td>
+          <td><div class="actions"><button data-act="open-day" data-uid="${r.uid}" data-date="${r.date}">Open day</button><button class="ghost" data-act="resolve" data-id="${r.id}">Resolve</button></div></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+    listEl.querySelectorAll("button[data-act]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.act === "open-day") {
+          dayPick.value = btn.dataset.date;
+          userPick.value = btn.dataset.uid;
+          loadDay();
+          loadHistory();
+          dayPick.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (btn.dataset.act === "resolve") {
+          openResolve(reqs.find(r => r.id === btn.dataset.id));
+        }
+      });
+    });
+  }
+
+  // Resolve modal
+  let resolveTarget = null;
+  function openResolve(req) {
+    resolveTarget = req;
+    document.getElementById("resolveDetails").innerHTML = `
+      <strong>${escapeHtml(usersByUid[req.uid]?.name || req.contractorName)}</strong>
+      <div class="muted" style="margin-top:4px">${escapeHtml(req.date)}</div>
+      <div style="margin-top:8px">${escapeHtml(req.description)}</div>
+    `;
+    document.getElementById("resolveNote").value = "";
+    document.getElementById("resolveErr").textContent = "";
+    document.getElementById("resolveModal").classList.add("open");
+  }
+  document.getElementById("resolveCancelBtn").addEventListener("click", () => {
+    document.getElementById("resolveModal").classList.remove("open");
+  });
+  document.getElementById("resolveDismissBtn").addEventListener("click", () => decideResolve("dismissed"));
+  document.getElementById("resolveDoneBtn").addEventListener("click", () => decideResolve("resolved"));
+  async function decideResolve(status) {
+    if (!resolveTarget) return;
+    try {
+      const note = document.getElementById("resolveNote").value.trim() || null;
+      await updateDoc(doc(db, "timeEditRequests", resolveTarget.id), {
+        status,
+        adminNote: note,
+        resolvedAt: serverTimestamp(),
+        resolvedBy: profile.email
+      });
+      logAudit({ profile }, { action: `timeEditRequest.${status === "resolved" ? "resolve" : "dismiss"}`, targetType: "timeEditRequest", targetId: resolveTarget.id, targetUser: resolveTarget.uid, after: { status, adminNote: note }, note });
+      document.getElementById("resolveModal").classList.remove("open");
+      loadEditRequests();
+    } catch (ex) {
+      document.getElementById("resolveErr").textContent = "Failed: " + (ex.message || ex.code);
+    }
+  }
+
+  // ===================================================================
+  // DAILY VIEW
+  // ===================================================================
+  dayPick.value = melDateKey();
+  function shiftDay(deltaDays) {
+    const [y, m, d] = dayPick.value.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d) + deltaDays * 86_400_000);
+    dayPick.value = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
+    loadDay();
+  }
+  document.getElementById("prevDay").addEventListener("click", () => shiftDay(-1));
+  document.getElementById("nextDay").addEventListener("click", () => shiftDay(1));
+  document.getElementById("todayBtn").addEventListener("click", () => { dayPick.value = melDateKey(); loadDay(); });
+  dayPick.addEventListener("change", loadDay);
+
+  async function loadDay() {
+    const dateKey = dayPick.value;
+    if (!dateKey) return;
+    const isToday = dateKey === melDateKey();
+    dayLabel.textContent = `${fmtDay(dateKey)} — Melbourne${isToday ? " (today)" : ""}`;
+    dayList.classList.remove("empty");
+    dayList.innerHTML = `<div class="empty">Loading…</div>`;
+
+    // For today, re-fetch users so we see live currentBreakStartAt
+    let liveUsersByUid = usersByUid;
+    if (isToday) {
+      const fresh = await getDocs(query(collection(db, "users"), where("role", "==", "contractor")));
+      liveUsersByUid = {};
+      fresh.forEach(d => liveUsersByUid[d.id] = { uid: d.id, ...d.data() });
+    }
+
+    const snap = await getDocs(query(collection(db, "timeEntries"), where("date", "==", dateKey)));
+    const byUid = {};
+    snap.forEach(d => {
+      const e = { id: d.id, ...d.data() };
+      if (!byUid[e.uid]) byUid[e.uid] = { hours: 0, sessions: [], openStart: null };
+      const bucket = byUid[e.uid];
+      const start = e.clockInUTC.toDate();
+      const end   = e.clockOutUTC ? e.clockOutUTC.toDate() : null;
+      bucket.sessions.push({ id: e.id, start, end });
+      if (end) bucket.hours += e.hoursWorked || 0;
+      else bucket.openStart = start;
+    });
+
+    const now = Date.now();
+    const rows = users.filter(u => u.active !== false).map(u => {
+      const b = byUid[u.uid];
+      const liveUser = liveUsersByUid[u.uid] || u;
+      const isOnBreakNow = isToday && b && b.openStart && liveUser.currentBreakStartAt?.toDate;
+      let statusHtml, hoursHtml;
+      if (b && b.openStart && isOnBreakNow) {
+        const brkStart = liveUser.currentBreakStartAt.toDate();
+        statusHtml = `<span class="status-pill break"><span class="dot"></span>On break since ${melTimeShort(brkStart)} <span style="opacity:.7; margin-left:6px">· clocked in ${melTimeShort(b.openStart)}</span></span>`;
+        hoursHtml = `<span style="color:#7C3AED; font-weight:700">${fmtHours(b.hours)}</span>`;
+      } else if (b && b.openStart) {
+        const live = isToday ? hoursBetween(b.openStart.getTime(), now) : 0;
+        statusHtml = `<span class="status-pill working"><span class="dot"></span>Working since ${melTimeShort(b.openStart)}</span>`;
+        hoursHtml = `<span style="color:#4ade80; font-weight:700">${fmtHours(b.hours + live)}</span>`;
+      } else if (b && b.hours > 0) {
+        const lastEnd = b.sessions.filter(s => s.end).sort((a, c) => c.end - a.end)[0]?.end;
+        statusHtml = `<span class="status-pill done"><span class="dot"></span>Done${lastEnd ? ` · last out ${melTimeShort(lastEnd)}` : ""}</span>`;
+        hoursHtml = `<strong>${fmtHours(b.hours)}</strong>`;
+      } else {
+        statusHtml = `<span class="status-pill none"><span class="dot"></span>No entry</span>`;
+        hoursHtml = `<span class="muted">—</span>`;
+      }
+      const sessionsHtml = b && b.sessions.length
+        ? `<div class="session-chips">${b.sessions.sort((a, c) => a.start - c.start).map(s => sessionChip(s)).join("")}</div>`
+        : `<span class="no-sessions">no sessions</span>`;
+      return `
+        <tr>
+          <td><a href="#" data-uid="${u.uid}" class="name-link">${escapeHtml(u.name || u.email)}</a></td>
+          <td>${statusHtml}</td>
+          <td>${sessionsHtml}</td>
+          <td style="text-align:right; font-variant-numeric: tabular-nums">${hoursHtml}</td>
+          <td><button class="ghost" data-add="${u.uid}">+ Add</button></td>
+        </tr>
+      `;
+    });
+
+    if (rows.length === 0) {
+      dayList.innerHTML = `<div class="empty">No active contractors.</div>`;
+      return;
+    }
+    dayList.innerHTML = `<table class="data">
+      <thead><tr><th>Name</th><th>Status</th><th>Sessions</th><th style="text-align:right">Hours</th><th></th></tr></thead>
+      <tbody>${rows.join("")}</tbody>
+    </table>`;
+
+    function sessionChip(s) {
+      if (!s.end) {
+        return `<span class="session-chip open" data-edit-id="${s.id}">
+          <span class="from">${melTimeShort(s.start)}</span>
+          <span class="arr">→</span>
+          <span class="to">still in</span>
+        </span>`;
+      }
+      const dur = hoursBetween(s.start.getTime(), s.end.getTime());
+      return `<span class="session-chip" data-edit-id="${s.id}">
+        <span class="from">${melTimeShort(s.start)}</span>
+        <span class="arr">→</span>
+        <span class="to">${melTimeShort(s.end)}</span>
+        <span class="dur">${fmtHours(dur)}</span>
+      </span>`;
+    }
+
+    dayList.querySelectorAll(".name-link").forEach(a => {
+      a.addEventListener("click", (e) => {
+        e.preventDefault();
+        userPick.value = a.dataset.uid;
+        loadHistory();
+        document.querySelector("#userPick").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    });
+    if (canWrite) {
+      dayList.querySelectorAll(".session-chip[data-edit-id]").forEach(el => {
+        el.addEventListener("click", () => openEditEntry(el.dataset.editId));
+      });
+      dayList.querySelectorAll("button[data-add]").forEach(btn => {
+        btn.addEventListener("click", () => openAddEntry(btn.dataset.add, dateKey));
+      });
+    }
+  }
+  setInterval(() => { if (dayPick.value === melDateKey()) loadDay(); }, 60_000);
+
+  // ===================================================================
+  // EDIT / ADD ENTRY MODAL
+  // ===================================================================
+  const entryModal = document.getElementById("entryModal");
+  const entryId = document.getElementById("entryId");
+  const entryUid = document.getElementById("entryUid");
+  const entryDate = document.getElementById("entryDate");
+  const entryStart = document.getElementById("entryStart");
+  const entryEnd = document.getElementById("entryEnd");
+  const entryHoursPreview = document.getElementById("entryHoursPreview");
+  const entryErr = document.getElementById("entryErr");
+  const entryDeleteBtn = document.getElementById("entryDeleteBtn");
+
+  document.getElementById("entryCancelBtn").addEventListener("click", () => entryModal.classList.remove("open"));
+
+  function openAddEntry(uid, dateKey) {
+    entryId.value = "";
+    entryUid.value = uid;
+    document.getElementById("entryModalTitle").textContent = "Add entry";
+    document.getElementById("entryContractorName").textContent = usersByUid[uid]?.name || usersByUid[uid]?.email || "";
+    entryDate.value = dateKey;
+    entryStart.value = "08:30";
+    entryEnd.value = "16:30";
+    entryErr.textContent = "";
+    entryDeleteBtn.style.display = "none";
+    updateEntryPreview();
+    entryModal.classList.add("open");
+  }
+
+  async function openEditEntry(id) {
+    const snap = await getDocs(query(collection(db, "timeEntries"), where("__name__", "==", id)));
+    if (snap.empty) return;
+    const e = { id, ...snap.docs[0].data() };
+    entryId.value = id;
+    entryUid.value = e.uid;
+    document.getElementById("entryModalTitle").textContent = "Edit entry";
+    document.getElementById("entryContractorName").textContent = usersByUid[e.uid]?.name || "";
+    entryDate.value = e.date;
+    entryStart.value = melTimeShort(e.clockInUTC.toDate());
+    entryEnd.value = e.clockOutUTC ? melTimeShort(e.clockOutUTC.toDate()) : "";
+    entryErr.textContent = "";
+    entryDeleteBtn.style.display = "inline-block";
+    updateEntryPreview();
+    entryModal.classList.add("open");
+  }
+
+  function updateEntryPreview() {
+    if (!entryDate.value || !entryStart.value) { entryHoursPreview.textContent = ""; return; }
+    const startMs = parseMelTime(entryDate.value, entryStart.value);
+    if (!entryEnd.value) {
+      entryHoursPreview.textContent = "(Open session — no clock-out time)";
+      return;
+    }
+    const endMs = parseMelTime(entryDate.value, entryEnd.value);
+    if (endMs <= startMs) {
+      entryHoursPreview.innerHTML = `<span style="color:var(--bad)">End must be after start.</span>`;
+      return;
+    }
+    const hrs = hoursBetween(startMs, endMs);
+    entryHoursPreview.textContent = `Duration: ${fmtHours(hrs)} (${hrs.toFixed(2)} hours)`;
+  }
+  entryDate.addEventListener("change", updateEntryPreview);
+  entryStart.addEventListener("change", updateEntryPreview);
+  entryEnd.addEventListener("change", updateEntryPreview);
+
+  // Parse "YYYY-MM-DD" + "HH:MM" as Melbourne wall-clock time → UTC millis.
+  function parseMelTime(dateKey, timeStr) {
+    const [y, m, d] = dateKey.split("-").map(Number);
+    const [h, min] = timeStr.split(":").map(Number);
+    // Build a date assuming UTC, then back-out the Melbourne offset by formatting.
+    // Cheap approach: construct as if local, then adjust using the offset reported for that moment in MEL.
+    const guess = new Date(Date.UTC(y, m - 1, d, h, min, 0));
+    // Use Intl to find the offset Melbourne had at this moment
+    const fmt = new Intl.DateTimeFormat("en-US", { timeZone: MEL_TZ, timeZoneName: "shortOffset" });
+    const parts = fmt.formatToParts(guess);
+    const off = parts.find(p => p.type === "timeZoneName")?.value || "GMT+10";
+    const m2 = /GMT([+-])(\d{1,2})(?::?(\d{2}))?/.exec(off);
+    let offsetMin = 0;
+    if (m2) {
+      const sign = m2[1] === "+" ? 1 : -1;
+      offsetMin = sign * (parseInt(m2[2], 10) * 60 + parseInt(m2[3] || "0", 10));
+    }
+    return guess.getTime() - offsetMin * 60_000;
+  }
+
+  document.getElementById("entryForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    entryErr.textContent = "";
+    const dateKey = entryDate.value;
+    const startMs = parseMelTime(dateKey, entryStart.value);
+    let endMs = null;
+    if (entryEnd.value) {
+      endMs = parseMelTime(dateKey, entryEnd.value);
+      if (endMs <= startMs) { entryErr.textContent = "End must be after start."; return; }
+    }
+    const data = {
+      uid: entryUid.value,
+      date: dateKey,
+      clockInUTC: Timestamp.fromMillis(startMs),
+      clockOutUTC: endMs == null ? null : Timestamp.fromMillis(endMs),
+      hoursWorked: endMs == null ? null : hoursBetween(startMs, endMs),
+      source: "admin",
+      lastEditedBy: profile.email,
+      lastEditedAt: serverTimestamp()
+    };
+    try {
+      if (entryId.value) {
+        await updateDoc(doc(db, "timeEntries", entryId.value), data);
+        logAudit({ profile }, { action: "timeEntry.edit", targetType: "timeEntry", targetId: entryId.value, targetUser: entryUid.value, after: { date: dateKey, hoursWorked: data.hoursWorked }, note: `Edited time entry on ${dateKey}` });
+      } else {
+        data.createdAt = serverTimestamp();
+        const ref = await addDoc(collection(db, "timeEntries"), data);
+        logAudit({ profile }, { action: "timeEntry.add", targetType: "timeEntry", targetId: ref.id, targetUser: entryUid.value, after: { date: dateKey, hoursWorked: data.hoursWorked }, note: `Added time entry on ${dateKey}` });
+      }
+      entryModal.classList.remove("open");
+      loadDay();
+      if (userPick.value === entryUid.value) loadHistory();
+    } catch (ex) {
+      entryErr.textContent = "Failed: " + (ex.message || ex.code);
+    }
+  });
+
+  entryDeleteBtn.addEventListener("click", async () => {
+    if (!entryId.value) return;
+    if (!confirm("Delete this time entry? This can't be undone.")) return;
+    try {
+      // If the contractor's profile is currently pointing to this open entry, clear it
+      const u = users.find(x => x.currentEntryId === entryId.value);
+      if (u) await updateDoc(doc(db, "users", u.uid), { currentEntryId: null, clockedInAt: null });
+      const delUid = entryUid.value;
+      await deleteDoc(doc(db, "timeEntries", entryId.value));
+      logAudit({ profile }, { action: "timeEntry.delete", targetType: "timeEntry", targetId: entryId.value, targetUser: delUid, note: `Deleted time entry` });
+      entryModal.classList.remove("open");
+      loadDay();
+      if (userPick.value === entryUid.value) loadHistory();
+    } catch (ex) {
+      entryErr.textContent = "Failed: " + (ex.message || ex.code);
+    }
+  });
+
+  // ===================================================================
+  // HISTORY DRILL-DOWN
+  // ===================================================================
+  // Resolve the contractor-history range — preset N-days or a custom pair.
+  function historyRange() {
+    if (rangePick.value === "custom") {
+      const s = document.getElementById("historyCustomStart")?.value;
+      const e = document.getElementById("historyCustomEnd")?.value;
+      if (!s || !e) return null;
+      const keys = [];
+      const [sy, sm, sd] = s.split("-").map(Number);
+      const [ey, em, ed] = e.split("-").map(Number);
+      let cur = Date.UTC(sy, sm - 1, sd);
+      const end = Date.UTC(ey, em - 1, ed);
+      while (cur <= end) {
+        const dt = new Date(cur);
+        keys.unshift(`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`);
+        cur += 86_400_000;
+      }
+      return keys;
+    }
+    return lastNDateKeys(Number(rangePick.value));
+  }
+
+  async function loadHistory() {
+    const uid = userPick.value;
+    if (!uid) {
+      historyList.classList.add("empty");
+      historyList.innerHTML = "Pick a contractor above, or click a name in the daily view.";
+      summaryEl.innerHTML = "";
+      return;
+    }
+    const keys = historyRange();
+    if (!keys) {
+      historyList.classList.add("empty");
+      historyList.innerHTML = "Pick a custom start and end date.";
+      summaryEl.innerHTML = "";
+      return;
+    }
+    const oldestKey = keys[keys.length - 1];
+    historyList.classList.remove("empty");
+    historyList.innerHTML = `<div class="empty">Loading…</div>`;
+
+    const snap = await getDocs(query(
+      collection(db, "timeEntries"),
+      where("uid", "==", uid),
+      where("date", ">=", oldestKey),
+      orderBy("date", "desc")
+    ));
+    const byDay = {};
+    keys.forEach(k => byDay[k] = { hours: 0, entries: [] });
+    snap.forEach(d => {
+      const e = { id: d.id, ...d.data() };
+      if (!byDay[e.date]) return;
+      byDay[e.date].entries.push(e);
+      if (e.hoursWorked) byDay[e.date].hours += e.hoursWorked;
+    });
+
+    const totalHours = keys.reduce((s, k) => s + byDay[k].hours, 0);
+    const daysWorked = keys.filter(k => byDay[k].hours > 0).length;
+    summaryEl.innerHTML = `
+      <div><div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em">Total</div><div style="font-size:20px; color:var(--text); font-weight:700">${fmtHours(totalHours)}</div></div>
+      <div><div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em">Days worked</div><div style="font-size:20px; color:var(--text); font-weight:700">${daysWorked}</div></div>
+      <div><div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em">Avg / worked day</div><div style="font-size:20px; color:var(--text); font-weight:700">${daysWorked > 0 ? fmtHours(totalHours / daysWorked) : "—"}</div></div>
+    `;
+
+    historyList.innerHTML = `<table class="data">
+      <thead><tr><th>Date</th><th>Sessions</th><th style="text-align:right">Hours</th><th></th></tr></thead>
+      <tbody>${keys.map(k => {
+        const d = byDay[k];
+        let sessionsHtml = `<span class="no-sessions">no sessions</span>`;
+        if (d.entries.length) {
+          const segments = [];
+          d.entries.forEach(e => entrySegmentsAdmin(e).forEach(s => segments.push(s)));
+          segments.sort((a, b) => a.start - b.start);
+          sessionsHtml = `<div class="session-chips">${segments.map(s => chipHtmlAdmin(s)).join("")}</div>`;
+        }
+        return `<tr>
+          <td>${fmtDay(k)}</td>
+          <td>${sessionsHtml}</td>
+          <td style="text-align:right; font-variant-numeric: tabular-nums">${d.hours > 0 ? `<strong>${fmtHours(d.hours)}</strong>` : '<span class="muted">—</span>'}</td>
+          <td><button class="ghost" data-add-history-uid="${uid}" data-add-history-date="${k}">+ Add</button></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+
+    if (canWrite) {
+      historyList.querySelectorAll(".session-chip[data-edit-id]").forEach(el => {
+        el.addEventListener("click", () => openEditEntry(el.dataset.editId));
+      });
+      historyList.querySelectorAll("button[data-add-history-uid]").forEach(btn => {
+        btn.addEventListener("click", () => openAddEntry(btn.dataset.addHistoryUid, btn.dataset.addHistoryDate));
+      });
+    }
+  }
+
+  userPick.addEventListener("change", loadHistory);
+  rangePick.addEventListener("change", () => {
+    const wrap = document.getElementById("historyCustomWrap");
+    if (rangePick.value === "custom") {
+      wrap.style.display = "inline-flex";
+      const cs = document.getElementById("historyCustomStart");
+      const ce = document.getElementById("historyCustomEnd");
+      if (!cs.value || !ce.value) {
+        const today = melDateKey();
+        cs.value = lastNDateKeys(30)[29];
+        ce.value = today;
+      }
+    } else {
+      wrap.style.display = "none";
+    }
+    loadHistory();
+  });
+  document.getElementById("historyCustomStart").addEventListener("change", loadHistory);
+  document.getElementById("historyCustomEnd").addEventListener("change", loadHistory);
+
+  // Same segment logic as contractor side, plus carry the entry id so chips stay clickable for edit.
+  function entrySegmentsAdmin(e) {
+    const out = [];
+    const start = e.clockInUTC?.toDate?.();
+    const end   = e.clockOutUTC?.toDate?.();
+    if (!start) return out;
+    const breaks = (e.breaks || [])
+      .map(b => ({ start: b.startUTC?.toDate?.(), end: b.endUTC?.toDate?.() }))
+      .filter(b => b.start && b.end)
+      .sort((a, b) => a.start - b.start);
+    let cursor = start;
+    breaks.forEach(b => {
+      if (b.start > cursor) out.push({ kind: "work", start: cursor, end: b.start, entryId: e.id });
+      out.push({ kind: "brk", start: b.start, end: b.end, entryId: e.id });
+      cursor = b.end;
+    });
+    if (end) {
+      if (end > cursor) out.push({ kind: "work", start: cursor, end, entryId: e.id });
+    } else {
+      out.push({ kind: "work", start: cursor, end: null, ongoing: true, entryId: e.id });
+    }
+    return out;
+  }
+  function chipHtmlAdmin(s) {
+    if (s.kind === "brk") {
+      const dur = (s.end - s.start) / 60_000;
+      return `<span class="session-chip brk" data-edit-id="${s.entryId}">
+        <span>${melTimeShort(s.start)}</span>
+        <span class="arr">→</span>
+        <span>${melTimeShort(s.end)}</span>
+        <span class="dur">${dur >= 1 ? Math.round(dur) + "m" : Math.max(1, Math.round(dur*60)) + "s"}</span>
+      </span>`;
+    }
+    if (s.ongoing) {
+      return `<span class="session-chip open" data-edit-id="${s.entryId}">
+        <span>${melTimeShort(s.start)}</span>
+        <span class="arr">→</span>
+        <span class="to">still in</span>
+      </span>`;
+    }
+    const dur = hoursBetween(s.start.getTime(), s.end.getTime());
+    return `<span class="session-chip" data-edit-id="${s.entryId}">
+      <span>${melTimeShort(s.start)}</span>
+      <span class="arr">→</span>
+      <span>${melTimeShort(s.end)}</span>
+      <span class="dur">${fmtHours(dur)}</span>
+    </span>`;
+  }
+
+  // ===================================================================
+  // PERIOD SUMMARY (daily / week / month / 90 days)
+  // ===================================================================
+  function fmtHM(hours) {
+    if (hours == null || isNaN(hours)) return "—";
+    const totalMins = Math.round(Math.abs(hours) * 60);
+    const sign = hours < 0 ? "-" : "";
+    const h = Math.floor(totalMins / 60), m = totalMins % 60;
+    if (h === 0 && m === 0) return "0m";
+    if (h === 0) return `${sign}${m}m`;
+    if (m === 0) return `${sign}${h}h`;
+    return `${sign}${h}h ${m}m`;
+  }
+  function periodRange(kind) {
+    const todayKey = melDateKey();
+    const [y, m, d] = todayKey.split("-").map(Number);
+    const today = Date.UTC(y, m - 1, d);
+    if (kind === "day") {
+      return { start: todayKey, end: todayKey };
+    }
+    if (kind === "week") {
+      const dt = new Date(today);
+      const dow = (dt.getUTCDay() + 6) % 7; // Mon = 0
+      const mon = today - dow * 86_400_000;
+      const monDt = new Date(mon);
+      const monKey = `${monDt.getUTCFullYear()}-${String(monDt.getUTCMonth()+1).padStart(2,"0")}-${String(monDt.getUTCDate()).padStart(2,"0")}`;
+      return { start: monKey, end: todayKey };
+    }
+    if (kind === "month") {
+      const start = `${y}-${String(m).padStart(2,"0")}-01`;
+      return { start, end: todayKey };
+    }
+    if (kind === "custom") {
+      const s = document.getElementById("periodCustomStart")?.value;
+      const e = document.getElementById("periodCustomEnd")?.value;
+      if (s && e) return { start: s, end: e };
+      return { start: todayKey, end: todayKey };
+    }
+    // quarter = last 90 days
+    const startMs = today - 89 * 86_400_000;
+    const s = new Date(startMs);
+    const sKey = `${s.getUTCFullYear()}-${String(s.getUTCMonth()+1).padStart(2,"0")}-${String(s.getUTCDate()).padStart(2,"0")}`;
+    return { start: sKey, end: todayKey };
+  }
+  function keysBetween(startKey, endKey) {
+    const [sy, sm, sd] = startKey.split("-").map(Number);
+    const [ey, em, ed] = endKey.split("-").map(Number);
+    let cur = Date.UTC(sy, sm - 1, sd);
+    const end = Date.UTC(ey, em - 1, ed);
+    const out = [];
+    while (cur <= end) {
+      const dt = new Date(cur);
+      out.push(`${dt.getUTCFullYear()}-${String(dt.getUTCMonth()+1).padStart(2,"0")}-${String(dt.getUTCDate()).padStart(2,"0")}`);
+      cur += 86_400_000;
+    }
+    return out;
+  }
+
+  let __chartStyle = null;
+  try {
+    __chartStyle = await import("../assets/chart-style.js");
+  } catch (e) {
+    console.error("Failed to load chart-style.js:", e);
+    alert("Could not load chart styles. " + (e.message || e));
+  }
+  const PALETTE = __chartStyle?.VIVID_PALETTE || ["#3B82F6","#14B8A6","#EAB308","#EF4444","#8B5CF6","#0EA5E9"];
+  const vividChartOptions = __chartStyle?.vividChartOptions || (() => ({ responsive: true, maintainAspectRatio: false }));
+  const chartToPieData    = __chartStyle?.chartToPieData    || ((d) => d);
+  const vividPieOptions   = __chartStyle?.vividPieOptions   || (() => ({ responsive: true, maintainAspectRatio: false }));
+  const makeChartToggle   = __chartStyle?.makeChartToggle   || (() => document.createElement("span"));
+  let periodChart = null;
+  let periodType = "bar";
+  let lastPeriodData = null;
+  let lastPeriodOpts = null;
+  async function loadPeriodSummary() {
+    const kind = document.getElementById("periodPick").value;
+    const { start, end } = periodRange(kind);
+    const keys = keysBetween(start, end);
+    const labels = keys.map(k => kind === "quarter" ? fmtAUShort(k) : fmtAUDow(k));
+
+    const active = users.filter(u => u.active !== false);
+
+    const todayKey = melDateKey();
+    const nowMs = Date.now();
+    const perUserDaily = await Promise.all(active.map(async (u) => {
+      const teSnap = await getDocs(query(collection(db, "timeEntries"), where("uid", "==", u.uid)));
+      const workMap = Object.fromEntries(keys.map(k => [k, 0]));
+      const breakMap = Object.fromEntries(keys.map(k => [k, 0]));
+      let total = 0, breakTotal = 0;
+      teSnap.forEach(d => {
+        const e = d.data();
+        if (e.date < start || e.date > end) return;
+        // Closed shifts: use stored hoursWorked + breakMinutes
+        if (e.clockOutUTC && e.hoursWorked != null) {
+          workMap[e.date] = (workMap[e.date] || 0) + e.hoursWorked;
+          total += e.hoursWorked;
+          if (e.breakMinutes) { breakMap[e.date] = (breakMap[e.date] || 0) + e.breakMinutes / 60; breakTotal += e.breakMinutes / 60; }
+          return;
+        }
+        // Open shifts (today only): compute live hours from clockIn → now (or current break-start)
+        if (!e.clockOutUTC && e.date === todayKey && e.clockInUTC?.toDate) {
+          const startMs = e.clockInUTC.toDate().getTime();
+          const breakMins = e.breakMinutes || 0;
+          // Subtract in-progress break too (lookup user.currentBreakStartAt)
+          let currentBreakMs = 0;
+          if (u.currentEntryId === d.id && u.currentBreakStartAt?.toDate) {
+            currentBreakMs = nowMs - u.currentBreakStartAt.toDate().getTime();
+          }
+          const liveWorkH = Math.max(0, (nowMs - startMs - breakMins * 60_000 - currentBreakMs) / 3_600_000);
+          const liveBreakH = (breakMins * 60_000 + currentBreakMs) / 3_600_000;
+          workMap[e.date] = (workMap[e.date] || 0) + liveWorkH;
+          total += liveWorkH;
+          breakMap[e.date] = (breakMap[e.date] || 0) + liveBreakH;
+          breakTotal += liveBreakH;
+        }
+      });
+      return { user: u, workMap, breakMap, total, breakTotal };
+    }));
+
+    document.getElementById("periodMeta").textContent = `${fmtAU(start)} → ${fmtAU(end)}`;
+
+    // Two datasets per user (Worked + Break) — same colour family but Worked solid, Break lighter
+    const datasets = [];
+    const thickness = kind === "quarter" ? 6 : kind === "month" ? 10 : kind === "week" ? 18 : 36;
+    perUserDaily.forEach((row, i) => {
+      const c = PALETTE[i % PALETTE.length];
+      const name = (row.user.name || row.user.email).split(" ")[0];
+      datasets.push({
+        label: `${name} · Worked ${fmtHM(row.total)}`,
+        data: keys.map(k => Number((row.workMap[k] || 0).toFixed(2))),
+        backgroundColor: c, borderColor: c, borderWidth: 0, borderRadius: 2,
+        maxBarThickness: thickness
+      });
+      datasets.push({
+        label: `${name} · Break ${fmtHM(row.breakTotal)}`,
+        data: keys.map(k => Number((row.breakMap[k] || 0).toFixed(2))),
+        backgroundColor: c + "55", borderColor: c, borderWidth: 0, borderRadius: 2,
+        maxBarThickness: thickness
+      });
+    });
+
+    lastPeriodData = { labels, datasets };
+    lastPeriodOpts = vividChartOptions({ yLabel: "Hours", titleLookup: (idx) => fmtAUDow(keys[idx]) });
+    renderPeriodChart();
+  }
+
+  function renderPeriodChart() {
+    if (!lastPeriodData) return;
+    if (periodChart) periodChart.destroy();
+    periodChart = new Chart(document.getElementById("periodChart"), periodType === "pie"
+      ? { type: "pie", data: chartToPieData(lastPeriodData), options: vividPieOptions() }
+      : { type: "bar", data: lastPeriodData, options: lastPeriodOpts });
+  }
+
+  const periodToggle = document.getElementById("periodChartToggle");
+  if (periodToggle && !periodToggle.dataset.wired) {
+    periodToggle.appendChild(makeChartToggle("bar", (t) => { periodType = t; renderPeriodChart(); }));
+    periodToggle.dataset.wired = "1";
+  }
+  document.getElementById("periodPick").addEventListener("change", () => {
+    // Show / hide custom date pickers when toggling Custom range…
+    const wrap = document.getElementById("periodCustomWrap");
+    if (document.getElementById("periodPick").value === "custom") {
+      wrap.style.display = "inline-flex";
+      const cs = document.getElementById("periodCustomStart");
+      const ce = document.getElementById("periodCustomEnd");
+      if (!cs.value || !ce.value) {
+        const today = melDateKey();
+        // Default custom = today's calendar month
+        const [y, m] = today.split("-");
+        cs.value = `${y}-${m}-01`;
+        ce.value = today;
+      }
+    } else {
+      wrap.style.display = "none";
+    }
+    subscribePeriodSummary();
+  });
+  document.getElementById("periodCustomStart").addEventListener("change", subscribePeriodSummary);
+  document.getElementById("periodCustomEnd").addEventListener("change", subscribePeriodSummary);
+
+  // Live period summary — listener tracks the active period so it auto-re-renders on writes.
+  let __periodUnsub = null;
+  function subscribePeriodSummary() {
+    if (__periodUnsub) __periodUnsub();
+    const kind = document.getElementById("periodPick").value;
+    const { start } = periodRange(kind);
+    __periodUnsub = onSnapshot(
+      query(collection(db, "timeEntries"), where("date", ">=", start)),
+      () => loadPeriodSummary().catch(e => console.error("Period summary live:", e)),
+      (err) => console.error("Period summary sub:", err)
+    );
+  }
+  subscribePeriodSummary();
+
+  // ===================================================================
+  // INITIAL LOAD
+  // ===================================================================
+  loadEditRequests();
+  loadDay();
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>

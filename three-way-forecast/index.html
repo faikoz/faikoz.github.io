@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOUR COMPANY LTD - 3-Way Financial Forecast</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="tour/tour.css">
+<script src="tour/tour.js" defer></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">YOUR COMPANY LTD</h1>
+                <h2 class="text-xl text-gray-600 mb-4">3-Way Financial Forecast - FY2026</h2>
+                
+                <!-- Key Performance Summary -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4" id="kpiSummary">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-blue-700">Projected Revenue</h3>
+                        <p class="text-2xl font-bold text-blue-800" id="projectedRevenue"></p>
+                        <p class="text-sm text-blue-600">+18.5% vs FY2025</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-green-700">Gross Profit</h3>
+                        <p class="text-2xl font-bold text-green-800" id="grossProfit"></p>
+                        <p class="text-sm text-green-600" id="grossMargin"></p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-purple-700">Net Profit</h3>
+                        <p class="text-2xl font-bold text-purple-800" id="netProfit"></p>
+                        <p class="text-sm text-purple-600" id="netProfitComparison"></p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-orange-700">Year-end Cash</h3>
+                        <p class="text-2xl font-bold text-orange-800" id="yearEndCash"></p>
+                        <p class="text-sm text-orange-600" id="cashComparison"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="bg-white rounded-lg shadow-md mb-6">
+                <div class="flex border-b border-gray-200">
+                    <button onclick="showView('summary')" class="px-6 py-3 font-medium border-b-2 border-blue-500 text-blue-600 bg-blue-50" id="tab-summary">Executive Summary</button>
+                    <button onclick="showView('pnl')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-pnl">P&L Forecast</button>
+                    <button onclick="showView('balance')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-balance">Balance Sheet</button>
+                    <button onclick="showView('cashflow')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-cashflow">Cash Flow</button>
+                    <button onclick="showView('charts')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-charts">Visualizations</button>
+                </div>
+            </div>
+
+            <!-- Content Views -->
+            
+            <!-- Executive Summary View -->
+            <div id="view-summary" class="space-y-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Executive Summary - FY2026 Forecast</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3 text-gray-700">Financial Highlights</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Revenue Growth:</span>
+                                    <span class="font-medium text-green-600" id="revenueGrowth"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Gross Margin Compression:</span>
+                                    <span class="font-medium text-red-600">-1.9pp to 24.3%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Net Profit Improvement:</span>
+                                    <span class="font-medium text-green-600" id="netProfitImprovement"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Operating Efficiency:</span>
+                                    <span class="font-medium">20.5% expense ratio</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-3 text-gray-700">Key Strategic Insights</h4>
+                            <ul class="text-sm space-y-2">
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Revenue diversification across product lines showing strong growth trajectory
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Rising input costs — COGS forecast at 75.7% of revenue vs 73.8% in 2025</li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Seasonal patterns indicate stronger H1 performance (H1 revenue $43.7M vs H2 $41.1M)
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Cash flow management focus in Jan, Jul, Jun — the tightest net-profit months
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- YoY Comparison -->
+                    <div class="mt-6 border-t pt-4">
+                        <h4 class="font-semibold mb-3 text-gray-700">Year-over-Year Comparison</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-2">Metric</th>
+                                        <th class="text-right py-2">FY2025 Actual</th>
+                                        <th class="text-right py-2">FY2026 Budget</th>
+                                        <th class="text-right py-2">Variance</th>
+                                        <th class="text-right py-2">% Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="yoyComparison">
+                                    <!-- Data populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- P&L View -->
+            <div id="view-pnl" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Profit & Loss Forecast - FY2026</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="pnlTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cash Flow View -->
+            <div id="view-cashflow" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Cash Flow Forecast - FY2026</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="cashflowTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+                
+                <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
+                    <h4 class="font-semibold text-yellow-800 mb-2">Cash Flow Analysis</h4>
+                    <div class="text-sm text-yellow-700 space-y-1">
+                        <p>• <strong>Working Capital Impact:</strong> Monitor receivables growth with revenue increase</p>
+                        <p>• <strong>Seasonal Cash Cycles:</strong> Tight cash periods in Jan, Jul, Jun require attention</p>
+                        <p>• <strong>Investment Capacity:</strong> H1 cash generation is the primary source of growth investment funding</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balance Sheet View -->
+            <div id="view-balance" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Balance Sheet Forecast - FY2026</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="balanceSheetTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">Asset Growth Analysis</h4>
+                        <p class="text-sm text-blue-700" id="assetGrowthAnalysis">
+                            <!-- Analysis populated by JavaScript -->
+                        </p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">Equity Position</h4>
+                        <p class="text-sm text-green-700" id="equityPosition">
+                            <!-- Analysis populated by JavaScript -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts View -->
+            <div id="view-charts" class="space-y-6" style="display: none;">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Revenue & Profitability Trends</h3>
+                    <div style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Cash Flow Projection</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Assumptions and Risks -->
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h3 class="text-xl font-bold mb-4">Key Assumptions & Risk Factors</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3 text-green-700">Key Assumptions</h4>
+                        <ul class="text-sm space-y-2">
+                            <li>• Revenue growth of 19% based on market expansion and pricing optimization</li>
+                            <li>• COGS ratio rising to ~75.7% of revenue (from 73.8% in FY25) — supplier renegotiations planned</li>
+                            <li>• Operating expenses tightening as a share of revenue — scale efficiencies expected</li>
+                            <li>• No major capital expenditure planned beyond routine replacements</li>
+                            <li>• Interest rates remain stable for the corporate lender financing</li>
+                            <li>• Working capital requirements scale proportionally with revenue</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-3 text-red-700">Risk Factors</h4>
+                        <ul class="text-sm space-y-2">
+                            <li>• Seasonal cash flow constraints in Q1 and Q3</li>
+                            <li>• External financing balance of $5.73M (6.8% of revenue) — manageable</li>
+                            <li>• Foreign exchange exposure impacting COGS and margins</li>
+                            <li>• Concentration risk in market cyclicality</li>
+                            <li>• Receivables focus on $12.08M outstanding (~52 days sales)</li>
+                            <li>• Margin pressure from competitive pricing environment</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <strong>Recommendation:</strong> Establish a $2.15M revolving credit facility to manage seasonal cash flow fluctuations 
+                        and consider accelerating receivables collection processes to improve working capital efficiency.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Financial Data
+        const actual2025 = {
+            revenue: 71536312,
+            cogs: 52790823,
+            grossProfit: 18745489,
+            otherIncome: 602347,
+            totalExpenses: 16486048,
+            netProfit: 2861788,
+            cash: 1690853,
+            totalAssets: 23023234,
+            totalLiabilities: 15731674,
+            equity: 7291560
+        };
+
+        const monthlyBudgetData = {
+            months: ['Jul-25', 'Aug-25', 'Sep-25', 'Oct-25', 'Nov-25', 'Dec-25', 'Jan-26', 'Feb-26', 'Mar-26', 'Apr-26', 'May-26', 'Jun-26'],
+            revenue: [5598414, 8269745, 8373428, 6913419, 8042352, 6462925, 4832771, 6731427, 6358793, 8636706, 8712073, 5854545],
+            cogs: [4301743, 6419814, 6461253, 5357973, 6161639, 4403585, 3726280, 5187314, 4731486, 6546985, 6442166, 4404879],
+            grossProfit: [1296671, 1849931, 1912175, 1555446, 1880713, 2059340, 1106491, 1544113, 1627307, 2089721, 2269907, 1449666],
+            expenses: [1508483, 1332901, 1334427, 1455208, 1508334, 1439013, 1497219, 1427987, 1466595, 1427359, 1458794, 1517683],
+            netProfit: [-146903, 581939, 642657, 165147, 437288, 685236, -325819, 181035, 225621, 727271, 876022, -3108]
+        };
+
+        // Utility functions
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-AU', {
+                style: 'currency',
+                currency: 'AUD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(value);
+        };
+
+        const formatPercentage = (value) => {
+            return (value * 100).toFixed(1) + '%';
+        };
+
+        // Calculate derived data
+        const calculateCashFlow = () => {
+            let runningCash = actual2025.cash;
+            return monthlyBudgetData.months.map((month, index) => {
+                const netCashFlow = monthlyBudgetData.netProfit[index] + (536485 / 12);
+                runningCash += netCashFlow;
+                return {
+                    month,
+                    netProfit: monthlyBudgetData.netProfit[index],
+                    depreciation: 536485 / 12,
+                    cashFlow: netCashFlow,
+                    cumulativeCash: runningCash
+                };
+            });
+        };
+
+        const calculateBalanceSheet = () => {
+            let runningEquity = actual2025.equity;
+            let runningAssets = actual2025.totalAssets;
+            
+            return monthlyBudgetData.months.map((month, index) => {
+                runningEquity += monthlyBudgetData.netProfit[index];
+                runningAssets += monthlyBudgetData.netProfit[index] * 0.3;
+                
+                return {
+                    month,
+                    totalAssets: runningAssets,
+                    totalLiabilities: runningAssets - runningEquity,
+                    equity: runningEquity,
+                    workingCapital: runningAssets * 0.6 - (runningAssets - runningEquity) * 0.5
+                };
+            });
+        };
+
+        const cashFlowData = calculateCashFlow();
+        const balanceSheetData = calculateBalanceSheet();
+
+        // Calculate annual totals
+        const annualTotals = {
+            revenue: monthlyBudgetData.revenue.reduce((a, b) => a + b, 0),
+            cogs: monthlyBudgetData.cogs.reduce((a, b) => a + b, 0),
+            grossProfit: monthlyBudgetData.grossProfit.reduce((a, b) => a + b, 0),
+            expenses: monthlyBudgetData.expenses.reduce((a, b) => a + b, 0),
+            netProfit: monthlyBudgetData.netProfit.reduce((a, b) => a + b, 0)
+        };
+
+        // View management
+        let currentView = 'summary';
+
+        function showView(viewName) {
+            // Hide all views
+            const views = ['summary', 'pnl', 'balance', 'cashflow', 'charts'];
+            views.forEach(view => {
+                const element = document.getElementById(`view-${view}`);
+                if (element) {
+                    element.style.display = 'none';
+                }
+                
+                // Update tab styling
+                const tab = document.getElementById(`tab-${view}`);
+                if (tab) {
+                    tab.className = 'px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50';
+                }
+            });
+
+            // Show selected view
+            const selectedView = document.getElementById(`view-${viewName}`);
+            if (selectedView) {
+                selectedView.style.display = viewName === 'charts' ? 'block' : 'block';
+            }
+
+            // Update selected tab styling
+            const selectedTab = document.getElementById(`tab-${viewName}`);
+            if (selectedTab) {
+                selectedTab.className = 'px-6 py-3 font-medium border-b-2 border-blue-500 text-blue-600 bg-blue-50';
+            }
+
+            currentView = viewName;
+
+            // Initialize specific view content
+            if (viewName === 'pnl') {
+                populatePnLTable();
+            } else if (viewName === 'cashflow') {
+                populateCashflowTable();
+            } else if (viewName === 'balance') {
+                populateBalanceSheetTable();
+            } else if (viewName === 'charts') {
+                // Delay chart initialization to ensure the view is visible
+                setTimeout(() => {
+                    initializeCharts();
+                }, 100);
+            }
+        }
+
+        // Populate KPI Summary
+        function populateKPISummary() {
+            document.getElementById('projectedRevenue').textContent = formatCurrency(annualTotals.revenue);
+            document.getElementById('grossProfit').textContent = formatCurrency(annualTotals.grossProfit);
+            document.getElementById('grossMargin').textContent = formatPercentage(annualTotals.grossProfit / annualTotals.revenue) + ' margin';
+            document.getElementById('netProfit').textContent = formatCurrency(annualTotals.netProfit);
+            document.getElementById('netProfitComparison').textContent = `vs ${formatCurrency(actual2025.netProfit)} FY2025`;
+            document.getElementById('yearEndCash').textContent = formatCurrency(cashFlowData[11].cumulativeCash);
+            document.getElementById('cashComparison').textContent = `vs ${formatCurrency(actual2025.cash)} current`;
+            
+            // Summary page specific elements
+            document.getElementById('revenueGrowth').textContent = `+18.5% (${formatCurrency(annualTotals.revenue - actual2025.revenue)})`;
+            document.getElementById('netProfitImprovement').textContent = formatCurrency(annualTotals.netProfit - actual2025.netProfit);
+        }
+
+        // Populate YoY Comparison Table
+        function populateYoYComparison() {
+            const tbody = document.getElementById('yoyComparison');
+            const comparisons = [
+                {
+                    metric: 'Revenue',
+                    actual: actual2025.revenue,
+                    budget: annualTotals.revenue,
+                    isPositive: true
+                },
+                {
+                    metric: 'Gross Profit',
+                    actual: actual2025.grossProfit,
+                    budget: annualTotals.grossProfit,
+                    isPositive: false
+                },
+                {
+                    metric: 'Net Profit',
+                    actual: actual2025.netProfit,
+                    budget: annualTotals.netProfit,
+                    isPositive: true
+                }
+            ];
+
+            tbody.innerHTML = comparisons.map(comp => {
+                const variance = comp.budget - comp.actual;
+                const percentChange = Math.abs(comp.actual) > 0 ? (variance / Math.abs(comp.actual) * 100).toFixed(1) : '0.0';
+                const colorClass = comp.isPositive && variance > 0 || !comp.isPositive && variance < 0 ? 'text-green-600' : 'text-red-600';
+                const sign = variance >= 0 ? '+' : '';
+                
+                return `
+                    <tr class="border-b">
+                        <td class="py-2 font-medium">${comp.metric}</td>
+                        <td class="text-right py-2">${formatCurrency(comp.actual)}</td>
+                        <td class="text-right py-2">${formatCurrency(comp.budget)}</td>
+                        <td class="text-right py-2 ${colorClass}">${formatCurrency(variance)}</td>
+                        <td class="text-right py-2 ${colorClass}">${sign}${percentChange}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Populate P&L Table
+        function populatePnLTable() {
+            const table = document.getElementById('pnlTable');
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Account</th>
+                        ${monthlyBudgetData.months.map(month => `<th class="text-right py-3 px-2 font-semibold">${month}</th>`).join('')}
+                        <th class="text-right py-3 px-4 font-semibold bg-blue-100">Annual Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-blue-700">REVENUE</td>
+                        ${monthlyBudgetData.revenue.map(rev => `<td class="text-right py-3 px-2">${formatCurrency(rev)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-blue-50">${formatCurrency(annualTotals.revenue)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-red-700">COST OF GOODS SOLD</td>
+                        ${monthlyBudgetData.cogs.map(cog => `<td class="text-right py-3 px-2">(${formatCurrency(cog)})</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-red-50">(${formatCurrency(annualTotals.cogs)})</td>
+                    </tr>
+                    <tr class="border-b bg-green-50">
+                        <td class="py-3 px-4 font-bold text-green-700">GROSS PROFIT</td>
+                        ${monthlyBudgetData.grossProfit.map(gp => `<td class="text-right py-3 px-2 font-semibold">${formatCurrency(gp)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-green-100">${formatCurrency(annualTotals.grossProfit)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Gross Margin %</td>
+                        ${monthlyBudgetData.grossProfit.map((gp, i) => `<td class="text-right py-3 px-2">${formatPercentage(gp / monthlyBudgetData.revenue[i])}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatPercentage(annualTotals.grossProfit / annualTotals.revenue)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-orange-700">OPERATING EXPENSES</td>
+                        ${monthlyBudgetData.expenses.map(exp => `<td class="text-right py-3 px-2">(${formatCurrency(exp)})</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-orange-50">(${formatCurrency(annualTotals.expenses)})</td>
+                    </tr>
+                    <tr class="border-b bg-purple-50">
+                        <td class="py-3 px-4 font-bold text-purple-700">NET PROFIT</td>
+                        ${monthlyBudgetData.netProfit.map(np => `<td class="text-right py-3 px-2 font-semibold ${np >= 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(np)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-purple-100 text-green-700">${formatCurrency(annualTotals.netProfit)}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-medium">Net Margin %</td>
+                        ${monthlyBudgetData.netProfit.map((np, i) => `<td class="text-right py-3 px-2 ${np >= 0 ? 'text-green-600' : 'text-red-600'}">${formatPercentage(np / monthlyBudgetData.revenue[i])}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatPercentage(annualTotals.netProfit / annualTotals.revenue)}</td>
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+        }
+
+        // Populate Cash Flow Table
+        function populateCashflowTable() {
+            const table = document.getElementById('cashflowTable');
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Cash Flow Item</th>
+                        ${monthlyBudgetData.months.map(month => `<th class="text-right py-3 px-2 font-semibold">${month}</th>`).join('')}
+                        <th class="text-right py-3 px-4 font-semibold bg-blue-100">Annual Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Net Profit</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 ${cf.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(cf.netProfit)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(annualTotals.netProfit)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Add: Depreciation</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2">${formatCurrency(cf.depreciation)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(536485)}</td>
+                    </tr>
+                    <tr class="border-b bg-blue-50">
+                        <td class="py-3 px-4 font-bold">Operating Cash Flow</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 font-semibold">${formatCurrency(cf.cashFlow)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(annualTotals.netProfit + 536485)}</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="py-3 px-4 font-bold">Cumulative Cash Balance</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(cf.cumulativeCash)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-blue-100">${formatCurrency(cashFlowData[11].cumulativeCash)}</td>
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+        }
+
+        // Populate Balance Sheet Table
+        function populateBalanceSheetTable() {
+            const table = document.getElementById('balanceSheetTable');
+            const quarterlyData = [2, 5, 8, 11]; // Sep, Dec, Mar, Jun indices
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Balance Sheet Item</th>
+                        <th class="text-right py-3 px-4 font-semibold">Jun-25 Actual</th>
+                        ${quarterlyData.map(i => `<th class="text-right py-3 px-2 font-semibold">${monthlyBudgetData.months[i]}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b bg-blue-50">
+                        <td class="py-3 px-4 font-bold">TOTAL ASSETS</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(actual2025.totalAssets)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].totalAssets)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Current Assets (Est.)</td>
+                        <td class="text-right py-3 px-4">${formatCurrency(actual2025.totalAssets * 0.94)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].totalAssets * 0.94)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Non-Current Assets (Est.)</td>
+                        <td class="text-right py-3 px-4">${formatCurrency(actual2025.totalAssets * 0.06)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].totalAssets * 0.06)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b bg-red-50">
+                        <td class="py-3 px-4 font-bold">TOTAL LIABILITIES</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(actual2025.totalLiabilities)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].totalLiabilities)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b bg-green-50">
+                        <td class="py-3 px-4 font-bold">TOTAL EQUITY</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(actual2025.equity)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].equity)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-medium">Working Capital</td>
+                        <td class="text-right py-3 px-4">${formatCurrency((actual2025.totalAssets * 0.94) - (actual2025.totalLiabilities * 0.5))}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].workingCapital)}</td>`).join('')}
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+
+            // Update analysis text
+            const assetGrowth = (balanceSheetData[11].totalAssets - actual2025.totalAssets) / actual2025.totalAssets;
+            document.getElementById('assetGrowthAnalysis').textContent = 
+                `Projected asset growth of ${formatPercentage(assetGrowth)} driven by retained earnings and working capital expansion.`;
+            
+            document.getElementById('equityPosition').textContent = 
+                `Equity strengthening from ${formatCurrency(actual2025.equity)} to ${formatCurrency(balanceSheetData[11].equity)}, improving financial stability and borrowing capacity.`;
+        }
+
+        // Chart instances to prevent multiple initializations
+        let revenueChart = null;
+        let cashFlowChart = null;
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Destroy existing charts if they exist
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+            if (cashFlowChart) {
+                cashFlowChart.destroy();
+            }
+
+            // Revenue and Profitability Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyBudgetData.months,
+                    datasets: [
+                        {
+                            label: 'Revenue ($\'000)',
+                            data: monthlyBudgetData.revenue.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#3B82F6',
+                            borderColor: '#3B82F6',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'COGS ($\'000)', 
+                            data: monthlyBudgetData.cogs.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#EF4444',
+                            borderColor: '#EF4444',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Gross Profit ($\'000)',
+                            data: monthlyBudgetData.grossProfit.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#10B981',
+                            borderColor: '#10B981',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.parsed.y + 'k';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Amount ($\'000)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cash Flow Chart
+            const cashFlowCtx = document.getElementById('cashFlowChart').getContext('2d');
+            cashFlowChart = new Chart(cashFlowCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyBudgetData.months,
+                    datasets: [
+                        {
+                            label: 'Cumulative Cash ($\'000)',
+                            data: cashFlowData.map(cf => Math.round(cf.cumulativeCash / 1000)),
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Monthly Net Profit ($\'000)',
+                            data: monthlyBudgetData.netProfit.map(v => Math.round(v / 1000)),
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': $' + context.parsed.y + 'k';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Amount ($\'000)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            populateKPISummary();
+            populateYoYComparison();
+            showView('summary'); // Show summary by default
+        });
+    </script>
+<script src="../tour-three-way-forecast/tour.js"></script>
+</body>
+</html>

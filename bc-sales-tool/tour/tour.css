@@ -1,0 +1,578 @@
+/* ============================================================
+   Custom styling for the bc-sales-tool guided tour.
+   Loaded automatically by tour.js — do not include separately.
+
+   Fully themed via CSS custom properties. Every visual attribute
+   of the popover, the "Take the tour" button, and the loading
+   toast reads from a --bct-* variable. Each theme block below
+   just overrides the variables — no per-theme selector explosion.
+   ============================================================ */
+
+/* ---------- Default (Classic) palette ---------- */
+:root {
+    --bct-bg:            #ffffff;
+    --bct-fg:            #2c2f4a;
+    --bct-muted:         #6b6f8f;
+    --bct-title:         #1a237e;
+    --bct-title-font:    'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --bct-body-font:     'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --bct-accent:        #1a237e;
+    --bct-accent-hover:  #283593;
+    --bct-accent-fg:     #ffffff;
+    --bct-secondary-bg:  #eceffa;
+    --bct-secondary-fg:  #1a237e;
+    --bct-border:        rgba(26, 35, 126, 0.10);
+    --bct-stage-outline: rgba(26, 35, 126, 0.35);
+    --bct-shadow:        0 24px 60px rgba(26, 35, 126, 0.20), 0 4px 14px rgba(26, 35, 126, 0.10);
+    --bct-radius:        14px;
+    --bct-close-bg:      rgba(26, 35, 126, 0.06);
+    --bct-close-fg:      #1a237e;
+    --bct-close-hover:   rgba(26, 35, 126, 0.14);
+    --bct-fab-bg:        #ffca28;
+    --bct-fab-fg:        #1a237e;
+    --bct-fab-hover:     #ffd54f;
+    --bct-fab-shadow:    0 2px 6px rgba(0, 0, 0, 0.15);
+    --bct-toast-bg:      #ffffff;
+    --bct-toast-fg:      #2c2f4a;
+    --bct-toast-accent:  #1a237e;
+    --bct-toast-shadow:  0 12px 40px rgba(26, 35, 126, 0.25);
+}
+
+/* ---------- Onyx: champagne on warm black ---------- */
+html.theme-onyx {
+    --bct-bg: #141416;
+    --bct-fg: #f5f4f1;
+    --bct-muted: #88837a;
+    --bct-title: #d4af7a;
+    --bct-title-font: 'Cormorant Garamond', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #d4af7a;
+    --bct-accent-hover: #e0bc86;
+    --bct-accent-fg: #141416;
+    --bct-secondary-bg: rgba(212, 175, 122, 0.12);
+    --bct-secondary-fg: #d4af7a;
+    --bct-border: rgba(212, 175, 122, 0.20);
+    --bct-stage-outline: rgba(212, 175, 122, 0.55);
+    --bct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4);
+    --bct-close-bg: rgba(212, 175, 122, 0.10);
+    --bct-close-fg: #d4af7a;
+    --bct-close-hover: rgba(212, 175, 122, 0.22);
+    --bct-fab-bg: #d4af7a;
+    --bct-fab-fg: #141416;
+    --bct-fab-hover: #e0bc86;
+    --bct-toast-bg: #1c1c1e;
+    --bct-toast-fg: #f5f4f1;
+    --bct-toast-accent: #d4af7a;
+    --bct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Linen: quiet-luxury cream ---------- */
+html.theme-linen {
+    --bct-bg: #f6f2ea;
+    --bct-fg: #1a1a1a;
+    --bct-muted: #6e6a60;
+    --bct-title: #1a1a1a;
+    --bct-title-font: 'Fraunces', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #5b6e3f;
+    --bct-accent-hover: #6f8250;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(91, 110, 63, 0.12);
+    --bct-secondary-fg: #3c4a2a;
+    --bct-border: rgba(45, 42, 36, 0.14);
+    --bct-stage-outline: rgba(45, 42, 36, 0.35);
+    --bct-shadow: 0 18px 50px rgba(45, 42, 36, 0.14);
+    --bct-close-bg: rgba(45, 42, 36, 0.08);
+    --bct-close-fg: #1a1a1a;
+    --bct-close-hover: rgba(45, 42, 36, 0.16);
+    --bct-fab-bg: #5b6e3f;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #6f8250;
+    --bct-toast-bg: #f6f2ea;
+    --bct-toast-fg: #1a1a1a;
+    --bct-toast-accent: #5b6e3f;
+}
+
+/* ---------- Aurora: iridescent dark tech-glass ---------- */
+html.theme-aurora {
+    --bct-bg: rgba(24, 22, 45, 0.92);
+    --bct-fg: #eaeaf2;
+    --bct-muted: #b8b6cc;
+    --bct-title: #eaeaf2;
+    --bct-title-font: 'Space Grotesk', sans-serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #b57bff;
+    --bct-accent-hover: #c78fff;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(181, 123, 255, 0.16);
+    --bct-secondary-fg: #eaeaf2;
+    --bct-border: rgba(255, 255, 255, 0.12);
+    --bct-stage-outline: rgba(181, 123, 255, 0.55);
+    --bct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(181, 123, 255, 0.25);
+    --bct-close-bg: rgba(255, 255, 255, 0.10);
+    --bct-close-fg: #eaeaf2;
+    --bct-close-hover: rgba(255, 255, 255, 0.20);
+    --bct-fab-bg: linear-gradient(135deg, #b57bff, #ff6b9d);
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: linear-gradient(135deg, #c78fff, #ff85af);
+    --bct-toast-bg: rgba(24, 22, 45, 0.94);
+    --bct-toast-fg: #eaeaf2;
+    --bct-toast-accent: #b57bff;
+    --bct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 30px rgba(181, 123, 255, 0.3);
+}
+
+/* ---------- Atelier: brutalist black-on-white ---------- */
+html.theme-atelier {
+    --bct-bg: #ffffff;
+    --bct-fg: #000000;
+    --bct-muted: #444444;
+    --bct-title: #000000;
+    --bct-title-font: 'Space Grotesk', sans-serif;
+    --bct-body-font: 'Space Grotesk', sans-serif;
+    --bct-accent: #ff4400;
+    --bct-accent-hover: #e63d00;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: #000000;
+    --bct-secondary-fg: #ffffff;
+    --bct-border: #000000;
+    --bct-stage-outline: #ff4400;
+    --bct-shadow: 6px 6px 0 #000000;
+    --bct-radius: 0px;
+    --bct-close-bg: #000000;
+    --bct-close-fg: #ffffff;
+    --bct-close-hover: #ff4400;
+    --bct-fab-bg: #ff4400;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #e63d00;
+    --bct-fab-shadow: 3px 3px 0 #000000;
+    --bct-toast-bg: #ffffff;
+    --bct-toast-fg: #000000;
+    --bct-toast-accent: #ff4400;
+    --bct-toast-shadow: 4px 4px 0 #000000;
+}
+
+/* ---------- Concierge: sand + emerald ---------- */
+html.theme-concierge {
+    --bct-bg: #f3eee5;
+    --bct-fg: #2c2a26;
+    --bct-muted: #7a7368;
+    --bct-title: #0e4d3f;
+    --bct-title-font: 'Fraunces', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #0e4d3f;
+    --bct-accent-hover: #12604f;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(14, 77, 63, 0.12);
+    --bct-secondary-fg: #0e4d3f;
+    --bct-border: rgba(44, 42, 38, 0.14);
+    --bct-stage-outline: rgba(14, 77, 63, 0.50);
+    --bct-shadow: 0 18px 50px rgba(44, 42, 38, 0.15);
+    --bct-close-bg: rgba(44, 42, 38, 0.08);
+    --bct-close-fg: #2c2a26;
+    --bct-close-hover: rgba(44, 42, 38, 0.16);
+    --bct-fab-bg: #9c7a3c;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #b08d47;
+    --bct-toast-bg: #f3eee5;
+    --bct-toast-fg: #2c2a26;
+    --bct-toast-accent: #0e4d3f;
+}
+
+/* ---------- Marble: private-bank navy ---------- */
+html.theme-marble {
+    --bct-bg: #ffffff;
+    --bct-fg: #1c2833;
+    --bct-muted: #6a7681;
+    --bct-title: #1e3a5f;
+    --bct-title-font: 'Cormorant Garamond', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #1e3a5f;
+    --bct-accent-hover: #2a4e7d;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(30, 58, 95, 0.08);
+    --bct-secondary-fg: #1e3a5f;
+    --bct-border: rgba(28, 40, 51, 0.10);
+    --bct-stage-outline: rgba(30, 58, 95, 0.45);
+    --bct-shadow: 0 20px 50px rgba(28, 40, 51, 0.14);
+    --bct-close-bg: rgba(28, 40, 51, 0.06);
+    --bct-close-fg: #1e3a5f;
+    --bct-close-hover: rgba(28, 40, 51, 0.14);
+    --bct-fab-bg: #1e3a5f;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #2a4e7d;
+    --bct-toast-bg: #ffffff;
+    --bct-toast-fg: #1c2833;
+    --bct-toast-accent: #1e3a5f;
+}
+
+/* ---------- Velvet: opera-house burgundy + gold ---------- */
+html.theme-velvet {
+    --bct-bg: #1f0a10;
+    --bct-fg: #f0e6d2;
+    --bct-muted: rgba(240, 230, 210, 0.60);
+    --bct-title: #c9a04a;
+    --bct-title-font: 'Cormorant Garamond', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #c9a04a;
+    --bct-accent-hover: #d9b25a;
+    --bct-accent-fg: #1f0a10;
+    --bct-secondary-bg: rgba(201, 160, 74, 0.14);
+    --bct-secondary-fg: #c9a04a;
+    --bct-border: rgba(201, 160, 74, 0.24);
+    --bct-stage-outline: rgba(201, 160, 74, 0.60);
+    --bct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4);
+    --bct-close-bg: rgba(201, 160, 74, 0.12);
+    --bct-close-fg: #c9a04a;
+    --bct-close-hover: rgba(201, 160, 74, 0.24);
+    --bct-fab-bg: #c9a04a;
+    --bct-fab-fg: #1f0a10;
+    --bct-fab-hover: #d9b25a;
+    --bct-toast-bg: #2a1014;
+    --bct-toast-fg: #f0e6d2;
+    --bct-toast-accent: #c9a04a;
+    --bct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Glacier: arctic mineral ---------- */
+html.theme-glacier {
+    --bct-bg: #f6f9fb;
+    --bct-fg: #1a2738;
+    --bct-muted: #5e7286;
+    --bct-title: #1b4f7e;
+    --bct-title-font: 'Fraunces', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #1b4f7e;
+    --bct-accent-hover: #276a9d;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(27, 79, 126, 0.10);
+    --bct-secondary-fg: #1b4f7e;
+    --bct-border: rgba(26, 39, 56, 0.10);
+    --bct-stage-outline: rgba(27, 79, 126, 0.50);
+    --bct-shadow: 0 20px 50px rgba(26, 39, 56, 0.14);
+    --bct-close-bg: rgba(26, 39, 56, 0.06);
+    --bct-close-fg: #1b4f7e;
+    --bct-close-hover: rgba(26, 39, 56, 0.14);
+    --bct-fab-bg: #1b4f7e;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #276a9d;
+    --bct-toast-bg: #f6f9fb;
+    --bct-toast-fg: #1a2738;
+    --bct-toast-accent: #1b4f7e;
+}
+
+/* ---------- Bibliotheque: reading-room claret + gilt ---------- */
+html.theme-bibliotheque {
+    --bct-bg: #f6efdd;
+    --bct-fg: #2a1c0e;
+    --bct-muted: #6e5526;
+    --bct-title: #7a1f2b;
+    --bct-title-font: 'Cormorant Garamond', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #7a1f2b;
+    --bct-accent-hover: #932639;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(122, 31, 43, 0.10);
+    --bct-secondary-fg: #7a1f2b;
+    --bct-border: rgba(42, 28, 14, 0.14);
+    --bct-stage-outline: rgba(122, 31, 43, 0.50);
+    --bct-shadow: 0 18px 50px rgba(42, 28, 14, 0.16);
+    --bct-close-bg: rgba(42, 28, 14, 0.08);
+    --bct-close-fg: #7a1f2b;
+    --bct-close-hover: rgba(42, 28, 14, 0.16);
+    --bct-fab-bg: #b8923c;
+    --bct-fab-fg: #2a1c0e;
+    --bct-fab-hover: #cca350;
+    --bct-toast-bg: #f6efdd;
+    --bct-toast-fg: #2a1c0e;
+    --bct-toast-accent: #7a1f2b;
+}
+
+/* ---------- Pavilion: sage + brushed brass ---------- */
+html.theme-pavilion {
+    --bct-bg: #f9f5ec;
+    --bct-fg: #2e3329;
+    --bct-muted: #6e7561;
+    --bct-title: #2e3329;
+    --bct-title-font: 'Fraunces', serif;
+    --bct-body-font: 'Inter', sans-serif;
+    --bct-accent: #6e7d5e;
+    --bct-accent-hover: #82936f;
+    --bct-accent-fg: #ffffff;
+    --bct-secondary-bg: rgba(110, 125, 94, 0.14);
+    --bct-secondary-fg: #2e3329;
+    --bct-border: rgba(46, 51, 41, 0.12);
+    --bct-stage-outline: rgba(110, 125, 94, 0.50);
+    --bct-shadow: 0 18px 50px rgba(46, 51, 41, 0.14);
+    --bct-close-bg: rgba(46, 51, 41, 0.08);
+    --bct-close-fg: #2e3329;
+    --bct-close-hover: rgba(46, 51, 41, 0.16);
+    --bct-fab-bg: #a88a4c;
+    --bct-fab-fg: #ffffff;
+    --bct-fab-hover: #b89c5c;
+    --bct-toast-bg: #f9f5ec;
+    --bct-toast-fg: #2e3329;
+    --bct-toast-accent: #a88a4c;
+}
+
+/* ============================================================
+   "Take the tour" button — sits in the demo header
+   ============================================================ */
+.bc-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 13px 7px 10px;
+    background: var(--bct-fab-bg);
+    color: var(--bct-fab-fg);
+    border: 0;
+    border-radius: 999px;
+    font: 600 12px/1 var(--bct-body-font);
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: var(--bct-fab-shadow);
+    transition: transform 0.08s, filter 0.15s;
+}
+.bc-tour-btn:hover    { background: var(--bct-fab-hover); filter: brightness(1.02); }
+.bc-tour-btn:active   { transform: translateY(1px); }
+.bc-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.14);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+}
+html.theme-aurora .bc-tour-btn-icon,
+html.theme-onyx .bc-tour-btn-icon,
+html.theme-velvet .bc-tour-btn-icon {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.bc-tour-btn-floating {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/* ============================================================
+   Driver.js popover — polished + fully themed
+   ============================================================ */
+.driver-popover.bc-tour-popover {
+    background: var(--bct-bg);
+    color: var(--bct-fg);
+    border-radius: var(--bct-radius);
+    box-shadow: var(--bct-shadow);
+    border: 1px solid var(--bct-border);
+    font-family: var(--bct-body-font);
+    max-width: 380px;
+    padding: 22px 24px 18px;
+    /* Aurora uses translucent backgrounds — add backdrop blur */
+    backdrop-filter: saturate(1.1) blur(6px);
+}
+
+.driver-popover.bc-tour-popover .driver-popover-title {
+    font-family: var(--bct-title-font);
+    color: var(--bct-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0; /* leave room for the close X */
+}
+
+.driver-popover.bc-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--bct-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.bc-tour-popover .driver-popover-description b,
+.driver-popover.bc-tour-popover .driver-popover-description strong {
+    color: var(--bct-title);
+    font-weight: 700;
+}
+
+/* Progress text — quiet, tabular */
+.driver-popover.bc-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--bct-border);
+    margin-top: 6px;
+}
+.driver-popover.bc-tour-popover .driver-popover-progress-text {
+    color: var(--bct-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+.driver-popover.bc-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.bc-tour-popover .driver-popover-next-btn,
+.driver-popover.bc-tour-popover .driver-popover-prev-btn {
+    background: var(--bct-accent);
+    color: var(--bct-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 var(--bct-body-font);
+    letter-spacing: 0.2px;
+    text-shadow: none;
+    cursor: pointer;
+    transition: filter 0.12s, transform 0.06s;
+}
+.driver-popover.bc-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.bc-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--bct-accent-hover);
+    filter: brightness(1.03);
+}
+.driver-popover.bc-tour-popover .driver-popover-next-btn:active,
+.driver-popover.bc-tour-popover .driver-popover-prev-btn:active {
+    transform: translateY(1px);
+}
+.driver-popover.bc-tour-popover .driver-popover-prev-btn {
+    background: var(--bct-secondary-bg);
+    color: var(--bct-secondary-fg);
+}
+.driver-popover.bc-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--bct-secondary-bg);
+    filter: brightness(0.96);
+}
+
+/* Close button — subtle circular pill, top-right */
+.driver-popover.bc-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bct-close-bg);
+    color: var(--bct-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.12s;
+    text-shadow: none;
+}
+.driver-popover.bc-tour-popover .driver-popover-close-btn:hover {
+    background: var(--bct-close-hover);
+}
+html.theme-atelier .driver-popover.bc-tour-popover .driver-popover-close-btn {
+    border-radius: 0;
+}
+
+/* Arrow colour — Driver.js draws a CSS-triangle border; match --bct-bg. */
+.driver-popover.bc-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--bct-bg); }
+.driver-popover.bc-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--bct-bg); }
+.driver-popover.bc-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--bct-bg); }
+.driver-popover.bc-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--bct-bg); }
+
+/* Stage outline — subtle themed ring around the highlighted element */
+.driver-active-element {
+    outline: 2px solid var(--bct-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+/* ============================================================
+   Center-screen loading card — shown while Load sales is running.
+   Deliberately NOT anchored bottom-right, so the demo's own
+   #bcProgress ("Value Entries (loading)…") stays visible over
+   there and you can see which entity BC is fetching.
+   ============================================================ */
+
+/* Lift the demo's own bottom-right progress card above the Driver.js
+   stage overlay (z-index ~10000) so it stays at full brightness while
+   the tour is running — otherwise the overlay dims it into unreadable. */
+#bcProgress {
+    z-index: 100001 !important;
+}
+#bc-tour-load-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    opacity: 0;
+    z-index: 100000;
+    pointer-events: none;   /* click-through so the demo's UI stays reachable */
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 26px 20px 22px;
+    background: var(--bct-toast-bg);
+    color: var(--bct-toast-fg);
+    border: 1px solid var(--bct-border);
+    border-radius: 14px;
+    box-shadow: var(--bct-toast-shadow, var(--bct-shadow));
+    font-family: var(--bct-body-font);
+    font-size: 14px;
+    min-width: 320px;
+    max-width: 420px;
+    backdrop-filter: saturate(1.1) blur(8px);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+html.theme-atelier #bc-tour-load-toast {
+    border-radius: 0;
+    border: 2px solid var(--bct-fg);
+}
+
+#bc-tour-load-toast.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.bc-tour-toast-spinner {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--bct-border);
+    border-top-color: var(--bct-toast-accent);
+    animation: bct-spin 0.9s linear infinite;
+}
+html.theme-atelier .bc-tour-toast-spinner { border-radius: 0; }
+
+.bc-tour-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.bc-tour-toast-title {
+    font-weight: 700;
+    color: var(--bct-toast-accent);
+    font-family: var(--bct-title-font);
+    letter-spacing: 0.1px;
+    font-size: 15px;
+    line-height: 1.2;
+}
+.bc-tour-toast-sub {
+    font-size: 12.5px;
+    color: var(--bct-muted);
+    line-height: 1.4;
+}
+
+@keyframes bct-spin {
+    to { transform: rotate(360deg); }
+}

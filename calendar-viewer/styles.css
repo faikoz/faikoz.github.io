@@ -1,0 +1,397 @@
+* { box-sizing: border-box; }
+html, body {
+  font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+  margin: 0;
+  background: #f6f7f9;
+  color: #1a1a1a;
+  height: 100%;
+  overflow: hidden; /* no page scroll */
+}
+header {
+  padding: 10px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+}
+header h1 { margin: 0; font-size: 20px; }
+.muted { color: #6b7280; font-size: 13px; }
+/* Calendar toggle buttons inside FullCalendar toolbar */
+.fc .fc-toggleCommercial-button {
+  background: #a9d18e !important;
+  border-color: #8eba72 !important;
+  color: #2d5a1e !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease !important;
+}
+.fc .fc-toggleResidential-button {
+  background: #f4b183 !important;
+  border-color: #d9915e !important;
+  color: #7a3b10 !important;
+  font-weight: 600 !important;
+  transition: all 0.15s ease !important;
+}
+.fc .fc-toggleCommercial-button.toggle-off,
+.fc .fc-toggleResidential-button.toggle-off {
+  background: #fff !important;
+  color: #9ca3af !important;
+  border-color: #d1d5db !important;
+}
+.fc .fc-toggleCommercial-button:hover:not(.toggle-off) {
+  background: #a8e6b0 !important;
+}
+.fc .fc-toggleResidential-button:hover:not(.toggle-off) {
+  background: #f0b090 !important;
+}
+/* Dark text on light pastel event backgrounds */
+.fc-event { color: #1a1a1a !important; }
+/* Kill ALL inner backgrounds so only the outer event bg color shows through */
+.fc-event *:not(.fc-event-title):not(.fc-event-time) {
+  background: transparent !important;
+}
+/* Full-height flex layout */
+body {
+  display: flex;
+  flex-direction: column;
+}
+main {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 16px;
+  padding: 12px 24px;
+  flex: 1;
+  min-height: 0; /* critical for flex child to shrink */
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+}
+#calendar-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  overflow: auto; /* scroll inside if calendar overflows */
+  min-height: 0;
+}
+#sidebar {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+#sidebar h2 { margin-top: 0; font-size: 16px; flex-shrink: 0; }
+#upcoming {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto; /* only the upcoming list scrolls */
+  flex: 1;
+  min-height: 0;
+}
+#upcoming li {
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f1f1;
+  font-size: 14px;
+}
+#upcoming li:last-child { border-bottom: none; }
+footer {
+  padding: 6px 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+/* Non-business hours: faded background in week/day views */
+.fc-timegrid-col.fc-day-sat,
+.fc-timegrid-col.fc-day-sun,
+.fc-daygrid-day.fc-day-sat,
+.fc-daygrid-day.fc-day-sun {
+  background: #f3f4f6 !important;
+}
+/* FullCalendar marks non-business slots with this class */
+.fc-non-business {
+  background: #f3f4f6 !important;
+}
+/* Slightly dim weekend day headers */
+.fc .fc-col-header-cell.fc-day-sat,
+.fc .fc-col-header-cell.fc-day-sun {
+  background: #f9fafb;
+  color: #9ca3af;
+}
+/* Keep event text contained within its own box.
+   Full text is available in the hover tooltip and click modal. */
+.fc-timegrid-event,
+.fc-timegrid-event .fc-event-main,
+.fc-timegrid-event .fc-event-main-frame {
+  overflow: hidden !important;
+}
+.fc-event-title, .fc-event-time {
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  word-break: break-word !important;
+}
+/* Month view: single-line with ellipsis */
+.fc-daygrid-event {
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  text-overflow: ellipsis !important;
+}
+/* List view: allow full text to wrap (plenty of width) */
+.fc-list-event-title {
+  white-space: normal !important;
+}
+
+/* Now indicator (current time red line) */
+.fc .fc-timegrid-now-indicator-line {
+  border-color: #ef4444;
+  border-width: 2px;
+}
+.fc .fc-timegrid-now-indicator-arrow {
+  border-top-color: #ef4444;
+}
+
+/* Event hover tooltip */
+.event-tooltip {
+  position: absolute;
+  z-index: 9999;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  color: #f1f5f9;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-family: 'Segoe UI', -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.7;
+  max-width: 360px;
+  min-width: 200px;
+  pointer-events: none;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.1);
+  white-space: normal;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(8px);
+  animation: tooltipIn 0.15s ease-out;
+}
+.event-tooltip .tt-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+}
+.event-tooltip .tt-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 2px 0;
+  color: #cbd5e1;
+}
+.event-tooltip .tt-label {
+  font-weight: 500;
+  color: #94a3b8;
+  min-width: 65px;
+  flex-shrink: 0;
+}
+@keyframes tooltipIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Tooltip hint line for clickable events */
+.tt-hint {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+  font-size: 12px;
+  color: #93c5fd;
+  font-style: italic;
+}
+
+/* ---- Event detail modal ---- */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 10000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  overflow-y: auto;
+  animation: fadeIn 0.15s ease-out;
+}
+.modal-overlay.show { display: flex; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 100%;
+  padding: 32px 36px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  position: relative;
+  animation: modalIn 0.2s ease-out;
+  margin: auto;
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 28px;
+  color: #64748b;
+  cursor: pointer;
+  margin: 0;
+  padding: 4px 12px;
+  line-height: 1;
+}
+.modal-close:hover { background: #f1f5f9; color: #1e293b; border-radius: 6px; }
+
+.modal-title {
+  margin: 0 0 16px 0;
+  font-size: 22px;
+  color: #0f172a;
+  padding-right: 40px;
+}
+.modal-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px 20px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 20px;
+}
+.modal-meta-label {
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 6px;
+}
+.modal-customer {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #1e293b, #334155);
+  color: #fff;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.modal-customer-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+.modal-customer-id {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.modal-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+@media (max-width: 700px) {
+  .modal-columns { grid-template-columns: 1fr; }
+}
+.modal-column {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 16px;
+}
+.modal-col-title {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 700;
+  padding-bottom: 8px;
+  border-bottom: 2px solid;
+}
+.modal-col-title.comm { color: #0369a1; border-bottom-color: #0369a1; }
+.modal-col-title.res  { color: #059669; border-bottom-color: #059669; }
+
+.modal-total {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+.modal-total strong { color: #0f172a; }
+
+/* Database toggle pills at the top of each project column.
+   Both ON by default — totals are consolidated. Click to filter
+   one source out. */
+.source-toggles {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 10px 0;
+}
+.src-toggle {
+  padding: 3px 12px;
+  border: 1.5px solid #cbd5e1;
+  background: #fff;
+  color: #94a3b8;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.src-toggle:hover { border-color: #94a3b8; }
+.src-toggle.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+.src-toggle.active:hover { background: #1d4ed8; border-color: #1d4ed8; }
+
+.modal-section {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fff;
+  border-radius: 6px;
+  border-left: 4px solid #94a3b8;
+  border-top: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.modal-section.m-won    { border-left-color: #10b981; }
+.modal-section.m-lost   { border-left-color: #ef4444; }
+.modal-section.m-follow { border-left-color: #f59e0b; }
+.modal-section.m-other  { border-left-color: #64748b; }
+
+.modal-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+.modal-section.m-won    .modal-section-label { color: #059669; }
+.modal-section.m-lost   .modal-section-label { color: #dc2626; }
+.modal-section.m-follow .modal-section-label { color: #d97706; }
+
+.modal-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 4px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed #f1f5f9;
+}
+.modal-row:last-child { border-bottom: none; }
+.modal-row-name { color: #475569; flex: 1; }
+.modal-row-vals { color: #0f172a; font-weight: 600; white-space: nowrap; }

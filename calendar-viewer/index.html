@@ -1,0 +1,593 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team Appointments — Demo</title>
+
+  <!-- FullCalendar (free, CDN) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+  <!-- Firebase (modular, via CDN) -->
+  <script type="module">
+    // DEMO: static data loader (no Firebase). All onSnapshot() calls below
+    // are rewired to resolve from this promise.
+    const DEMO_DATA = fetch("./calendar-data.json").then((r) => r.json());
+    // Stubs so any leftover references parse (they are all overridden below):
+    const collection = () => null;
+    const doc = () => null;
+    const query = () => null;
+    const orderBy = () => null;
+    function onSnapshot(_ref, cb) {
+      // Never called — every real onSnapshot below is rewritten to
+      // DEMO_DATA.then(...). This stub exists only so the parser doesn't
+      // complain if a stray call slips through.
+    }
+
+    // Default settings — overridden by admin config from Firestore
+    let settings = {
+      pageTitle: "Appointments",
+      defaultView: "dayGridMonth",
+      showUpcoming: true,
+      upcomingCount: 10,
+      hiddenCalendars: [],
+      calendarColors: {},
+    };
+
+    let calendar = null;
+    let allEvents = []; // raw event data from Firestore
+
+    // Calendar filter toggles — both ON by default
+    let showCommercial = true;
+    let showResidential = true;
+
+    // Per-column source toggles inside the modal — both ON by default
+    // (consolidated Database 1 + Database 2 totals are shown).
+    const toggleState = {
+      commercial: { db1: true, db2: true },
+      residential: { db1: true, db2: true },
+    };
+    let currentModalEvent = null;
+
+    const COMMERCIAL_CALENDAR = "Team 1";
+    const RESIDENTIAL_CALENDAR = "Team 2";
+
+    // Project stats — loaded from Firestore, keyed by customer number
+    // Kept separate so the modal can show Commercial vs Residential distinctly,
+    // and within each, Database 1 vs Database 2.
+    let commercialStats = {};
+    let residentialStats = {};
+    let commercialStatsDb2 = {};
+    let residentialStatsDb2 = {};
+
+    // DEMO: manual overrides cleared (customer names come from the anonymised static file)
+    const CUSTOMER_NAME_OVERRIDES = {};
+
+    // DEMO: aliases cleared (the anonymiser already collapsed the one aliased customer)
+    const DB1_TO_DB2_CUST_NO = {};
+    function db2Key(primaryNo) {
+      return DB1_TO_DB2_CUST_NO[primaryNo] || primaryNo;
+    }
+
+    // DEMO: title carries no number — read from the event's customerNumber
+    // field instead. Accepts either a FullCalendar event (extendedProps) or
+    // a raw allEvents entry, since it's called from both.
+    function extractCustomerNo(input) {
+      if (!input) return null;
+      // FullCalendar event: number lives on extendedProps.customerNumber
+      if (input.extendedProps && input.extendedProps.customerNumber) {
+        return String(input.extendedProps.customerNumber);
+      }
+      // Raw allEvents entry
+      if (typeof input === "object" && input.customerNumber) {
+        return String(input.customerNumber);
+      }
+      return null;
+    }
+
+    function formatMoney(v) {
+      return "$" + (v || 0).toLocaleString("en-AU", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    function hasStats(customerNo) {
+      const wKey = db2Key(customerNo);
+      return !!(
+        commercialStats[customerNo] ||
+        residentialStats[customerNo] ||
+        commercialStatsDb2[wKey] ||
+        residentialStatsDb2[wKey]
+      );
+    }
+
+    function getCustomerName(customerNo) {
+      if (CUSTOMER_NAME_OVERRIDES[customerNo]) {
+        return CUSTOMER_NAME_OVERRIDES[customerNo];
+      }
+      const wKey = db2Key(customerNo);
+      const candidates = [
+        commercialStatsDb2[wKey],
+        residentialStatsDb2[wKey],
+        commercialStats[customerNo],
+        residentialStats[customerNo],
+      ];
+      for (const c of candidates) {
+        if (c && c.name) return c.name;
+      }
+      return "Customer #" + customerNo;
+    }
+
+    // Build one "project type" block (Commercial or Residential).
+    // sourceLabel is shown as a small header above the totals so the user
+    // can tell which source the numbers came from (Database 1 / Database 2).
+    function buildProjectBlock(stats, sourceLabel) {
+      if (!stats) return "";
+      const section = (label, bucket, colorClass) => {
+        const entries = Object.entries(bucket || {}).filter(([, v]) => v.c > 0);
+        if (entries.length === 0) return "";
+        let html = `<div class="modal-section ${colorClass}"><div class="modal-section-label">${escapeHtml(label)}</div>`;
+        for (const [campaign, v] of entries) {
+          html += `<div class="modal-row"><span class="modal-row-name">${escapeHtml(campaign)}</span><span class="modal-row-vals">${v.c} · ${escapeHtml(formatMoney(v.v))}</span></div>`;
+        }
+        html += "</div>";
+        return html;
+      };
+      let html = "";
+      if (sourceLabel) {
+        html += `<div class="modal-source-tag">${escapeHtml(sourceLabel)}</div>`;
+      }
+      html += `<div class="modal-total">Total: <strong>${stats.totalCount}</strong> quotes · <strong>${escapeHtml(formatMoney(stats.totalValue))}</strong></div>`;
+      html += section("Won", stats.won, "m-won");
+      html += section("Lost", stats.lost, "m-lost");
+      html += section("Follow-up", stats.follow, "m-follow");
+      html += section("Other", stats.other, "m-other");
+      return html;
+    }
+
+    // Sum Database 1 + Database 2 (or whichever are toggled on) into a single stats
+    // object so the modal shows one consolidated total per project type.
+    function consolidateStats(uploadStats, db2Stats, projectType) {
+      const state = toggleState[projectType];
+      const sources = [];
+      if (state.db1 && uploadStats) sources.push(uploadStats);
+      if (state.db2 && db2Stats) sources.push(db2Stats);
+      if (sources.length === 0) return null;
+      if (sources.length === 1) return sources[0];
+
+      const merged = {
+        name: sources[0].name,
+        totalCount: 0,
+        totalValue: 0,
+        won: {},
+        lost: {},
+        follow: {},
+        other: {},
+      };
+      for (const s of sources) {
+        merged.totalCount += s.totalCount || 0;
+        merged.totalValue += s.totalValue || 0;
+        for (const bucket of ["won", "lost", "follow", "other"]) {
+          for (const [campaign, v] of Object.entries(s[bucket] || {})) {
+            if (!merged[bucket][campaign]) merged[bucket][campaign] = { c: 0, v: 0 };
+            merged[bucket][campaign].c += v.c;
+            merged[bucket][campaign].v += v.v;
+          }
+        }
+      }
+      return merged;
+    }
+
+    // Render one project type column: Database 1/Database 2 toggle pills at the top
+    // (only shown when both sources have data for this customer), then a
+    // single consolidated block beneath.
+    function buildProjectColumn(uploadStats, db2Stats, projectType) {
+      const hasDb1 = !!uploadStats;
+      const hasDb2 = !!db2Stats;
+      let html = "";
+
+      if (hasDb1 && hasDb2) {
+        const state = toggleState[projectType];
+        html += `<div class="source-toggles">
+          <button type="button" class="src-toggle ${state.db1 ? "active" : ""}" data-proj="${projectType}" data-src="db1">Database 1</button>
+          <button type="button" class="src-toggle ${state.db2 ? "active" : ""}" data-proj="${projectType}" data-src="db2">Database 2</button>
+        </div>`;
+      }
+
+      const merged = consolidateStats(uploadStats, db2Stats, projectType);
+      if (!merged) {
+        html += `<p class="muted" style="padding:10px 0;">No source selected — turn on Database 1 or Database 2 above.</p>`;
+        return html;
+      }
+      html += buildProjectBlock(merged, null);
+      return html;
+    }
+
+    // Open the modal with full event + customer stats
+    function openEventModal(event) {
+      currentModalEvent = event;
+      const overlay = document.getElementById("modal-overlay");
+      const body = document.getElementById("modal-body");
+      const p = event.extendedProps;
+      const start = event.start ? event.start.toLocaleString() : "";
+      const end = event.end ? event.end.toLocaleString() : "";
+
+      let html = `<button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('show')">×</button>`;
+      html += `<h2 class="modal-title">${escapeHtml(event.title)}</h2>`;
+      html += `<div class="modal-meta">`;
+      if (start) html += `<div><span class="modal-meta-label">Start:</span> ${escapeHtml(start)}</div>`;
+      if (end) html += `<div><span class="modal-meta-label">End:</span> ${escapeHtml(end)}</div>`;
+      if (p.calendarName) html += `<div><span class="modal-meta-label">Calendar:</span> ${escapeHtml(p.calendarName)}</div>`;
+      if (p.location) html += `<div><span class="modal-meta-label">Location:</span> ${escapeHtml(p.location)}</div>`;
+      html += `</div>`;
+
+      const custNo = extractCustomerNo(event);
+      if (custNo && hasStats(custNo)) {
+        const name = getCustomerName(custNo);
+        html += `<div class="modal-customer"><div class="modal-customer-name">${escapeHtml(name)}</div></div>`;
+
+        const wKey = db2Key(custNo);
+        const cUp = commercialStats[custNo];
+        const cWi = commercialStatsDb2[wKey];
+        const rUp = residentialStats[custNo];
+        const rWi = residentialStatsDb2[wKey];
+        const hasC = cUp || cWi;
+        const hasR = rUp || rWi;
+
+        if (hasC && hasR) {
+          html += `<div class="modal-columns">`;
+          html += `<div class="modal-column"><h3 class="modal-col-title comm">Team 1 Project</h3>${buildProjectColumn(cUp, cWi, "commercial")}</div>`;
+          html += `<div class="modal-column"><h3 class="modal-col-title res">Team 2 Project</h3>${buildProjectColumn(rUp, rWi, "residential")}</div>`;
+          html += `</div>`;
+        } else if (hasC) {
+          html += `<h3 class="modal-col-title comm">Team 1 Project</h3>${buildProjectColumn(cUp, cWi, "commercial")}`;
+        } else if (hasR) {
+          html += `<h3 class="modal-col-title res">Team 2 Project</h3>${buildProjectColumn(rUp, rWi, "residential")}`;
+        }
+      }
+
+      body.innerHTML = html;
+      overlay.classList.add("show");
+
+      // Wire up Database 1/Database 2 toggle pills (must be attached after innerHTML
+      // so the new buttons exist; defined in module scope so toggleState
+      // and openEventModal are in scope).
+      body.querySelectorAll(".src-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const proj = btn.dataset.proj;
+          const src = btn.dataset.src;
+          if (toggleState[proj] && (src === "db1" || src === "db2")) {
+            toggleState[proj][src] = !toggleState[proj][src];
+            if (currentModalEvent) openEventModal(currentModalEvent);
+          }
+        });
+      });
+    }
+
+    // Holiday keywords — events matching these get a distinct color
+    const HOLIDAY_KEYWORDS = [
+      "easter", "christmas", "new year", "anzac", "australia day",
+      "queen's birthday", "king's birthday", "good friday", "boxing day",
+      "holiday", "public holiday", "bank holiday",
+      "labour day", "labor day", "may day", "spring bank", "mother's day",
+      "father's day", "remembrance", "reconciliation",
+    ];
+    const HOLIDAY_COLOR = "#f59e0b"; // amber/orange — stands out from green
+
+    function isHoliday(event) {
+      const title = (event.title || "").toLowerCase();
+      const calName = (event.calendarName || "").toLowerCase();
+      if (calName.includes("holiday")) return true;
+      return HOLIDAY_KEYWORDS.some((kw) => title.includes(kw));
+    }
+
+    // Wait for DOM
+    window.addEventListener("DOMContentLoaded", () => {
+      const calendarEl = document.getElementById("calendar");
+      const listEl = document.getElementById("upcoming");
+      const statusEl = document.getElementById("status");
+      const titleEl = document.getElementById("page-title");
+      const sidebarEl = document.getElementById("sidebar");
+
+      // DEMO: static settings from calendar-data.json
+      DEMO_DATA.then((data) => {
+        if (data.config && data.config.settings) {
+          settings = { ...settings, ...data.config.settings };
+        }
+        applySettings();
+      });
+
+      // DEMO: static stats from calendar-data.json
+      DEMO_DATA.then((data) => {
+        const cfg = (data.config) || {};
+        commercialStats       = (cfg.commercial_stats        && cfg.commercial_stats.customers)        || {};
+        residentialStats      = (cfg.residential_stats       && cfg.residential_stats.customers)       || {};
+        commercialStatsDb2  = (cfg.commercial_stats_db2  && cfg.commercial_stats_db2.customers)  || {};
+        residentialStatsDb2 = (cfg.residential_stats_db2 && cfg.residential_stats_db2.customers) || {};
+      });
+
+      function applySettings() {
+        // Title
+        titleEl.textContent = settings.pageTitle || "Appointments";
+        document.title = settings.pageTitle || "Appointments";
+
+        // Sidebar visibility
+        sidebarEl.style.display = settings.showUpcoming === false ? "none" : "";
+
+        // Init or update calendar view
+        if (!calendar) {
+          calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: settings.defaultView || "dayGridMonth",
+            customButtons: {
+              toggleCommercial: {
+                text: "Team 1",
+                click: function () {
+                  showCommercial = !showCommercial;
+                  const btn = document.querySelector(".fc-toggleCommercial-button");
+                  if (btn) btn.classList.toggle("toggle-off", !showCommercial);
+                  renderEvents();
+                },
+              },
+              toggleResidential: {
+                text: "Team 2",
+                click: function () {
+                  showResidential = !showResidential;
+                  const btn = document.querySelector(".fc-toggleResidential-button");
+                  if (btn) btn.classList.toggle("toggle-off", !showResidential);
+                  renderEvents();
+                },
+              },
+            },
+            headerToolbar: {
+              left: "prev,next today",
+              center: "title toggleCommercial,toggleResidential",
+              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+            },
+            height: "100%",
+            // Business hours: Mon-Fri 8:30am - 4:30pm
+            businessHours: {
+              daysOfWeek: [1, 2, 3, 4, 5], // Mon=1, Fri=5
+              startTime: "08:30",
+              endTime: "16:30",
+            },
+            slotMinTime: "06:00",   // show from 6am (some buffer before work)
+            slotMaxTime: "20:00",   // show until 8pm
+            nowIndicator: true,     // red line showing current time
+            weekends: true,         // show weekends but they'll be faded
+            slotEventOverlap: false, // overlapping events split into columns, no overlap
+            events: [],
+            eventDidMount: (info) => {
+              // Force background color on the element and all children
+              // to defeat FullCalendar's internal semi-transparent overlays
+              const bg = info.event.backgroundColor;
+              if (bg) {
+                info.el.style.setProperty("background-color", bg, "important");
+                info.el.style.setProperty("border-color", bg, "important");
+                const children = info.el.querySelectorAll("*");
+                children.forEach((child) => {
+                  child.style.setProperty("background-color", "transparent", "important");
+                });
+              }
+            },
+            eventMouseEnter: (info) => {
+              // Remove any existing tooltip
+              const old = document.getElementById("fc-tooltip");
+              if (old) old.remove();
+
+              const p = info.event.extendedProps;
+              const start = info.event.start
+                ? info.event.start.toLocaleString()
+                : "";
+              const end = info.event.end
+                ? info.event.end.toLocaleString()
+                : "";
+
+              let html = `<div class="tt-title">${escapeHtml(info.event.title)}</div>`;
+              if (start) html += `<div class="tt-row"><span class="tt-label">Start</span><span>${escapeHtml(start)}</span></div>`;
+              if (end) html += `<div class="tt-row"><span class="tt-label">End</span><span>${escapeHtml(end)}</span></div>`;
+              if (p.calendarName) html += `<div class="tt-row"><span class="tt-label">Calendar</span><span>${escapeHtml(p.calendarName)}</span></div>`;
+              if (p.location) html += `<div class="tt-row"><span class="tt-label">Location</span><span>${escapeHtml(p.location)}</span></div>`;
+
+              // Hint that clicking opens project stats
+              const custNo = extractCustomerNo(info.event);
+              if (custNo && hasStats(custNo)) {
+                const name = getCustomerName(custNo);
+                html += `<div class="tt-hint">Click to view ${escapeHtml(name)} project stats →</div>`;
+              }
+
+              const tooltip = document.createElement("div");
+              tooltip.id = "fc-tooltip";
+              tooltip.className = "event-tooltip";
+              tooltip.innerHTML = html;
+              document.body.appendChild(tooltip);
+
+              // Position below the event element
+              const rect = info.el.getBoundingClientRect();
+              tooltip.style.left = rect.left + "px";
+              tooltip.style.top = rect.bottom + 6 + window.scrollY + "px";
+
+              // Keep on screen
+              requestAnimationFrame(() => {
+                const tr = tooltip.getBoundingClientRect();
+                if (tr.right > window.innerWidth) {
+                  tooltip.style.left = (window.innerWidth - tr.width - 8) + "px";
+                }
+                if (tr.bottom > window.innerHeight + window.scrollY) {
+                  tooltip.style.top = (rect.top + window.scrollY - tr.height - 6) + "px";
+                }
+              });
+            },
+            eventMouseLeave: () => {
+              const tooltip = document.getElementById("fc-tooltip");
+              if (tooltip) tooltip.remove();
+            },
+            eventClick: (info) => {
+              info.jsEvent.preventDefault();
+              // Remove any hover tooltip first
+              const tooltip = document.getElementById("fc-tooltip");
+              if (tooltip) tooltip.remove();
+              openEventModal(info.event);
+            },
+          });
+          calendar.render();
+        }
+
+        // Re-render events with current filter/colors
+        renderEvents();
+      }
+
+      function renderEvents() {
+        if (!calendar) return;
+
+        const hidden = new Set(settings.hiddenCalendars || []);
+        const colors = settings.calendarColors || {};
+
+        // Show events from visible calendars + always show holidays regardless
+        const filtered = allEvents.filter((e) => {
+          // Always show holidays
+          if (isHoliday(e)) return true;
+          // Admin panel visibility
+          if (hidden.has(e.calendarId)) return false;
+          // Commercial/Residential toggle
+          if (e.calendarName === COMMERCIAL_CALENDAR && !showCommercial) return false;
+          if (e.calendarName === RESIDENTIAL_CALENDAR && !showResidential) return false;
+          // Hide Commercial/Residential events without a customer number
+          if (
+            (e.calendarName === COMMERCIAL_CALENDAR || e.calendarName === RESIDENTIAL_CALENDAR) &&
+            !extractCustomerNo(e)
+          ) return false;
+          return true;
+        });
+
+        // Update calendar
+        calendar.removeAllEvents();
+        filtered.forEach((d) => {
+          const holiday = isHoliday(d);
+          let bg;
+          if (holiday) {
+            bg = HOLIDAY_COLOR;
+          } else if (d.calendarName === COMMERCIAL_CALENDAR) {
+            bg = "#a9d18e";
+          } else if (d.calendarName === RESIDENTIAL_CALENDAR) {
+            bg = "#f4b183";
+          } else {
+            bg = colors[d.calendarId] || d.color || "#94a3b8";
+          }
+          calendar.addEvent({
+            id: d.id,
+            title: d.title || "(no title)",
+            start: d.start,
+            end: d.end,
+            allDay: d.isAllDay || false,
+            backgroundColor: bg,
+            borderColor: bg,
+            extendedProps: {
+              calendarName: d.calendarName,
+              location: d.location,
+              customerNumber: d.customerNumber || "",
+            },
+          });
+        });
+
+        // Update upcoming list
+        const listEl = document.getElementById("upcoming");
+        const now = new Date();
+        const upcoming = filtered
+          .filter((d) => new Date(d.start) >= now)
+          .slice(0, settings.upcomingCount || 10);
+
+        listEl.innerHTML = "";
+        upcoming.forEach((e) => {
+          const li = document.createElement("li");
+          const when = new Date(e.start).toLocaleString();
+          li.innerHTML = `<strong>${escapeHtml(
+            e.title || "(no title)"
+          )}</strong><br><span class="muted">${when}${
+            e.calendarName ? " &middot; " + escapeHtml(e.calendarName) : ""
+          }${e.location ? " &middot; " + escapeHtml(e.location) : ""}</span>`;
+          listEl.appendChild(li);
+        });
+
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = `${filtered.length} event${
+          filtered.length === 1 ? "" : "s"
+        } loaded · live`;
+      }
+
+      // DEMO: static events from calendar-data.json
+      DEMO_DATA.then((data) => {
+        allEvents = data.events || [];
+        renderEvents();
+      }).catch((err) => {
+        document.getElementById("status").textContent =
+          "Error loading demo data: " + err.message;
+        console.error(err);
+      });
+    });
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c]));
+    }
+  </script>
+
+  <link rel="stylesheet" href="./styles.css" />
+<link rel="stylesheet" href="tour/tour.css">
+<script src="tour/tour.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1 id="page-title">Team Appointments</h1>
+    <p id="status" class="muted">Loading…</p>
+  </header>
+
+  <main>
+    <section id="calendar-wrap">
+      <div id="calendar"></div>
+    </section>
+
+    <aside id="sidebar">
+      <h2>Upcoming</h2>
+      <ul id="upcoming"></ul>
+    </aside>
+  </main>
+
+  <footer>
+    <p class="muted">
+      Read-only view. Updates automatically as the source calendar changes.
+    </p>
+  </footer>
+
+  <!-- Click-to-open event detail modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <script>
+    // Close modal on backdrop click
+    document.getElementById("modal-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "modal-overlay") {
+        document.getElementById("modal-overlay").classList.remove("show");
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.getElementById("modal-overlay").classList.remove("show");
+      }
+    });
+  </script>
+
+  <!-- Guided product tour (see ../../tour-calendar-viewer/README.md) -->
+  <script src="../../tour-calendar-viewer/tour.js"></script>
+</body>
+</html>

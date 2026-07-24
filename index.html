@@ -1,0 +1,1946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-site-verification" content="IF97P7QUoR-mIrSuIGiGHT-0ASTJ3owiZh-_ttzXHdM" />
+<title>Faik Öz — HVAC operations × Software architecture</title>
+<meta name="description" content="HVAC operations + software architecture. Head of Estimation & Project Delivery at Vic Air Supplies, Melbourne. Six internal platforms in production.">
+<meta property="og:title" content="Faik Öz — HVAC operations × Software architecture">
+<meta property="og:description" content="Head of Estimation & Project Delivery at Vic Air Supplies. M.Sc. Mechanical Engineer (CFD). Architect of six internal production platforms.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://faikoz.com/">
+<meta property="og:image" content="https://faikoz.com/portrait.jpg">
+<meta name="author" content="Faik Öz">
+<link rel="canonical" href="https://faikoz.com/">
+
+<!-- Structured data (Person schema) — tells Google this page is about
+     Faik Öz and links it to the same identity on LinkedIn / GitHub. -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Faik Öz",
+  "givenName": "Faik",
+  "familyName": "Öz",
+  "alternateName": ["Faik Oz", "Faikoz"],
+  "jobTitle": "Head of Estimation & Project Delivery",
+  "worksFor": {
+    "@type": "Organization",
+    "name": "Vic Air Supplies"
+  },
+  "description": "Head of Estimation & Project Delivery at Vic Air Supplies; M.Sc. Mechanical Engineer (CFD); full-stack architect of six internal production platforms and a shared Microsoft Dynamics 365 Business Central client SDK.",
+  "url": "https://faikoz.com/",
+  "image": "https://faikoz.com/portrait.jpg",
+  "email": "mailto:faik@faikoz.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Melbourne",
+    "addressCountry": "AU"
+  },
+  "sameAs": [
+    "https://linkedin.com/in/faikoz",
+    "https://github.com/faikoz"
+  ],
+  "knowsAbout": [
+    "HVAC operations",
+    "Software architecture",
+    "Microsoft Dynamics 365 Business Central",
+    "OData v4",
+    "Mechanical engineering",
+    "CFD",
+    "Estimation",
+    "Project delivery"
+  ]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-alt: #F7F5F0;
+    --border: #E4E2DD;
+    --border-strong: #1A1A1A;
+    --text: #1A1A1A;
+    --text-dim: #555555;
+    --text-mute: #888888;
+    --accent: #1A1A1A;
+    --accent-warm: #C89A2B;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; font-size: 15px; overflow-x: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;   /* safety net — prevent any element from horizontally scrolling the page */
+  }
+
+  /* LAYOUT: fixed left sidebar + scrollable main content */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    padding: 3rem 2rem 2rem;
+    border-right: 1px solid var(--border);
+    position: sticky; top: 0;
+    height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  .brand {
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+    font-size: 2.35rem;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 3.5rem;
+    color: var(--text);
+    text-transform: none;   /* preserve "Faik ÖZ" mixed casing */
+  }
+  .brand span { display: inline; margin-right: 0.4rem; }
+  .brand span:last-child { margin-right: 0; }
+  .side-nav { display: flex; flex-direction: column; gap: 0.15rem; }
+  .side-nav a {
+    display: block;
+    padding: 0.5rem 0;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: color 0.15s;
+  }
+  .side-nav a:hover { color: var(--text-mute); }
+  .side-nav a.active { color: var(--text-mute); }
+  .side-nav .nav-group {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  /* Selected Works sub-list — expands under the "Selected Works" nav item */
+  .side-sublist {
+    list-style: none;
+    padding: 0.25rem 0 0.35rem 0.85rem;
+    margin: 0;
+    display: none;
+  }
+  .side-sublist.open { display: block; }
+  .side-sublist li { margin: 0; }
+  .side-sublist a, .side-sublist span {
+    display: block;
+    padding: 0.35rem 0;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    line-height: 1.35;
+    transition: color 0.15s;
+  }
+  .side-sublist a:hover { color: var(--text); }
+  .side-sublist .muted { color: var(--text-mute); cursor: default; }
+  .sidebar-foot {
+    margin-top: auto;
+    font-size: 0.7rem; color: var(--text-mute);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* MAIN CONTENT — fills the viewport height so there's no empty gap below */
+  .main-content {
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .view { display: none; flex: 1; flex-direction: column; }
+  .view.active { display: flex; }
+
+  /* ABOUT VIEW — two columns:
+       col 1: portrait (full height, spans both rows)
+       col 2 row 1: Headline (Part A: HVAC operations × Software architecture + subtitle)
+       col 2 row 2: About (Part B: paragraphs + "What the stack has displaced" callout) */
+  .about-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "portrait intro"
+      "portrait bio";
+    gap: 2rem 2.5rem;
+    align-items: start;
+    max-width: 1500px;
+    flex: 1;
+  }
+  .about-portrait { grid-area: portrait; align-self: stretch; }
+  .about-intro    { grid-area: intro; }
+  .about-bio      { grid-area: bio; }
+  .about-portrait {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mute);
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    overflow: hidden;
+    min-height: 100%;
+  }
+  /* On short landscape displays (Nest Hub 1024×600, Nest Hub Max 1280×800)
+     the portrait's min-height: 100% stretches it into a tall slim bar.
+     Constrain it to a portrait aspect ratio and cap its height so it looks
+     like a photograph, not a column. */
+  @media (min-width: 1081px) and (max-height: 850px) {
+    .about-portrait {
+      min-height: 0;
+      aspect-ratio: 4 / 5;
+      max-height: 65vh;
+      align-self: start;
+    }
+  }
+  .about-portrait img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .about-intro h2 {
+    /* Font-size is set by JS (fitTitle) so the headline exactly fills
+       the width of its column on a single line. This value is only a
+       fallback for when JS hasn't run yet or fails. */
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+  .about-intro h2 .sep {
+    color: var(--text-mute);
+    font-weight: 400;
+    margin: 0 0.3rem;
+  }
+  /* Unified body font size — all paragraphs / list items / labels share this */
+  .about-intro p,
+  .about-bio p,
+  .displaced li,
+  .rd-project p,
+  .rd-tech {
+    font-size: 1.15rem;
+    line-height: 1.55;
+  }
+  .about-intro p {
+    color: var(--text-dim);
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
+  }
+  /* Bulleted tagline under the h2 headline */
+  .about-intro {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .intro-list {
+    list-style: none;
+    padding: 0;
+    margin: 0.7rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    flex: 0 0 auto;
+    justify-content: flex-start;
+  }
+  .intro-list li {
+    color: var(--text-dim);
+    font-size: 1.15rem;
+    line-height: 1.55;
+    padding-left: 1.7rem;
+    position: relative;
+  }
+  .intro-list li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.6rem;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--accent-warm);
+  }
+  .about-bio p {
+    color: var(--text-dim);
+    margin-bottom: 0.95rem;
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
+    line-height: 1.6;
+  }
+  .about-scope { margin-top: 0.5rem; }
+  .about-open  { margin-bottom: 0.7rem !important; }
+  .section-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text);
+    margin-bottom: 0.9rem;
+  }
+  .displaced {
+    background: var(--bg-alt);
+    padding: 0.85rem 1.1rem;
+    border-left: 3px solid var(--border-strong);
+    border-radius: 3px;
+    margin-top: auto;
+  }
+  .displaced .label {
+    font-weight: 700;
+    color: var(--accent-warm);
+    text-transform: uppercase;
+    font-size: 0.95rem;
+    letter-spacing: 0.16em;
+    margin-bottom: 0.5rem;
+  }
+  .displaced ul { list-style: none; }
+  .displaced li {
+    padding: 0.08rem 0;
+    color: var(--text-dim);
+    text-align: justify;
+    text-align-last: left;
+    hyphens: auto;
+    overflow-wrap: break-word;
+    line-height: 1.55;
+  }
+
+  /* about-bio flex column so the R&D block can grow to fill remaining
+     vertical space in the column (bottom-aligned to the photo). */
+  .about-bio {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  /* Applied R&D project block — lives just below "What the stack has displaced",
+     grows to fill remaining space so its bottom edge lines up with the photo. */
+  .rd-project {
+    margin-top: 0.5rem;
+    padding: 1.15rem 1.35rem;
+    background: var(--bg-alt);
+    border-left: 3px solid var(--accent-warm);
+    border-radius: 3px;
+    flex: 1;                           /* fills remaining height */
+    display: flex;
+    flex-direction: column;
+  }
+  .rd-project .rd-tech {
+    margin-top: auto;                  /* pushes the tech line to the bottom */
+  }
+  .rd-title {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.35;
+    margin-bottom: 0.6rem;
+  }
+  .rd-project p {
+    color: var(--text-dim);
+    margin-bottom: 0.6rem;
+    text-align: justify;
+    hyphens: auto;
+  }
+  .rd-project p strong { color: var(--text); font-weight: 700; }
+  .rd-tech {
+    color: var(--text-mute);
+    letter-spacing: 0.02em;
+    margin-top: 0.3rem;
+  }
+
+  /* WORKS VIEW: card grid */
+  .works-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+  .works-head h2 {
+    font-size: 0.8rem; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--text);
+  }
+  .works-head .count {
+    font-size: 0.75rem;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+  }
+  /* Selected work grid — vertical cards, wraps naturally */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    display: flex; flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+  }
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: #C6C1B8;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  }
+  .placeholder {
+    height: 130px;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 1rem 1.25rem;
+    color: rgba(255,255,255,0.98);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+  }
+  .ph-1 { background: linear-gradient(135deg, #1E3A8A, #3B82F6); }
+  .ph-2 { background: linear-gradient(135deg, #5B21B6, #8B5CF6); }
+  .ph-3 { background: linear-gradient(135deg, #B45309, #F59E0B); }
+  .ph-4 { background: linear-gradient(135deg, #0F766E, #14B8A6); }
+  .ph-5 { background: linear-gradient(135deg, #166534, #22C55E); }
+  .ph-6 { background: linear-gradient(135deg, #92400E, #D97706); }
+  .ph-7 { background: linear-gradient(135deg, #334155, #64748B); }
+  .ph-8 { background: linear-gradient(135deg, #0891B2, #06B6D4); }
+  .ph-9 { background: linear-gradient(135deg, #9D174D, #EC4899); }
+
+  .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+  .card h3 {
+    font-size: 1rem; font-weight: 600;
+    margin-bottom: 0.55rem; color: var(--text);
+    line-height: 1.35;
+  }
+  .card h3 .more {
+    color: var(--text);
+    font-weight: 500; font-size: 0.78rem;
+    margin-left: 0.4rem; white-space: nowrap;
+    opacity: 0.6;
+  }
+  .card p {
+    font-size: 0.86rem; color: var(--text-dim);
+    margin-bottom: 0.85rem; line-height: 1.55;
+  }
+  .outcome {
+    font-size: 0.82rem !important;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-alt);
+    border-left: 2px solid var(--border-strong);
+    border-radius: 2px;
+    color: var(--text) !important;
+    margin-top: auto;
+  }
+  .outcome strong { color: var(--text); font-weight: 700; }
+  .tech {
+    list-style: none; display: flex; flex-wrap: wrap;
+    gap: 0.35rem; margin-top: 0.85rem;
+  }
+  .tech li {
+    font-size: 0.68rem; color: var(--text-dim);
+    padding: 0.2rem 0.55rem;
+    background: #ffffff;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.01em;
+  }
+
+  /* TOOL VIEW — mirrors the About layout:
+     left column = tool description card (matches image #60),
+     right column = live demo iframe. */
+  .tool-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    grid-template-rows: 1fr;
+    gap: 2rem 2.5rem;
+    flex: 1;
+    min-height: 0;
+    max-width: 1500px;
+  }
+  .tool-info {
+    background: var(--bg-alt);
+    border-left: 3px solid var(--border-strong);
+    border-radius: 4px;
+    padding: 1.5rem 1.5rem 1.5rem;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    min-height: 0;
+  }
+  .tool-info h3 {
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--text); line-height: 1.3;
+    margin-bottom: 0.7rem;
+  }
+  .tool-try {
+    display: inline-block; margin-bottom: 1rem;
+    color: var(--text); text-decoration: none;
+    font-size: 0.82rem; font-weight: 500;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0;
+    border-bottom: 1px solid var(--border-strong);
+    align-self: flex-start;
+  }
+  .tool-try:hover { color: var(--accent-warm); border-bottom-color: var(--accent-warm); }
+  .tool-info .tool-desc {
+    font-size: 0.9rem; line-height: 1.55;
+    color: var(--text-dim); margin-bottom: 1.15rem;
+    text-align: justify; hyphens: auto;
+    flex: 0 0 auto;
+  }
+  .tool-info .tool-desc code {
+    background: var(--bg); padding: 0.05em 0.35em;
+    border-radius: 3px; font-size: 0.9em;
+  }
+  .tool-info .tool-outcome {
+    font-size: 0.86rem;
+    padding: 0.75rem 0.95rem;
+    background: var(--bg);
+    border-left: 2px solid var(--accent-warm);
+    border-radius: 2px;
+    color: var(--text-dim);
+    margin-bottom: 1.15rem;
+    line-height: 1.5;
+    flex: 0 0 auto;
+  }
+  .tool-info .tool-outcome strong { color: var(--text); font-weight: 700; }
+  .tool-info .tool-tech {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+    padding: 0;
+    margin-top: 0;
+    flex: 0 0 auto;
+  }
+  .tool-info .tool-tech li {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text);
+    padding: 0.85rem 1rem;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    letter-spacing: 0.01em;
+    line-height: 1.25;
+  }
+  .tool-info .tool-tech li svg {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    color: var(--accent-warm);
+    stroke-width: 2;
+  }
+  /* Fills the empty space between tech grid and the bottom of the card;
+     pins the CTA button to the bottom edge, centered horizontally. */
+  .tool-try-wrap {
+    flex: 1 1 0;
+    min-height: 0;
+    margin-top: 1rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 0.25rem;
+  }
+  .tool-try-btn {
+    padding: 1.55rem 3rem;
+    background: var(--text);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.18);
+    text-align: center;
+    max-width: 100%;
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+  .tool-try-btn:hover {
+    background: #333333;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.22);
+  }
+  .tool-try-btn:active { transform: translateY(0); box-shadow: 0 4px 14px rgba(0,0,0,0.14); }
+  /* Disabled state for the 3 informational tools without demos */
+  .tool-try-btn.disabled,
+  .tool-try-btn:disabled {
+    background: #B0ACA2;
+    color: #ffffff;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .tool-try-btn.disabled:hover,
+  .tool-try-btn:disabled:hover {
+    background: #B0ACA2;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Full-window demo popup */
+  .demo-modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(15, 20, 25, 0.88);
+    display: none;
+    z-index: 2000;
+    padding: 1.75rem 1.75rem 1.5rem;
+  }
+  .demo-modal-backdrop.open { display: flex; }
+  .demo-modal-frame {
+    flex: 1;
+    display: flex; flex-direction: column;
+    background: #ffffff;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  }
+  .demo-modal-header {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: #1A1A1A;
+    color: #ffffff;
+  }
+  .demo-modal-title {
+    font-size: 0.85rem; font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .demo-modal-close {
+    background: none; border: none;
+    color: #ffffff;
+    font-size: 1.4rem; line-height: 1;
+    cursor: pointer;
+    padding: 0.15rem 0.55rem;
+    border-radius: 3px;
+  }
+  .demo-modal-close:hover { background: rgba(255,255,255,0.15); }
+
+  /* Mobile "best viewed on desktop" notice — shown when the demo CTA is
+     tapped on a phone, instead of loading the heavy demo. */
+  .mobile-notice {
+    position: fixed; inset: 0;
+    background: rgba(15, 20, 25, 0.72);
+    display: none; align-items: center; justify-content: center;
+    z-index: 3000;
+    padding: 1.5rem;
+  }
+  .mobile-notice.open { display: flex; }
+  .mobile-notice-card {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 1.6rem 1.35rem 1.25rem;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+  }
+  .mobile-notice-card p {
+    margin: 0 0 1.2rem;
+    color: var(--text);
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+  .mobile-notice-card p strong { font-weight: 700; }
+  .mobile-notice-card button {
+    background: var(--text);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.7rem 2.25rem;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+  }
+  .mobile-notice-card button:hover { background: #333333; }
+  .demo-modal-iframe {
+    flex: 1 1 0; min-height: 0;
+    border: 0; width: 100%; height: 100%;
+    background: #ffffff;
+  }
+  /* Architecture (top ~35%) + Code sample (bottom ~65%) — the right column */
+  .tool-diagram-arch {
+    flex: 0 0 35%;
+    padding: 0.9rem 1.2rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+  .tool-diagram-arch svg {
+    max-width: 100%; width: 100%; height: auto;
+    max-height: 100%; margin: auto 0;
+  }
+  .tool-diagram-arch::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.68rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-mute);
+    margin-bottom: 0.45rem; font-weight: 700;
+  }
+  .tool-diagram-code {
+    flex: 1 1 0;
+    background: #F7F5F0;
+    padding: 0.9rem 1.15rem 0.95rem;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .tool-diagram-code::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 0.68rem; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--text-mute);
+    margin-bottom: 0.5rem; font-weight: 700;
+    flex: 0 0 auto;
+  }
+  .tool-diagram-code pre {
+    margin: 0;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 0.78rem;
+    line-height: 1.45;
+    color: var(--text);
+    white-space: pre;
+    tab-size: 2;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .tool-diagram-code .kw  { color: #A94A00; font-weight: 600; }  /* keyword */
+  .tool-diagram-code .str { color: #0F766E; }                     /* string */
+  .tool-diagram-code .cm  { color: #94A3B8; font-style: italic; } /* comment */
+  .tool-diagram-code .fn  { color: #4338CA; }                     /* function */
+  .tool-demo {
+    display: flex; flex-direction: column;
+    min-height: 0;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+
+  /* ========== RESPONSIVE (mobile + tablet, ≤ 1080 px) ==========
+     Single-block fluid design. Every size uses clamp() so widths from
+     320 px → 1080 px interpolate smoothly. No per-device patches —
+     one rule set covers every phone, tablet, foldable, and smart display.
+     Desktop CSS (> 1080 px) above this block is untouched. */
+  @media (max-width: 1080px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding: clamp(1.25rem, 1vw + 1rem, 1.75rem) clamp(1rem, 1vw + 0.75rem, 1.5rem) clamp(1rem, 0.5vw + 0.85rem, 1.25rem);
+    }
+    .brand {
+      font-size: clamp(1.85rem, 1vw + 1.6rem, 2.1rem);
+      margin-bottom: clamp(1.1rem, 1vw + 0.85rem, 1.5rem);
+    }
+    .side-nav { flex-direction: row; flex-wrap: wrap; gap: 0.4rem 1.25rem; }
+    .side-nav a { font-size: clamp(0.72rem, 0.15vw + 0.68rem, 0.78rem); }
+    /* Nav group (LinkedIn / GitHub / Contact / Resume) sits on its own row
+       under About + Selected Works — flex-basis:100% forces the line break. */
+    .side-nav .nav-group {
+      flex-basis: 100%;
+      display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem;
+      margin: 0.4rem 0 0 0; padding: 0; border: none;
+    }
+    /* Sublist keeps its default display:none — only expand when .open (click toggled).
+       When open, wrap as chips instead of a vertical column. */
+    .side-sublist { width: 100%; }
+    .side-sublist.open {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
+      padding: 0.25rem 0 0.5rem;
+    }
+    .side-sublist a, .side-sublist span {
+      font-size: clamp(0.62rem, 0.15vw + 0.58rem, 0.7rem);
+      padding: 0.3rem 0;
+    }
+    .sidebar-foot { margin-top: 1rem; }
+    .main-content {
+      padding: clamp(1.25rem, 1vw + 0.85rem, 1.5rem) clamp(1rem, 1vw + 0.75rem, 1.5rem);
+      min-height: auto;
+    }
+
+    /* About view stacks vertically */
+    .about-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      grid-template-areas: "portrait" "intro" "bio";
+      gap: clamp(0.9rem, 1vw + 0.5rem, 1.5rem);
+    }
+    /* Portrait: fixed 4:5 aspect. Width is the SMALLER of viewport-width and
+       viewport-height derived limits, so on short landscape displays like
+       Nest Hub (1024×600) the portrait shrinks proportionally instead of
+       becoming a slim tall bar. */
+    .about-portrait {
+      aspect-ratio: 4 / 5;
+      width: min(clamp(180px, 45vw, 340px), 44vh);
+      min-height: 0;
+      max-height: none;
+      margin: 0 auto;
+    }
+    .about-portrait img { height: 100%; }
+
+    .about-intro { height: auto; }
+    .about-intro h2 {
+      font-size: clamp(1.35rem, 2.5vw + 0.75rem, 2.35rem) !important;
+      white-space: normal !important;   /* override JS-set nowrap */
+      margin-bottom: clamp(0.55rem, 0.5vw + 0.4rem, 1rem);
+    }
+    .intro-list {
+      flex: 0 0 auto;
+      gap: clamp(0.4rem, 0.8vw + 0.2rem, 0.9rem);
+    }
+    .intro-list li {
+      font-size: clamp(0.82rem, 0.4vw + 0.72rem, 1.05rem);
+      line-height: 1.4;
+      padding-left: clamp(1.1rem, 0.4vw + 1rem, 1.5rem);
+    }
+    .intro-list li::before {
+      top: 0.45rem;
+      width: clamp(0.42rem, 0.15vw + 0.35rem, 0.55rem);
+      height: clamp(0.42rem, 0.15vw + 0.35rem, 0.55rem);
+    }
+
+    .about-bio { height: auto; }
+    /* Justified paragraphs + soft hyphenation, everywhere in the mobile/tablet zone */
+    .about-intro p,
+    .about-bio p,
+    .displaced li {
+      font-size: clamp(0.82rem, 0.4vw + 0.72rem, 1.05rem);
+      line-height: 1.55;
+      text-align: justify;
+      text-align-last: left;
+      hyphens: auto;
+    }
+    .about-bio p { margin-bottom: clamp(0.55rem, 0.6vw + 0.4rem, 0.9rem); }
+    .section-label {
+      font-size: clamp(0.78rem, 0.3vw + 0.7rem, 1rem);
+      margin-bottom: clamp(0.55rem, 0.5vw + 0.4rem, 1rem);
+      letter-spacing: 0.18em;
+    }
+    .displaced {
+      padding: clamp(0.65rem, 0.5vw + 0.5rem, 1rem) clamp(0.85rem, 0.5vw + 0.65rem, 1.2rem);
+      margin-top: clamp(0.85rem, 0.5vw + 0.65rem, 1.25rem);
+    }
+    .displaced .label {
+      font-size: clamp(0.72rem, 0.3vw + 0.65rem, 0.95rem);
+      margin-bottom: clamp(0.35rem, 0.3vw + 0.25rem, 0.6rem);
+    }
+
+    /* Tool view stacks (info card on top, arch + code below) */
+    .tool-layout {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      gap: clamp(1rem, 1vw + 0.7rem, 1.25rem);
+    }
+    .tool-info { padding: clamp(1.15rem, 1vw + 0.85rem, 1.5rem); }
+    .tool-info h3 { font-size: clamp(1rem, 0.4vw + 0.9rem, 1.15rem); }
+    .tool-info .tool-tech {
+      grid-template-columns: 1fr;
+      gap: clamp(0.45rem, 0.3vw + 0.4rem, 0.6rem);
+    }
+    .tool-info .tool-tech li {
+      font-size: clamp(0.98rem, 0.3vw + 0.9rem, 1.1rem);
+      padding: clamp(0.75rem, 0.5vw + 0.6rem, 0.95rem) clamp(0.9rem, 0.5vw + 0.75rem, 1.15rem);
+      gap: clamp(0.75rem, 0.4vw + 0.6rem, 1rem);
+    }
+    .tool-info .tool-tech li svg {
+      width: clamp(22px, 0.5vw + 20px, 28px);
+      height: clamp(22px, 0.5vw + 20px, 28px);
+      flex: 0 0 clamp(22px, 0.5vw + 20px, 28px);
+    }
+    /* On mobile/tablet, don't flex-grow the wrap — let it size to its
+       content so the button sits neatly BELOW the last tech chip
+       instead of overlapping it via align-items: flex-end anchor. */
+    .tool-try-wrap {
+      flex: 0 0 auto;
+      align-items: center;
+      margin-top: 1rem;
+      padding-bottom: 0;
+    }
+    .tool-try-btn {
+      padding: clamp(1.1rem, 0.5vw + 0.95rem, 1.55rem) clamp(1.75rem, 1vw + 1.4rem, 3rem);
+      font-size: clamp(1rem, 0.4vw + 0.85rem, 1.2rem);
+      width: 100%;
+      white-space: normal;
+      line-height: 1.35;
+    }
+
+    /* Let content dictate height so no code lines get clipped */
+    .tool-demo { min-height: 0; overflow: visible; }
+    .tool-diagram-arch {
+      flex: 0 0 auto;
+      padding: clamp(0.7rem, 0.5vw + 0.55rem, 0.9rem) clamp(0.9rem, 1vw + 0.5rem, 1.2rem);
+    }
+    .tool-diagram-arch svg { max-height: clamp(180px, 6vw + 130px, 220px); }
+    .tool-diagram-code {
+      flex: 0 0 auto;
+      min-height: 0;
+      overflow: visible;
+    }
+    .tool-diagram-code pre {
+      font-size: clamp(0.66rem, 0.15vw + 0.6rem, 0.78rem);
+      line-height: 1.4;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      flex: 0 0 auto;
+      height: auto;
+    }
+
+    /* Full-window demo modal — edge-to-edge on tiny screens, small padding on tablets */
+    .demo-modal-backdrop { padding: clamp(0px, 1.5vw - 0.5rem, 1rem); }
+    .demo-modal-frame { border-radius: clamp(0px, 0.4vw, 6px); overflow: hidden; }
+    .demo-modal-header {
+      padding: clamp(0.5rem, 0.15vw + 0.5rem, 0.65rem) clamp(0.75rem, 0.3vw + 0.65rem, 1rem);
+    }
+    .demo-modal-title { font-size: clamp(0.72rem, 0.15vw + 0.65rem, 0.85rem); }
+    .demo-modal-close { font-size: clamp(1.2rem, 0.2vw + 1.1rem, 1.4rem); }
+    .demo-modal-iframe { display: block; flex: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <!-- Displayed exactly as "FAİK ÖZ" per user preference — Turkish dotted
+         capital İ (U+0130), NOT plain "I". Do not add text-transform. -->
+    <h1 class="brand"><span>FA&#304;K</span><span>&Ouml;Z</span></h1>
+    <nav class="side-nav">
+      <a href="#" data-view="about" class="active">About</a>
+      <a href="#" data-view="works">Selected Works</a>
+      <ul class="side-sublist" id="worksSublist">
+        <li><a href="bc-sales-tool/">Sales Analytics Dashboard</a></li>
+        <li><a href="forecast-tool/">Item Demand &amp; Procurement Forecasting</a></li>
+        <li><a href="hr-tool/">HR &amp; Workforce Portal</a></li>
+        <li><a href="calendar-viewer/">Calendar &amp; Quoting Operating Surface</a></li>
+        <li><a href="productivity-tracker/">Productivity &amp; Performance Analytics</a></li>
+        <li><a href="three-way-forecast/">Three-Way Financial Forecast</a></li>
+        <li><a href="#bc-library">bc-library | BC Client SDK</a></li>
+        <li><a href="#hvac-estimator">HVAC Estimator Platform</a></li>
+        <li><a href="#pdf-takeoff">PDF-Driven HVAC Takeoff R&amp;D</a></li>
+      </ul>
+      <div class="nav-group">
+        <a href="https://linkedin.com/in/faikoz" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/faikoz" target="_blank" rel="noopener">GitHub</a>
+        <a href="mailto:faik@faikoz.com">Contact</a>
+        <a href="FaikOZ - Resume.pdf" target="_blank" rel="noopener">Resume</a>
+      </div>
+    </nav>
+    <div class="sidebar-foot">Melbourne &middot; 2026</div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- =============== ABOUT VIEW =============== -->
+    <section id="view-about" class="view active" aria-label="About">
+      <div class="about-layout">
+        <!-- Portrait placeholder — replace src with a real image later -->
+        <div class="about-portrait">
+          <img src="portrait.jpg" alt="Faik Öz portrait" onerror="this.style.display='none';this.parentElement.textContent='Portrait';">
+        </div>
+
+        <!-- Part A: intro headline + subtitle (bulleted) -->
+        <div class="about-intro">
+          <h2>HVAC operations <span class="sep">&amp;</span> Software architecture</h2>
+          <ul class="intro-list">
+            <li>Head of Estimation &amp; Project Delivery at Vic Air Supplies</li>
+            <li>M.Sc. Mechanical Engineer (CFD)</li>
+            <li>Full-stack architect of the company's internal software stack: six production platforms plus a shared Microsoft Dynamics 365 Business Central client SDK</li>
+          </ul>
+        </div>
+
+        <!-- Part B: About — paragraphs + "What the stack has displaced" callout -->
+        <div class="about-bio">
+          <h3 class="section-label">About</h3>
+          <p>M.Sc. Mechanical Engineer (CFD) with 10+ years of front-line HVAC delivery in Melbourne.</p>
+          <p>Head of Estimation &amp; Project Manager at Vic Air Supplies: three direct reports, owning the commercial, procurement, and operations interfaces across Sales, Sheet Metal, Warehouse, and Finance.</p>
+          <p>Alongside that, I architect and operate the company's internal software stack: six production platforms plus a shared Microsoft Dynamics 365 Business Central client SDK underneath them.</p>
+          <p>My work unifies project management and software architecture, and the combination matters: the software that runs an HVAC business (estimating, procurement, forecasting, workforce, finance, BI) fails or succeeds on the same operational details I see daily on the project delivery side. Building the stack in-house, with deep business context, has produced an edge that neither discipline could deliver alone.</p>
+          <p class="about-scope"><strong>Scope:</strong> $20M+ disclosed project book; largest single project $5.8M; standards experience across NCC/BCA, AS 1668, AS 4254.</p>
+          <div class="displaced">
+            <div class="label">What the stack has displaced</div>
+            <ul>
+              <li>Power BI + Azure data-warehouse + ETL stack for live sales-ledger visibility</li>
+              <li>Forecasting-SaaS tier (Netstock/Slimstock category) for inventory and supplier planning</li>
+              <li>Workforce-management SaaS tier</li>
+              <li>External banker-grade financial modelling: the in-house three-way model is the analytical basis for ongoing NAB facility reviews</li>
+            </ul>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== INDIVIDUAL TOOL VIEW =============== -->
+    <!-- Populated by JS when a sub-list item is clicked in the sidebar. -->
+    <section id="view-tool" class="view" aria-label="Tool">
+      <div class="tool-layout">
+        <div class="tool-info">
+          <h3 id="toolTitle">&nbsp;</h3>
+          <p class="tool-desc" id="toolDesc">&nbsp;</p>
+          <div class="tool-outcome" id="toolOutcome">&nbsp;</div>
+          <ul class="tool-tech" id="toolTech"></ul>
+          <div class="tool-try-wrap">
+            <button type="button" class="tool-try-btn" id="toolTryBtn">Launch interactive demo →</button>
+          </div>
+        </div>
+        <div class="tool-demo" id="toolDemo">
+          <div class="tool-diagram-arch" data-label="Architecture" id="toolArch"></div>
+          <div class="tool-diagram-code" data-label="Code sample" id="toolCode"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =============== SELECTED WORKS VIEW =============== -->
+    <section id="view-works" class="view" aria-label="Selected works">
+      <div class="works-head">
+        <h2>Selected work</h2>
+        <span class="count">9 platforms</span>
+      </div>
+      <div class="grid">
+
+        <a class="card" href="bc-sales-tool/">
+          <div class="card-body">
+            <h3>Sales Analytics Dashboard <span class="more">Try demo &rarr;</span></h3>
+            <p>Live executive view of the sales ledger, built directly on Microsoft Dynamics 365 Business Central via OData v4. MSAL-secured, with runtime <code>$metadata</code> schema discovery so the application is immune to vendor entity-name drift across Business Central upgrades. Single-tenant, free-tier deployment.</p>
+            <p class="outcome"><strong>Business outcome:</strong> replaces the Power BI + Azure data-warehouse + ETL pipeline that would otherwise be required to give the leadership team a live read on sales performance.</p>
+            <ul class="tech">
+              <li>JavaScript</li><li>MSAL OAuth 2.0</li><li>Business Central OData v4</li><li>Chart.js</li><li>XLSX.js</li><li>GitHub Pages</li>
+            </ul>
+          </div>
+        </a>
+
+        <a class="card" href="forecast-tool/">
+          <div class="card-body">
+            <h3>Item Demand &amp; Procurement Forecasting Platform <span class="more">Try demo &rarr;</span></h3>
+            <p>Statistical forecasting engine wired live to Business Central. Inventory demand and supplier purchasing volumes are modelled directly from the same operational ledger finance reports run on, so purchasing decisions reconcile to a single source of truth.</p>
+            <p class="outcome"><strong>Business outcome:</strong> replaces the subscription forecasting-SaaS category (Netstock/Slimstock tier) for inventory and supplier planning.</p>
+            <ul class="tech">
+              <li>JavaScript</li><li>Business Central OData v4</li><li>Time-series forecasting</li><li>Chart.js</li><li>date-fns</li><li>CSV ingestion</li>
+            </ul>
+          </div>
+        </a>
+
+        <a class="card" href="hr-tool/">
+          <div class="card-body">
+            <h3>HR &amp; Workforce Portal <span class="more">Try demo &rarr;</span></h3>
+            <p>Contractor onboarding, time capture, payroll self-service, and an auditable leave-accrual ledger with full transaction history. Firebase Authentication and Firestore Security Rules calibrated to organisational policy.</p>
+            <p class="outcome"><strong>Business outcome:</strong> replaces the workforce-management SaaS tier the business otherwise would have subscribed to.</p>
+            <ul class="tech">
+              <li>Firebase Authentication</li><li>Firestore</li><li>Firestore Security Rules</li><li>JavaScript</li><li>GitHub Pages</li>
+            </ul>
+          </div>
+        </a>
+
+        <a class="card" href="calendar-viewer/">
+          <div class="card-body">
+            <h3>Calendar &amp; Quoting Operating Surface <span class="more">Try demo &rarr;</span></h3>
+            <p>Office-wide view aggregating the team's Outlook calendars through Microsoft Graph and overlaying them with live quoting context. Single-tenant architecture refreshed on a scheduled cadence via GitHub Actions.</p>
+            <p class="outcome"><strong>Business outcome:</strong> one operating view where team availability and commercial pipeline intersect, replacing the manual stitching across calendar tools and quote spreadsheets.</p>
+            <ul class="tech">
+              <li>Microsoft Graph API</li><li>Microsoft Identity / MSAL</li><li>Firebase</li><li>GitHub Actions</li><li>JavaScript</li>
+            </ul>
+          </div>
+        </a>
+
+        <a class="card" href="productivity-tracker/">
+          <div class="card-body">
+            <h3>Productivity &amp; Performance Analytics <span class="more">Try demo &rarr;</span></h3>
+            <p>Nine-view analytics suite instrumenting team productivity, error taxonomy, and performance trends: the evidence base for continuous-improvement reviews and the quarterly business-reporting schedule.</p>
+            <p class="outcome"><strong>Business outcome:</strong> makes operational performance legible at the resolution executives need but rarely receive.</p>
+            <ul class="tech">
+              <li>JavaScript</li><li>Chart.js</li><li>Firestore</li>
+            </ul>
+          </div>
+        </a>
+
+        <a class="card" href="three-way-forecast/">
+          <div class="card-body">
+            <h3>Three-Way Financial Forecast <span class="more">Try demo &rarr;</span></h3>
+            <p>Driver-based three-statement model (profit &amp; loss, cash flow, balance sheet) used as the analytical basis for ongoing NAB facility reviews.</p>
+            <p class="outcome"><strong>Business outcome:</strong> supports management decisions, scenario analysis, and banking discussions through a single in-house forecasting framework, removing dependence on external modelling.</p>
+            <ul class="tech">
+              <li>Financial modelling</li><li>Cash-flow &amp; working-capital architecture</li><li>Sensitivity &amp; scenario design</li>
+            </ul>
+          </div>
+        </a>
+
+        <article class="card" style="cursor: default;">
+          <div class="card-body">
+            <h3>bc-library | Business Central Client SDK</h3>
+            <p>The integration spine beneath every internal application. A JavaScript SDK that gives the company's tools unified, MSAL-authenticated OData v4 access to Microsoft Dynamics 365 Business Central, with runtime <code>$metadata</code> schema discovery so each downstream application resists vendor version drift across upgrades.</p>
+            <p class="outcome"><strong>Business outcome:</strong> one integration layer underneath every platform: eliminates duplicated MSAL/OData code across applications and removes per-app maintenance from each Business Central release cycle.</p>
+            <ul class="tech">
+              <li>JavaScript</li><li>MSAL</li><li>OData v4</li><li>Runtime schema introspection</li><li>SDK architecture</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" style="cursor: default;">
+          <div class="card-body">
+            <h3>HVAC Estimator Platform</h3>
+            <p>Full-stack estimation platform combining PDF drawing takeoff, vision-based component detection, labour-hour calculation to Australian HVAC standards (NCC/BCA, AS 1668, AS 4254), quote revisioning, and Business Central interoperation.</p>
+            <p class="outcome"><strong>Business outcome:</strong> targets quoting-cycle compression from hours to minutes, with consistency and traceability across revisions.</p>
+            <ul class="tech">
+              <li>Node.js</li><li>Express.js</li><li>React.js</li><li>MongoDB</li><li>Tesseract.js</li><li>Google Cloud Vision API</li><li>PDF-Parse</li><li>JWT</li><li>Docker</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card" style="cursor: default;">
+          <div class="card-body">
+            <h3>PDF-Driven HVAC Takeoff Automation</h3>
+            <p>Three-generation research programme exploring three successive architectures for extracting duct geometry from mechanical drawings: vector-geometry traversal with OCR; drafter-assisted polyline interpretation; and annotation-driven extraction. A parallel line of work (DimensionX) explores pure vector measurement in the absence of OCR.</p>
+            <p class="outcome"><strong>Business outcome:</strong> establishes the technical pathway to automated estimation workflows and a step-change in quoting throughput.</p>
+            <ul class="tech">
+              <li>Python</li><li>PyMuPDF</li><li>RapidOCR</li><li>Shapely</li><li>NetworkX</li><li>Flask</li><li>Streamlit</li><li>PDF.js</li><li>Graph algorithms</li>
+            </ul>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+</div>
+
+<!-- Full-window demo popup — opened from the "Try ... demo app with tour" button -->
+<div class="demo-modal-backdrop" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="demo-modal-frame">
+    <div class="demo-modal-header">
+      <div class="demo-modal-title" id="demoModalTitle">&nbsp;</div>
+      <button type="button" class="demo-modal-close" aria-label="Close demo" onclick="closeDemoModal()">&times;</button>
+    </div>
+    <iframe class="demo-modal-iframe" id="demoModalIframe" title="Demo" src="about:blank" allow="fullscreen"></iframe>
+  </div>
+</div>
+
+<!-- Notice shown on mobile when a visitor taps "Launch interactive demo" -->
+<div class="mobile-notice" id="mobileNotice" role="alertdialog" aria-modal="true" aria-hidden="true" aria-labelledby="mobileNoticeText">
+  <div class="mobile-notice-card">
+    <p id="mobileNoticeText">This demo is <strong>best viewed on desktop</strong> — mobile browsers can't fit the full dataset without running out of memory.</p>
+    <button type="button" onclick="closeMobileNotice()">OK</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  // View switcher wired to sidebar "About" and "Selected Works" links.
+  const links = document.querySelectorAll('[data-view]');
+  const views = document.querySelectorAll('.view');
+
+  const worksSublist = document.getElementById('worksSublist');
+
+  function showView(name) {
+    views.forEach(v => v.classList.remove('active'));
+    const target = document.getElementById('view-' + name);
+    if (target) target.classList.add('active');
+    // Highlight the corresponding sidebar link (only matches About / Selected Works).
+    links.forEach(a => a.classList.toggle('active', a.getAttribute('data-view') === name));
+    const main = document.querySelector('.main-content');
+    if (main) main.scrollTop = 0;
+  }
+
+  links.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const view = link.getAttribute('data-view');
+      if (view === 'works') {
+        // Selected Works: only toggle the sub-list. Stay on the current view
+        // (usually About) until the user picks a specific tool.
+        if (worksSublist) worksSublist.classList.toggle('open');
+        link.classList.add('active');
+      } else {
+        // About (or other): switch view and close the sub-list.
+        showView(view);
+        if (worksSublist) worksSublist.classList.remove('open');
+      }
+    });
+  });
+
+  // ---- Simple SVG diagram builder ----
+  // nodes: [{x, y, w, h, title, subtitle, highlight}]
+  // edges: [{x1, y1, x2, y2}] (or curved via cp)
+  let _diagId = 0;
+  function svgDiagram(w, h, nodes, edges) {
+    const id = 'arr_' + (++_diagId);
+    const rects = nodes.map(n => `
+      <rect x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" rx="4"
+        fill="${n.highlight ? '#F7F5F0' : '#ffffff'}"
+        stroke="${n.highlight ? '#C89A2B' : '#B8B4AA'}"
+        stroke-width="${n.highlight ? 1.5 : 1}"/>
+      ${n.title ? `<text x="${n.x + n.w/2}" y="${n.y + (n.subtitle ? 17 : (n.h/2 + 4))}" text-anchor="middle" font-size="10" font-weight="600" fill="#1A1A1A">${n.title}</text>` : ''}
+      ${n.subtitle ? `<text x="${n.x + n.w/2}" y="${n.y + n.h - 8}" text-anchor="middle" font-size="9" fill="#666">${n.subtitle}</text>` : ''}
+    `).join('');
+    const lines = edges.map(e => e.curve
+      ? `<path d="M ${e.x1} ${e.y1} Q ${e.cx} ${e.cy} ${e.x2} ${e.y2}" fill="none" stroke="#888" stroke-width="1.4" marker-end="url(#${id})"/>`
+      : `<line x1="${e.x1}" y1="${e.y1}" x2="${e.x2}" y2="${e.y2}" stroke="#888" stroke-width="1.4" marker-end="url(#${id})"/>`
+    ).join('');
+    return `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" style="font-family:Inter,sans-serif">
+      <defs><marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#888"/></marker></defs>
+      ${rects}${lines}
+    </svg>`;
+  }
+
+  // ---- Data for each tool. Populates the tool view when a sub-item is clicked. ----
+  const TOOLS = {
+    'bc-sales-tool': {
+      title: 'Sales Analytics Dashboard',
+      url:   'bc-sales-tool/',
+      desc:  'Live executive view of the sales ledger, built directly on Microsoft Dynamics 365 Business Central via OData v4. MSAL-secured, with runtime <code>$metadata</code> schema discovery so the application is immune to vendor entity-name drift across Business Central upgrades. Single-tenant, free-tier deployment.',
+      outcome: 'replaces the Power BI + Azure data-warehouse + ETL pipeline that would otherwise be required to give the leadership team a live read on sales performance.',
+      tech: ['JavaScript','MSAL OAuth 2.0','Business Central OData v4','Chart.js','XLSX.js','GitHub Pages'],
+      code: `<span class="cm">// Live executive view — no ETL, no warehouse</span>
+<span class="kw">const</span> bc = <span class="kw">new</span> <span class="fn">BCClient</span>({
+  tenant:   <span class="str">"yourtenant.onmicrosoft.com"</span>,
+  clientId: <span class="str">"abcd-1234-..."</span>,
+  scopes:   [<span class="str">"https://api.businesscentral.dynamics.com/.default"</span>]
+});
+
+<span class="kw">await</span> bc.<span class="fn">connect</span>();       <span class="cm">// MSAL — popup or silent</span>
+<span class="kw">await</span> bc.<span class="fn">discover</span>();      <span class="cm">// read $metadata — resist BC upgrades</span>
+
+<span class="cm">// YTD sales — filter, select, sort</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> bc.<span class="fn">query</span>(<span class="str">"salesInvoiceLines"</span>, {
+  filter:  <span class="str">"postingDate ge 2026-01-01"</span>,
+  select:  [<span class="str">"itemNo"</span>, <span class="str">"quantity"</span>, <span class="str">"amountLCY"</span>, <span class="str">"postingDate"</span>],
+  orderby: <span class="str">"postingDate desc"</span>
+});
+
+<span class="cm">// Render + Excel export</span>
+<span class="fn">renderChart</span>(rows);
+<span class="fn">attachExport</span>(() =&gt; XLSX.<span class="fn">writeFile</span>(rows, <span class="str">"sales.xlsx"</span>));`,
+      diagram: svgDiagram(400, 130,
+        [
+          {x: 8,   y: 45, w: 82,  h: 40, title: 'Browser', subtitle: 'MSAL'},
+          {x: 104, y: 45, w: 82,  h: 40, title: 'bc-library', subtitle: 'SDK', highlight: true},
+          {x: 200, y: 45, w: 100, h: 40, title: 'BC OData v4', subtitle: 'live ledger'},
+          {x: 314, y: 45, w: 78,  h: 40, title: 'UI', subtitle: 'Chart + XLSX'}
+        ],
+        [
+          {x1: 90,  y1: 65, x2: 102, y2: 65},
+          {x1: 186, y1: 65, x2: 198, y2: 65},
+          {x1: 300, y1: 65, x2: 312, y2: 65}
+        ]
+      )
+    },
+    'forecast-tool': {
+      title: 'Item Demand & Procurement Forecasting Platform',
+      url:   'forecast-tool/',
+      desc:  'Statistical forecasting engine wired live to Business Central. Inventory demand and supplier purchasing volumes are modelled directly from the same operational ledger finance reports run on, so purchasing decisions reconcile to a single source of truth.',
+      outcome: 'replaces the subscription forecasting-SaaS category (Netstock/Slimstock tier) for inventory and supplier planning.',
+      tech: ['JavaScript','Business Central OData v4','Time-series forecasting','Chart.js','date-fns','CSV ingestion'],
+      code: `<span class="cm">// Live demand pull &rarr; monthly bucket &rarr; forecast &rarr; plan</span>
+<span class="kw">const</span> ledger = <span class="kw">await</span> bc.<span class="fn">query</span>(<span class="str">"itemLedgerEntries"</span>, {
+  filter: <span class="str">\`itemNo eq '\${item.no}' and postingDate ge '2024-01-01'\`</span>
+});
+
+<span class="cm">// Aggregate into calendar months</span>
+<span class="kw">const</span> monthly = <span class="fn">groupByMonth</span>(ledger, <span class="str">"postingDate"</span>, <span class="str">"quantity"</span>);
+
+<span class="cm">// Time-series forecast with seasonality + confidence bands</span>
+<span class="kw">const</span> forecast = <span class="fn">timeSeries</span>(monthly, {
+  horizon:     <span class="str">12</span>,
+  seasonality: <span class="str">true</span>,
+  confidence:  <span class="str">0.95</span>,
+  method:      <span class="str">"holt-winters"</span>
+});
+
+<span class="cm">// Combine actuals + forecast into supplier plan</span>
+<span class="kw">const</span> plan = <span class="fn">combinePlan</span>(monthly, forecast, {
+  supplierLead: item.leadDays,
+  safetyStock:  item.reorderPoint
+});
+<span class="fn">renderPlan</span>(monthly, forecast, plan);`,
+      diagram: svgDiagram(380, 160,
+        [
+          {x: 10,  y: 25, w: 78, h: 38, title: 'Browser'},
+          {x: 108, y: 25, w: 78, h: 38, title: 'bc-library', highlight: true},
+          {x: 206, y: 25, w: 96, h: 38, title: 'BC OData v4', subtitle: 'items · ledger'},
+          {x: 78,  y: 100, w: 108, h: 40, title: 'Time-series', subtitle: 'demand forecast'},
+          {x: 208, y: 100, w: 108, h: 40, title: 'Chart.js', subtitle: 'purchasing view'}
+        ],
+        [
+          {x1: 88, y1: 45, x2: 106, y2: 45},
+          {x1: 186, y1: 45, x2: 204, y2: 45},
+          {x1: 254, y1: 63, x2: 220, y2: 100, curve: true, cx: 254, cy: 100},
+          {x1: 186, y1: 120, x2: 206, y2: 120}
+        ]
+      )
+    },
+    'hr-tool': {
+      title: 'HR & Workforce Portal',
+      url:   'hr-tool/',
+      desc:  'Contractor onboarding, time capture, payroll self-service, and an auditable leave-accrual ledger with full transaction history. Firebase Authentication and Firestore Security Rules calibrated to organisational policy.',
+      outcome: 'replaces the workforce-management SaaS tier the business otherwise would have subscribed to.',
+      tech: ['Firebase Authentication','Firestore','Firestore Security Rules','JavaScript','GitHub Pages'],
+      code: `<span class="cm">// firestore.rules &mdash; time &amp; leave ledger, auditable</span>
+<span class="kw">match</span> /timeEntries/{entryId} {
+  <span class="kw">allow read</span>:   <span class="kw">if</span> request.auth.uid == resource.data.uid
+                || <span class="fn">isManager</span>(request.auth.uid);
+
+  <span class="kw">allow create</span>: <span class="kw">if</span> request.auth.uid == request.resource.data.uid
+                &amp;&amp; request.resource.data.hours &lt;= <span class="str">24</span>
+                &amp;&amp; request.resource.data.date &lt;= <span class="fn">today</span>()
+                &amp;&amp; !<span class="fn">isLocked</span>(request.resource.data.date);
+
+  <span class="kw">allow update</span>: <span class="kw">if</span> <span class="fn">isManager</span>(request.auth.uid)
+                &amp;&amp; !<span class="fn">isFinalised</span>(resource.data);
+
+  <span class="kw">allow delete</span>: <span class="kw">if</span> <span class="str">false</span>;   <span class="cm">// audit trail preserved</span>
+}
+
+<span class="cm">// Helper — manager check via user profile</span>
+<span class="kw">function</span> <span class="fn">isManager</span>(uid) {
+  <span class="kw">return</span> <span class="fn">get</span>(/databases/$(database)/documents/users/$(uid))
+    .data.role <span class="kw">in</span> [<span class="str">'manager'</span>, <span class="str">'admin'</span>];
+}`,
+      diagram: svgDiagram(380, 160,
+        [
+          {x: 150, y: 15, w: 80, h: 38, title: 'Browser'},
+          {x: 140, y: 75, w: 100, h: 38, title: 'Firebase Auth', highlight: true},
+          {x: 30,  y: 125, w: 130, h: 30, title: 'Firestore collections'},
+          {x: 220, y: 125, w: 130, h: 30, title: 'Security Rules'}
+        ],
+        [
+          {x1: 190, y1: 53, x2: 190, y2: 73},
+          {x1: 175, y1: 113, x2: 100, y2: 125, curve: true, cx: 130, cy: 120},
+          {x1: 205, y1: 113, x2: 280, y2: 125, curve: true, cx: 250, cy: 120}
+        ]
+      )
+    },
+    'calendar-viewer': {
+      title: 'Calendar & Quoting Operating Surface',
+      url:   'calendar-viewer/',
+      desc:  'Office-wide view aggregating the team’s Outlook calendars through Microsoft Graph and overlaying them with live quoting context. Single-tenant architecture refreshed on a scheduled cadence via GitHub Actions.',
+      outcome: 'one operating view where team availability and commercial pipeline intersect, replacing the manual stitching across calendar tools and quote spreadsheets.',
+      tech: ['Microsoft Graph API','Microsoft Identity / MSAL','Firebase','GitHub Actions','JavaScript'],
+      code: `<span class="cm"># .github/workflows/sync-calendars.yml</span>
+<span class="kw">name</span>: Sync team calendars
+
+<span class="kw">on</span>:
+  <span class="kw">schedule</span>:
+    - cron: <span class="str">"0 */3 * * *"</span>      <span class="cm"># every 3 hours</span>
+  <span class="kw">workflow_dispatch</span>:            <span class="cm"># manual trigger</span>
+
+<span class="kw">jobs</span>:
+  sync:
+    <span class="kw">runs-on</span>: ubuntu-latest
+    <span class="kw">steps</span>:
+      - <span class="kw">uses</span>: actions/checkout@v4
+
+      - <span class="kw">name</span>: Fetch Outlook calendars via Graph
+        <span class="kw">env</span>:
+          MS_CLIENT_ID: \${{ secrets.MS_CLIENT_ID }}
+          MS_TENANT:    \${{ secrets.MS_TENANT }}
+        <span class="kw">run</span>: node scripts/fetch-outlook.js
+
+      - <span class="kw">name</span>: Overlay quoting context
+        <span class="kw">run</span>: node scripts/join-quotes.js
+
+      - <span class="kw">name</span>: Publish to Firestore
+        <span class="kw">run</span>: node scripts/upload-firestore.js`,
+      diagram: svgDiagram(380, 160,
+        [
+          {x: 10,  y: 30, w: 90, h: 40, title: 'Outlook', subtitle: 'Graph API'},
+          {x: 120, y: 30, w: 110, h: 40, title: 'GitHub Actions', subtitle: 'scheduled sync', highlight: true},
+          {x: 250, y: 30, w: 90, h: 40, title: 'Firestore', subtitle: 'cache'},
+          {x: 140, y: 110, w: 100, h: 38, title: 'Browser view'}
+        ],
+        [
+          {x1: 100, y1: 50, x2: 118, y2: 50},
+          {x1: 230, y1: 50, x2: 248, y2: 50},
+          {x1: 295, y1: 70, x2: 210, y2: 110, curve: true, cx: 260, cy: 110}
+        ]
+      )
+    },
+    'productivity-tracker': {
+      title: 'Productivity & Performance Analytics',
+      url:   'productivity-tracker/',
+      desc:  'Nine-view analytics suite instrumenting team productivity, error taxonomy, and performance trends: the evidence base for continuous-improvement reviews and the quarterly business-reporting schedule.',
+      outcome: 'makes operational performance legible at the resolution executives need but rarely receive.',
+      tech: ['JavaScript','Chart.js','Firestore'],
+      code: `<span class="cm">// Nine-view analytics &mdash; Pareto by defect category</span>
+<span class="kw">async function</span> <span class="fn">loadPareto</span>(periodStart, periodEnd) {
+  <span class="kw">const</span> snap = <span class="kw">await</span> <span class="fn">getDocs</span>(
+    <span class="fn">query</span>(<span class="fn">collection</span>(db, <span class="str">"defects"</span>),
+      <span class="fn">where</span>(<span class="str">"date"</span>, <span class="str">"&gt;="</span>, periodStart),
+      <span class="fn">where</span>(<span class="str">"date"</span>, <span class="str">"&lt;="</span>, periodEnd),
+      <span class="fn">orderBy</span>(<span class="str">"date"</span>, <span class="str">"desc"</span>))
+  );
+
+  <span class="cm">// Group + count + sort desc</span>
+  <span class="kw">const</span> byCategory = <span class="fn">groupBy</span>(
+    snap.docs.<span class="fn">map</span>(d =&gt; d.<span class="fn">data</span>()), <span class="str">"category"</span>
+  );
+
+  <span class="kw">const</span> pareto = Object.<span class="fn">entries</span>(byCategory)
+    .<span class="fn">map</span>(([cat, list]) =&gt; ({ cat, count: list.length }))
+    .<span class="fn">sort</span>((a, b) =&gt; b.count - a.count);
+
+  <span class="cm">// Cumulative % overlay</span>
+  <span class="kw">const</span> total = pareto.<span class="fn">reduce</span>((s, x) =&gt; s + x.count, <span class="str">0</span>);
+  pareto.<span class="fn">forEach</span>((p, i, arr) =&gt; {
+    p.cumulative = arr.<span class="fn">slice</span>(<span class="str">0</span>, i + <span class="str">1</span>)
+      .<span class="fn">reduce</span>((s, x) =&gt; s + x.count, <span class="str">0</span>) / total * <span class="str">100</span>;
+  });
+
+  <span class="fn">renderChart</span>(pareto);
+}`,
+      diagram: svgDiagram(380, 160,
+        [
+          {x: 30,  y: 60, w: 90, h: 40, title: 'Browser'},
+          {x: 140, y: 60, w: 90, h: 40, title: 'Firestore', subtitle: 'events + defects', highlight: true},
+          {x: 250, y: 20, w: 110, h: 30, title: 'View · trend'},
+          {x: 250, y: 60, w: 110, h: 30, title: 'View · Pareto'},
+          {x: 250, y: 100, w: 110, h: 30, title: 'View · ×7 more'}
+        ],
+        [
+          {x1: 120, y1: 80, x2: 138, y2: 80},
+          {x1: 230, y1: 75, x2: 248, y2: 40, curve: true, cx: 245, cy: 60},
+          {x1: 230, y1: 80, x2: 248, y2: 75},
+          {x1: 230, y1: 85, x2: 248, y2: 115, curve: true, cx: 245, cy: 100}
+        ]
+      )
+    },
+    'three-way-forecast': {
+      title: 'Three-Way Financial Forecast',
+      url:   'three-way-forecast/',
+      desc:  'Driver-based three-statement model (profit & loss, cash flow, balance sheet) used as the analytical basis for ongoing NAB facility reviews.',
+      outcome: 'supports management decisions, scenario analysis, and banking discussions through a single in-house forecasting framework, removing dependence on external modelling.',
+      tech: ['Financial modelling','Cash-flow & working-capital architecture','Sensitivity & scenario design'],
+      code: `<span class="cm">// Driver-based three-statement forecast</span>
+<span class="kw">function</span> <span class="fn">forecast</span>(drivers, actuals, years) {
+  <span class="kw">const</span> result = [];
+  <span class="kw">let</span> openingCash   = actuals.cash;
+  <span class="kw">let</span> openingEquity = actuals.equity;
+
+  <span class="kw">for</span> (<span class="kw">let</span> yr = <span class="str">1</span>; yr &lt;= years; yr++) {
+    <span class="cm">// P&amp;L</span>
+    <span class="kw">const</span> revenue = actuals.revenue * (<span class="str">1</span> + drivers.growth) ** yr;
+    <span class="kw">const</span> cogs    = revenue * drivers.cogsRatio;
+    <span class="kw">const</span> gp      = revenue - cogs;
+    <span class="kw">const</span> ebitda  = gp - drivers.opex;
+    <span class="kw">const</span> net     = ebitda - drivers.depreciation - drivers.tax;
+
+    <span class="cm">// Cash Flow (linked to P&amp;L)</span>
+    <span class="kw">const</span> workingCap  = revenue * drivers.workingCapPct;
+    <span class="kw">const</span> operating   = net + drivers.depreciation - workingCap;
+    <span class="kw">const</span> investing   = -drivers.capex;
+    <span class="kw">const</span> closingCash = openingCash + operating + investing;
+
+    <span class="cm">// Balance Sheet (linked to Cash + P&amp;L)</span>
+    <span class="kw">const</span> closingEquity = openingEquity + net;
+    result.<span class="fn">push</span>({ yr, revenue, gp, net, closingCash, closingEquity });
+
+    openingCash   = closingCash;
+    openingEquity = closingEquity;
+  }
+  <span class="kw">return</span> result;
+}`,
+      diagram: svgDiagram(380, 160,
+        [
+          {x: 130, y: 15, w: 120, h: 40, title: 'Driver assumptions', subtitle: 'growth · costs · CapEx', highlight: true},
+          {x: 15,  y: 100, w: 105, h: 40, title: 'P & L', subtitle: 'revenue → EBIT'},
+          {x: 137, y: 100, w: 105, h: 40, title: 'Cash Flow', subtitle: 'operating · investing'},
+          {x: 259, y: 100, w: 105, h: 40, title: 'Balance Sheet', subtitle: 'assets · liab. · equity'}
+        ],
+        [
+          {x1: 165, y1: 55, x2: 65,  y2: 100, curve: true, cx: 100, cy: 90},
+          {x1: 190, y1: 55, x2: 190, y2: 100},
+          {x1: 215, y1: 55, x2: 310, y2: 100, curve: true, cx: 280, cy: 90}
+        ]
+      )
+    },
+    '#bc-library': {
+      title: 'bc-library | Business Central Client SDK',
+      noDemo: true,
+      demoNote: 'Internal SDK — no standalone demo. Sits under every other tool on this site.',
+      desc:  'The integration spine beneath every internal application. A JavaScript SDK that gives the company’s tools unified, MSAL-authenticated OData v4 access to Microsoft Dynamics 365 Business Central, with runtime <code>$metadata</code> schema discovery so each downstream application resists vendor version drift across upgrades.',
+      outcome: 'one integration layer underneath every platform: eliminates duplicated MSAL/OData code across applications and removes per-app maintenance from each Business Central release cycle.',
+      tech: ['JavaScript','MSAL','OData v4','Runtime schema introspection','SDK architecture'],
+      code: `<span class="cm">// Consumer usage — the same pattern in every downstream tool</span>
+<span class="kw">import</span> { BCClient } <span class="kw">from</span> <span class="str">"@company/bc-library"</span>;
+
+<span class="cm">// One-time bootstrap per tool</span>
+<span class="kw">const</span> bc = <span class="kw">new</span> <span class="fn">BCClient</span>({
+  tenant:   <span class="str">"yourtenant.onmicrosoft.com"</span>,
+  clientId: <span class="str">"abcd-1234-..."</span>,
+  scopes:   [<span class="str">"https://api.businesscentral.dynamics.com/.default"</span>]
+});
+
+<span class="kw">await</span> bc.<span class="fn">connect</span>();     <span class="cm">// MSAL — popup / silent</span>
+<span class="kw">await</span> bc.<span class="fn">discover</span>();    <span class="cm">// $metadata — no hardcoded entity names</span>
+
+<span class="cm">// Typed queries — SDK builds OData query strings + parses response</span>
+<span class="kw">const</span> items    = <span class="kw">await</span> bc.<span class="fn">query</span>(<span class="str">"items"</span>,        { top: <span class="str">50</span> });
+<span class="kw">const</span> quotes   = <span class="kw">await</span> bc.<span class="fn">query</span>(<span class="str">"salesQuotes"</span>,  { filter: <span class="str">"isOpen eq true"</span> });
+<span class="kw">const</span> invoices = <span class="kw">await</span> bc.<span class="fn">query</span>(<span class="str">"salesInvoiceLines"</span>, {
+  filter: <span class="str">"postingDate ge 2026-01-01"</span>,
+  select: [<span class="str">"itemNo"</span>, <span class="str">"amountLCY"</span>]
+});
+
+<span class="cm">// Batch fetch across entities — one round-trip</span>
+<span class="kw">const</span> [items2, customers] = <span class="kw">await</span> bc.<span class="fn">batch</span>([
+  bc.query.<span class="fn">build</span>(<span class="str">"items"</span>,     { top: <span class="str">10</span> }),
+  bc.query.<span class="fn">build</span>(<span class="str">"customers"</span>, { top: <span class="str">10</span> })
+]);`,
+      diagram: svgDiagram(380, 175,
+        [
+          {x: 5,   y: 5, w: 66, h: 28, title: 'Sales'},
+          {x: 79,  y: 5, w: 66, h: 28, title: 'Forecast'},
+          {x: 153, y: 5, w: 66, h: 28, title: 'HR'},
+          {x: 227, y: 5, w: 66, h: 28, title: 'Calendar'},
+          {x: 301, y: 5, w: 74, h: 28, title: 'Productivity'},
+          {x: 100, y: 70, w: 180, h: 40, title: 'bc-library SDK', subtitle: 'MSAL · $metadata · OData wrappers', highlight: true},
+          {x: 120, y: 138, w: 140, h: 30, title: 'BC OData v4'}
+        ],
+        [
+          {x1: 38,  y1: 33, x2: 165, y2: 70, curve: true, cx: 105, cy: 55},
+          {x1: 112, y1: 33, x2: 175, y2: 70, curve: true, cx: 145, cy: 55},
+          {x1: 186, y1: 33, x2: 190, y2: 70},
+          {x1: 260, y1: 33, x2: 205, y2: 70, curve: true, cx: 235, cy: 55},
+          {x1: 338, y1: 33, x2: 215, y2: 70, curve: true, cx: 275, cy: 55},
+          {x1: 190, y1: 110, x2: 190, y2: 138}
+        ]
+      )
+    },
+    '#hvac-estimator': {
+      title: 'HVAC Estimator Platform',
+      noDemo: true,
+      demoNote: 'In-development platform — no public demo available.',
+      desc:  'Full-stack estimation platform combining PDF drawing takeoff, vision-based component detection, labour-hour calculation to Australian HVAC standards (NCC/BCA, AS 1668, AS 4254), quote revisioning, and Business Central interoperation.',
+      outcome: 'targets quoting-cycle compression from hours to minutes, with consistency and traceability across revisions.',
+      tech: ['Node.js','Express.js','React.js','MongoDB','Tesseract.js','Google Cloud Vision API','PDF-Parse','JWT','Docker'],
+      code: `<span class="cm">// PDF drawing &rarr; vision &rarr; duct takeoff &rarr; labour hours</span>
+
+<span class="cm">// Stage 1: parse the PDF into pages + vectors</span>
+<span class="kw">const</span> pdf   = <span class="kw">await</span> <span class="fn">parsePDF</span>(uploadedFile);
+<span class="kw">const</span> pages = pdf.pages;
+
+<span class="cm">// Stage 2: computer-vision component detection</span>
+<span class="kw">const</span> regions = <span class="kw">await</span> vision.<span class="fn">detect</span>(pages, {
+  models: [<span class="str">"duct"</span>, <span class="str">"diffuser"</span>, <span class="str">"grille"</span>, <span class="str">"damper"</span>]
+});
+
+<span class="cm">// Stage 3: classify + measure ducts against drawing scale</span>
+<span class="kw">const</span> takeoff = <span class="fn">classifyDucts</span>(regions, {
+  scale: pdf.metadata.scale,
+  units: <span class="str">"mm"</span>
+});
+
+<span class="cm">// Stage 4: labour-hour calc against Australian standards</span>
+<span class="kw">const</span> hours = <span class="fn">calcLabour</span>(takeoff, {
+  reference:  <span class="str">"AS 4254"</span>,
+  compliance: [<span class="str">"NCC/BCA"</span>, <span class="str">"AS 1668"</span>],
+  supplyAir:  <span class="str">true</span>,
+  factors:    labourRates.mel2026
+});
+
+<span class="cm">// Persist + push a quote draft to Business Central</span>
+<span class="kw">await</span> <span class="fn">saveTakeoff</span>(takeoff, hours);
+<span class="kw">await</span> bc.<span class="fn">mutate</span>(<span class="str">"salesQuotes"</span>, <span class="fn">buildQuote</span>(takeoff, hours));`,
+      diagram: svgDiagram(400, 175,
+        [
+          {x: 6,   y: 60, w: 78, h: 40, title: 'PDF drawing', subtitle: 'upload'},
+          {x: 96,  y: 15, w: 108, h: 40, title: 'Vision + OCR', subtitle: 'GC Vision · Tesseract'},
+          {x: 96,  y: 100, w: 108, h: 40, title: 'React front-end', subtitle: 'reviewer UI'},
+          {x: 216, y: 60, w: 96, h: 40, title: 'Estimator', subtitle: 'AS 1668 · AS 4254', highlight: true},
+          {x: 324, y: 60, w: 72, h: 40, title: 'BC', subtitle: 'quote export'}
+        ],
+        [
+          {x1: 84, y1: 80, x2: 96,  y2: 45, curve: true, cx: 90, cy: 65},
+          {x1: 84, y1: 80, x2: 96,  y2: 115, curve: true, cx: 90, cy: 95},
+          {x1: 204, y1: 45, x2: 216, y2: 75, curve: true, cx: 210, cy: 55},
+          {x1: 204, y1: 115, x2: 216, y2: 85, curve: true, cx: 210, cy: 105},
+          {x1: 312, y1: 80, x2: 322, y2: 80}
+        ]
+      )
+    },
+    '#pdf-takeoff': {
+      title: 'PDF-Driven HVAC Takeoff Automation',
+      noDemo: true,
+      demoNote: 'Applied R&D — no public demo available.',
+      desc:  'Three-generation research programme exploring three successive architectures for extracting duct geometry from mechanical drawings: vector-geometry traversal with OCR; drafter-assisted polyline interpretation; and annotation-driven extraction. A parallel line of work (DimensionX) explores pure vector measurement in the absence of OCR.',
+      outcome: 'establishes the technical pathway to automated estimation workflows and a step-change in quoting throughput.',
+      tech: ['Python','PyMuPDF','RapidOCR','Shapely','NetworkX','Flask','Streamlit','PDF.js','Graph algorithms'],
+      code: `<span class="cm"># v3 — annotation-driven duct extraction</span>
+<span class="kw">import</span> fitz                <span class="cm"># PyMuPDF</span>
+<span class="kw">import</span> itertools
+<span class="kw">import</span> networkx <span class="kw">as</span> nx      <span class="cm"># graph algorithms</span>
+
+doc  = fitz.<span class="fn">open</span>(<span class="str">"drawing.pdf"</span>)
+page = doc[<span class="str">0</span>]
+
+<span class="cm"># Drafter has marked ducts with square annotations</span>
+squares = [a <span class="kw">for</span> a <span class="kw">in</span> page.<span class="fn">annots</span>()
+           <span class="kw">if</span> a.type[<span class="str">0</span>] == fitz.PDF_ANNOT_SQUARE]
+
+<span class="cm"># Build a graph of duct segments — node = annot, edge = adjacency</span>
+g = nx.<span class="fn">Graph</span>()
+<span class="kw">for</span> sq <span class="kw">in</span> squares:
+    label = sq.info[<span class="str">"content"</span>]        <span class="cm"># duct size (e.g. "400x300")</span>
+    g.<span class="fn">add_node</span>(sq.rect, size=label)
+
+<span class="cm"># Connect nodes by proximity + orientation alignment</span>
+<span class="kw">for</span> a, b <span class="kw">in</span> itertools.<span class="fn">combinations</span>(g.nodes, <span class="str">2</span>):
+    <span class="kw">if</span> <span class="fn">aligned</span>(a, b) <span class="kw">and</span> <span class="fn">gap</span>(a, b) &lt; TOLERANCE:
+        g.<span class="fn">add_edge</span>(a, b, length=<span class="fn">gap</span>(a, b))
+
+<span class="cm"># Traverse for full duct runs</span>
+runs = <span class="kw">list</span>(nx.<span class="fn">connected_components</span>(g))`,
+      diagram: svgDiagram(380, 200,
+        [
+          {x: 15,  y: 81, w: 70, h: 38, title: 'PDF', subtitle: 'drawing'},
+          {x: 110, y: 8,   w: 165, h: 36, title: 'v1 · Vector + OCR'},
+          {x: 110, y: 52,  w: 165, h: 36, title: 'v2 · Drafter polylines'},
+          {x: 110, y: 96,  w: 165, h: 36, title: 'v3 · Annotation-driven', highlight: true},
+          {x: 110, y: 140, w: 165, h: 36, title: 'DimensionX (vector-only)'},
+          {x: 295, y: 81, w: 78, h: 38, title: 'Duct model', subtitle: 'geometry'}
+        ],
+        [
+          {x1: 85, y1: 100, x2: 108, y2: 26, curve: true, cx: 97, cy: 62},
+          {x1: 85, y1: 100, x2: 108, y2: 70, curve: true, cx: 97, cy: 85},
+          {x1: 85, y1: 100, x2: 108, y2: 114, curve: true, cx: 97, cy: 107},
+          {x1: 85, y1: 100, x2: 108, y2: 158, curve: true, cx: 97, cy: 130},
+          {x1: 275, y1: 26, x2: 295, y2: 96, curve: true, cx: 293, cy: 62},
+          {x1: 275, y1: 70, x2: 295, y2: 96, curve: true, cx: 293, cy: 85},
+          {x1: 275, y1: 114, x2: 295, y2: 100, curve: true, cx: 293, cy: 107},
+          {x1: 275, y1: 158, x2: 295, y2: 100, curve: true, cx: 293, cy: 130}
+        ]
+      )
+    }
+  };
+
+  const toolTitleEl      = document.getElementById('toolTitle');
+  const toolDescEl       = document.getElementById('toolDesc');
+  const toolOutcomeEl    = document.getElementById('toolOutcome');
+  const toolTechEl       = document.getElementById('toolTech');
+  const toolArchEl       = document.getElementById('toolArch');
+  const toolCodeEl       = document.getElementById('toolCode');
+  const toolTryBtn       = document.getElementById('toolTryBtn');
+  const demoModal        = document.getElementById('demoModal');
+  const demoModalTitle   = document.getElementById('demoModalTitle');
+  const demoModalIframe  = document.getElementById('demoModalIframe');
+
+  // Lucide-style concept icons (24×24 stroke). Mapped by tech label below.
+  const ICON_SVGS = {
+    braces:      '<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/>',
+    terminal:    '<polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/>',
+    key:         '<circle cx="8" cy="15" r="4"/><path d="m10.85 12.15 7.65-7.65"/><path d="m19 4 2 2"/><path d="m15 5 3 3"/>',
+    shield:      '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+    database:    '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    flame:       '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
+    leaf:        '<path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>',
+    barChart:    '<path d="M3 3v18h18"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
+    table:       '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/><path d="M15 3v18"/>',
+    github:      '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/>',
+    trendingUp:  '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
+    calendar:    '<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>',
+    mail:        '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    hexagon:     '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',
+    server:      '<rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/>',
+    atom:        '<circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9-4.54-4.52-9.87-6.54-11.9-4.5-2.04 2.03-.02 7.36 4.5 11.9 4.54 4.52 9.87 6.54 11.9 4.5Z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9-2.03-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.87-4.5 11.9 2.03 2.04 7.36.02 11.9-4.5Z"/>',
+    container:   '<path d="M22 7.7c0-.6-.4-1.2-.8-1.5l-6.3-3.9a1.72 1.72 0 0 0-1.7 0l-10.3 6c-.5.2-.9.8-.9 1.4v6.6c0 .5.4 1.2.8 1.5l6.3 3.9a1.72 1.72 0 0 0 1.7 0l10.3-6c.5-.3.9-1 .9-1.5Z"/><path d="M10 21.9V14L2.1 9.1"/><path d="m10 14 11.9-6.9"/>',
+    eye:         '<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+    fileText:    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>',
+    triangle:    '<path d="M13.73 4a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3z"/>',
+    share:       '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>',
+    gitBranch:   '<line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',
+    dollar:      '<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>',
+    droplet:     '<path d="M12 2s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+    network:     '<rect x="9" y="2" width="6" height="6"/><rect x="16" y="16" width="6" height="6"/><rect x="2" y="16" width="6" height="6"/><path d="M5 16v-4h14v4"/><path d="M12 12V8"/>',
+    search:      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+    layers:      '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+    code:        '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>'
+  };
+  const TECH_ICONS = {
+    'JavaScript': 'braces',
+    'Python': 'terminal',
+    'MSAL OAuth 2.0': 'key',
+    'MSAL': 'key',
+    'Microsoft Identity / MSAL': 'key',
+    'BC OData v4': 'database',
+    'OData v4': 'database',
+    'Business Central OData v4': 'database',
+    'Firebase': 'flame',
+    'Firebase Auth': 'shield',
+    'Firebase Authentication': 'shield',
+    'Firestore': 'database',
+    'Security Rules': 'shield',
+    'Firestore Security Rules': 'shield',
+    'MongoDB': 'leaf',
+    'Chart.js': 'barChart',
+    'XLSX.js': 'table',
+    'CSV ingestion': 'table',
+    'GitHub Pages': 'github',
+    'GitHub Actions': 'github',
+    'Time-series forecasting': 'trendingUp',
+    'date-fns': 'calendar',
+    'Microsoft Graph': 'mail',
+    'Microsoft Graph API': 'mail',
+    'Node.js': 'hexagon',
+    'Express.js': 'server',
+    'React.js': 'atom',
+    'Docker': 'container',
+    'JWT': 'key',
+    'Tesseract.js': 'eye',
+    'Google Cloud Vision': 'eye',
+    'Google Cloud Vision API': 'eye',
+    'RapidOCR': 'eye',
+    'PyMuPDF': 'fileText',
+    'PDF-Parse': 'fileText',
+    'PDF.js': 'fileText',
+    'Flask': 'server',
+    'Streamlit': 'barChart',
+    'Shapely': 'triangle',
+    'NetworkX': 'share',
+    'Graph algorithms': 'gitBranch',
+    'Financial modelling': 'dollar',
+    'Cash-flow architecture': 'droplet',
+    'Cash-flow & working-capital architecture': 'droplet',
+    'Scenario design': 'network',
+    'Sensitivity & scenario design': 'network',
+    'Schema introspection': 'search',
+    'Runtime schema introspection': 'search',
+    'SDK design': 'layers',
+    'SDK architecture': 'layers'
+  };
+  function iconSvg(name) {
+    const paths = ICON_SVGS[name] || ICON_SVGS.code;
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + '</svg>';
+  }
+
+  function openTool(key) {
+    const t = TOOLS[key];
+    if (!t) return;
+    toolTitleEl.textContent = t.title;
+    toolDescEl.innerHTML     = t.desc;
+    toolOutcomeEl.innerHTML  = '<strong>Business outcome:</strong> ' + t.outcome;
+    toolTechEl.innerHTML     = t.tech.map(x => {
+      const iconName = TECH_ICONS[x] || 'code';
+      return '<li>' + iconSvg(iconName) + '<span>' + x + '</span></li>';
+    }).join('');
+    if (toolArchEl) toolArchEl.innerHTML = t.diagram || '';
+    if (toolCodeEl) toolCodeEl.innerHTML = t.code ? '<pre>' + t.code + '</pre>' : '';
+    setDemoButtonState(t);
+    showView('tool');
+  }
+  // Cached to allow the resize handler to re-render the button state.
+  let currentTool = null;
+  function setDemoButtonState(t) {
+    if (!toolTryBtn || !t) return;
+    currentTool = t;
+    const isMobile = window.innerWidth < 640;
+    if (isMobile && !(t.noDemo || !t.url)) {
+      // Demos are disabled on phones — 40 MB datasets + heavy DOM exceed
+      // mobile Safari's per-tab memory. Keep the CTA looking normal, but
+      // on click show a "Best viewed on desktop" notice instead of opening.
+      toolTryBtn.textContent = 'Launch interactive demo →';
+      toolTryBtn.classList.remove('disabled');
+      toolTryBtn.disabled = false;
+      toolTryBtn.onclick = () => openMobileNotice();
+    } else if (t.noDemo || !t.url) {
+      toolTryBtn.textContent = 'Not available in demo';
+      toolTryBtn.classList.add('disabled');
+      toolTryBtn.disabled = true;
+      toolTryBtn.onclick = null;
+    } else {
+      toolTryBtn.textContent = 'Launch interactive demo →';
+      toolTryBtn.classList.remove('disabled');
+      toolTryBtn.disabled = false;
+      toolTryBtn.onclick = () => openDemoModal(t.url, t.title);
+    }
+  }
+  window.addEventListener('resize', () => {
+    if (currentTool) setDemoButtonState(currentTool);
+  });
+
+  // "Best viewed on desktop" notice — shown to mobile visitors instead of
+  // loading a demo that would exhaust the browser's memory.
+  window.openMobileNotice = function () {
+    const n = document.getElementById('mobileNotice');
+    if (!n) return;
+    n.classList.add('open');
+    n.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+  window.closeMobileNotice = function () {
+    const n = document.getElementById('mobileNotice');
+    if (!n) return;
+    n.classList.remove('open');
+    n.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+  // Tap the dark backdrop or press Escape to dismiss the notice.
+  const mobileNoticeEl = document.getElementById('mobileNotice');
+  if (mobileNoticeEl) {
+    mobileNoticeEl.addEventListener('click', (e) => {
+      if (e.target === mobileNoticeEl) closeMobileNotice();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileNoticeEl && mobileNoticeEl.classList.contains('open')) {
+      closeMobileNotice();
+    }
+  });
+
+  // ---- Full-window demo popup ----
+  // On phones the demo iframe is rendered at a desktop reference width
+  // (1200 px) and CSS-scaled down so the desktop layout is visible in
+  // miniature — matches the "small like on desktop, fits the phone" feel.
+  function scaleModalIframe() {
+    if (!demoModal || !demoModalIframe) return;
+    if (!demoModal.classList.contains('open')) return;
+    const isMobile = window.innerWidth < 640;
+    if (isMobile) {
+      const headerH = 44;
+      const availW = window.innerWidth;
+      const availH = window.innerHeight - headerH;
+      const targetW = 1200;
+      const scale = availW / targetW;
+      demoModalIframe.style.width = targetW + 'px';
+      demoModalIframe.style.height = (availH / scale) + 'px';
+      demoModalIframe.style.transform = 'scale(' + scale + ')';
+      demoModalIframe.style.transformOrigin = 'top left';
+    } else {
+      demoModalIframe.style.width = '';
+      demoModalIframe.style.height = '';
+      demoModalIframe.style.transform = '';
+      demoModalIframe.style.transformOrigin = '';
+    }
+  }
+  window.addEventListener('resize', scaleModalIframe);
+
+  window.openDemoModal = function (url, title) {
+    if (!demoModal || !demoModalIframe) return;
+    // On phones, scaled iframes render the demo at 1200×~2000 virtual pixels
+    // and load 40+ MB of data — mobile Safari runs out of memory and shows
+    // "A problem repeatedly occurred". Open in a new tab instead so the
+    // browser handles memory on its own top-level page.
+    if (window.innerWidth < 640) {
+      window.open(url, '_blank', 'noopener');
+      return;
+    }
+    demoModalTitle.textContent = title;
+    demoModalIframe.setAttribute('src', url);
+    demoModal.classList.add('open');
+    demoModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    // Apply scaling after the modal is visible (needs open class + layout).
+    requestAnimationFrame(scaleModalIframe);
+  };
+  window.closeDemoModal = function () {
+    if (!demoModal || !demoModalIframe) return;
+    demoModal.classList.remove('open');
+    demoModal.setAttribute('aria-hidden', 'true');
+    demoModalIframe.setAttribute('src', 'about:blank');
+    demoModalIframe.style.width = '';
+    demoModalIframe.style.height = '';
+    demoModalIframe.style.transform = '';
+    demoModalIframe.style.transformOrigin = '';
+    document.body.style.overflow = '';
+  };
+  if (demoModal) {
+    demoModal.addEventListener('click', (e) => {
+      if (e.target === demoModal) closeDemoModal();
+    });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && demoModal && demoModal.classList.contains('open')) {
+      closeDemoModal();
+    }
+  });
+
+  // Wire up sub-list items — clicking one loads its tool in the tool view.
+  document.querySelectorAll('#worksSublist a[href]').forEach(a => {
+    const href = a.getAttribute('href');
+    // Trailing-slash URLs (e.g. "bc-sales-tool/") strip the slash to match
+    // the TOOLS key. Hash URLs (e.g. "#bc-library") match directly.
+    const key = href.startsWith('#') ? href : href.replace(/\/$/, '');
+    a.addEventListener('click', (e) => {
+      if (!TOOLS[key]) return;      // fallback: allow direct navigation
+      e.preventDefault();
+      openTool(key);
+    });
+  });
+
+  // ---- Auto-fit the intro headline to its column width (single line) ----
+  function fitTitle() {
+    const h2 = document.querySelector('.about-intro h2');
+    if (!h2) return;
+    // On mobile / tablet / iPad Pro portrait, don't force a single line —
+    // let CSS wrap naturally at its declared font-size. The nowrap+fit trick
+    // was pushing the headline wider than the viewport and causing horizontal
+    // page scroll / content clipping.
+    if (window.innerWidth < 1081) {
+      h2.style.whiteSpace = '';
+      h2.style.fontSize = '';
+      return;
+    }
+    const container = h2.parentElement;
+    const availWidth = container.clientWidth;
+    if (availWidth <= 0) return;
+    h2.style.whiteSpace = 'nowrap';
+    // Start at a reasonable large size, then converge on the exact fit.
+    let size = 80;
+    h2.style.fontSize = size + 'px';
+    // Shrink until it fits
+    while (h2.scrollWidth > availWidth && size > 12) {
+      size--;
+      h2.style.fontSize = size + 'px';
+    }
+    // Grow until it just fills (leaves 1-2px slack)
+    while (h2.scrollWidth <= availWidth - 2 && size < 200) {
+      size++;
+      h2.style.fontSize = size + 'px';
+    }
+    // Trim any final overshoot
+    while (h2.scrollWidth > availWidth && size > 12) {
+      size--;
+      h2.style.fontSize = size + 'px';
+    }
+  }
+  window.addEventListener('load', fitTitle);
+  window.addEventListener('resize', fitTitle);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitTitle);
+  }
+})();
+</script>
+</body>
+</html>

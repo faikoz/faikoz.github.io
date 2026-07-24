@@ -1,0 +1,22 @@
+# ==================================================================
+# faikoz.github.io Pages repo .gitignore
+# Keeps out inherited clone metadata + local build/state folders.
+# ==================================================================
+
+# ---- Nested clone metadata (would leak pre-scrub history) --------
+*/.git/
+*/.github/
+*/.firebase/
+
+# ---- OS / editor housekeeping ------------------------------------
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---- Logs / temp -------------------------------------------------
+*.log

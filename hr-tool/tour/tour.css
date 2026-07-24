@@ -1,0 +1,179 @@
+/* ============================================================
+   Guided tour styling for the YOUR COMPANY HR Tool.
+   Loaded automatically by tour.js — do not include separately.
+   Colours match the app's emerald palette (--brand: #047857).
+   ============================================================ */
+
+:root {
+    --hrt-bg:            #ffffff;
+    --hrt-fg:            #0B1220;
+    --hrt-muted:         #64748B;
+    --hrt-title:         #065F46;
+    --hrt-accent:        #047857;
+    --hrt-accent-hover:  #036649;
+    --hrt-accent-fg:     #ffffff;
+    --hrt-secondary-bg:  #ECFDF5;
+    --hrt-secondary-fg:  #065F46;
+    --hrt-border:        rgba(4, 120, 87, 0.14);
+    --hrt-shadow:        0 24px 60px rgba(4, 120, 87, 0.18), 0 4px 14px rgba(4, 120, 87, 0.08);
+    --hrt-close-bg:      rgba(4, 120, 87, 0.06);
+    --hrt-close-fg:      #065F46;
+    --hrt-close-hover:   rgba(4, 120, 87, 0.14);
+    --hrt-fab-bg:        #047857;
+    --hrt-fab-fg:        #ffffff;
+    --hrt-fab-hover:     #036649;
+    --hrt-stage-outline: rgba(4, 120, 87, 0.55);
+    --hrt-halo:          rgba(16, 185, 129, 0.55);
+}
+
+/* --- Floating "Take the tour" button (bottom-right) --- */
+.hrt-tour-btn {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 9999;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px 10px 12px;
+    background: var(--hrt-fab-bg);
+    color: var(--hrt-fab-fg);
+    border: 0;
+    border-radius: 999px;
+    font: 600 13px/1 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(4, 120, 87, 0.32);
+    transition: transform 0.08s, filter 0.15s, background 0.15s;
+}
+.hrt-tour-btn:hover  { background: var(--hrt-fab-hover); }
+.hrt-tour-btn:active { transform: translateY(1px); }
+.hrt-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.22);
+    color: inherit;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* --- Driver.js popover --- */
+.driver-popover.hrt-tour-popover {
+    background: var(--hrt-bg);
+    color: var(--hrt-fg);
+    border-radius: 14px;
+    box-shadow: var(--hrt-shadow);
+    border: 1px solid var(--hrt-border);
+    font-family: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+    max-width: 400px;
+    padding: 22px 24px 18px;
+}
+.driver-popover.hrt-tour-popover .driver-popover-title {
+    color: var(--hrt-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0;
+}
+.driver-popover.hrt-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--hrt-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.hrt-tour-popover .driver-popover-description b,
+.driver-popover.hrt-tour-popover .driver-popover-description strong {
+    color: var(--hrt-title);
+    font-weight: 700;
+}
+.driver-popover.hrt-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--hrt-border);
+    margin-top: 6px;
+}
+.driver-popover.hrt-tour-popover .driver-popover-progress-text {
+    color: var(--hrt-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+.driver-popover.hrt-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.hrt-tour-popover .driver-popover-next-btn,
+.driver-popover.hrt-tour-popover .driver-popover-prev-btn {
+    background: var(--hrt-accent);
+    color: var(--hrt-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 inherit;
+    text-shadow: none;
+    cursor: pointer;
+}
+.driver-popover.hrt-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.hrt-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--hrt-accent-hover);
+}
+.driver-popover.hrt-tour-popover .driver-popover-prev-btn {
+    background: var(--hrt-secondary-bg);
+    color: var(--hrt-secondary-fg);
+}
+.driver-popover.hrt-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hrt-close-bg);
+    color: var(--hrt-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: none;
+}
+.driver-popover.hrt-tour-popover .driver-popover-close-btn:hover {
+    background: var(--hrt-close-hover);
+}
+.driver-popover.hrt-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--hrt-bg); }
+.driver-popover.hrt-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--hrt-bg); }
+.driver-popover.hrt-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--hrt-bg); }
+.driver-popover.hrt-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--hrt-bg); }
+
+/* Pulsing halo so small buttons / KPI tiles are easy to spot. */
+.driver-active-element {
+    outline: 3px solid var(--hrt-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 10px;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.30),
+                0 0 24px 6px var(--hrt-halo);
+    animation: hrt-tour-pulse 1.5s ease-in-out infinite;
+}
+@keyframes hrt-tour-pulse {
+    0%, 100% {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.28),
+                    0 0 22px 4px rgba(16, 185, 129, 0.42);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.50),
+                    0 0 32px 10px rgba(16, 185, 129, 0.65);
+    }
+}

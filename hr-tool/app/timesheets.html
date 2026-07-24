@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+<style>
+  /* Demo: contractor iframe is 30% of the screen. Instead of blanket-zoom
+     the whole layout, force each container to fit and stack cards / nav
+     vertically so the panel reads naturally at narrow widths. */
+  html, body { min-width: 0 !important; overflow-x: hidden; }
+  body { font-size: 14px; }
+  .simple-shell { padding: 12px !important; max-width: 100% !important; }
+  .simple-header { flex-wrap: wrap !important; gap: 8px !important; padding: 10px 12px !important; }
+  .simple-header .brand-row { flex: 1 1 100%; }
+  .simple-header .simple-nav { flex: 1 1 100%; overflow-x: auto; }
+  .simple-nav a { padding: 6px 10px !important; font-size: 13px !important; }
+  .header-user { flex: 1 1 100%; justify-content: flex-end; }
+  .page-header { padding: 8px 0 !important; }
+  .page-title { font-size: 20px !important; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .card { padding: 12px !important; margin: 8px 0 !important; }
+  .stat { padding: 10px !important; }
+  .stat .value { font-size: 22px !important; }
+  .stat .label, .stat .sub { font-size: 11px !important; }
+  .shift-btn { padding: 12px !important; font-size: 14px !important; }
+  table { font-size: 12px !important; }
+  th, td { padding: 6px 4px !important; }
+  /* Any remaining wide element gets a gentle shrink as a safety net. */
+  main, .simple-shell > * { max-width: 100% !important; }
+</style>
+
+<meta charset="utf-8">
+<title>Timesheets — YOUR COMPANY HR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<div class="simple-shell">
+
+  <header class="simple-header">
+    <div class="brand-row">
+      <div class="logo">V</div>
+      <div class="name">
+        YOUR COMPANY
+        <small>HR Portal</small>
+        <div class="brand-badges" id="brandBadges"></div>
+      </div>
+    </div>
+    <nav class="simple-nav">
+      <a href="index.html">Dashboard</a>
+      <a class="active" href="timesheets.html" data-page="timesheets">Timesheets</a>
+      <a href="leave.html" data-page="leave">Leave</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+    <div class="header-user">
+      <div class="avatar" id="avatar">?</div>
+      <div>
+        <div class="name" id="who">…</div>
+        <div class="role">Contractor</div>
+      </div>
+      <button class="ghost" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Timesheets</h1>
+      <div class="page-subtitle">Your work history and fix requests</div>
+    </div>
+    <div class="row">
+      <select id="rangePick" style="min-width:160px">
+        <option value="7">Last 7 days</option>
+        <option value="30" selected>This month (30 days)</option>
+        <option value="365">This year (365 days)</option>
+      </select>
+      <button id="requestFixBtn">Request a fix</button>
+    </div>
+  </div>
+
+  <!-- KPI tiles -->
+  <div class="stat-grid">
+    <div class="stat brand">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div class="label">Total hours</div>
+      </div>
+      <div class="value" id="kpiHours">—</div>
+      <div class="sub" id="kpiHoursSub">range</div>
+      <div class="tile-tip" id="tipHours"></div>
+    </div>
+    <div class="stat indigo">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <div class="label">Days worked</div>
+      </div>
+      <div class="value" id="kpiDays">—</div>
+      <div class="sub" id="kpiDaysSub">unique days</div>
+      <div class="tile-tip" id="tipDays"></div>
+    </div>
+    <div class="stat cyan">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3v18"/></svg></div>
+        <div class="label">Avg / worked day</div>
+      </div>
+      <div class="value" id="kpiAvg">—</div>
+      <div class="sub">hours</div>
+      <div class="tile-tip" id="tipAvg"></div>
+    </div>
+    <div class="stat violet">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg></div>
+        <div class="label">Break time</div>
+      </div>
+      <div class="value" id="kpiBreak">—</div>
+      <div class="sub">total</div>
+      <div class="tile-tip" id="tipBreak"></div>
+    </div>
+  </div>
+
+  <!-- Hours chart -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Hours per day</h2>
+      <div class="row">
+        <span class="muted" style="font-size:12px" id="chartMeta">—</span>
+        <span id="dailyChartToggle"></span>
+      </div>
+    </div>
+    <div style="position:relative; height:260px"><canvas id="dailyChart"></canvas></div>
+  </div>
+
+  <!-- Day-by-day table -->
+  <div class="card">
+    <div class="toolbar"><h2>Day-by-day</h2></div>
+    <div id="daysList" class="empty">Loading…</div>
+  </div>
+
+  <!-- My fix requests -->
+  <div class="card">
+    <div class="toolbar"><h2>My fix requests</h2></div>
+    <div id="fixList" class="empty">No fix requests yet.</div>
+  </div>
+</div>
+
+<!-- Request a fix modal -->
+<div class="modal-backdrop" id="fixModal">
+  <div class="modal">
+    <h2>Request a time-entry fix</h2>
+    <p class="muted" style="margin-top:4px; font-size:13px">Tell admin what's wrong (forgot to clock out, wrong time, etc.). They'll fix it for you.</p>
+    <form id="fixForm">
+      <label>Date</label>
+      <input type="date" id="fixDate" required>
+      <label>Describe the issue</label>
+      <textarea id="fixDesc" rows="4" required placeholder="e.g. I forgot to clock out yesterday — please set clock-out to 16:30."></textarea>
+      <div class="error" id="fixErr"></div>
+      <div class="actions">
+        <button type="button" class="ghost" id="fixCancelBtn">Cancel</button>
+        <button type="submit" id="fixSubmitBtn">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "../assets/firebase-init.js";
+  import { requireRole, logout } from "../assets/auth-router.js";
+  import { getInitials, escapeHtml, roleBadgesHtml } from "../assets/admin-nav.js";
+  import { refreshContractorBadges } from "../assets/contractor-nav.js";
+  import { mountAnnouncementBanners } from "../assets/announcements.js";
+  import { fmtHours, fmtDay, lastNDateKeys, melDateKey, melTimeShort, hoursBetween, fmtAUShort, fmtAUDow, fmtAU } from "../assets/time.js";
+  import {
+    collection, query, where, getDocs, addDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { user, profile } = await requireRole("contractor");
+  document.getElementById("who").textContent = profile.name || profile.email || "";
+  document.getElementById("avatar").textContent = getInitials(profile.name || profile.email);
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+  const __bb = document.getElementById("brandBadges");
+  if (__bb) __bb.innerHTML = roleBadgesHtml(profile);
+  mountAnnouncementBanners(user, profile);
+
+  const rangePick = document.getElementById("rangePick");
+
+  function fmtMinutes(mins) {
+    if (mins == null || isNaN(mins)) return "—";
+    if (mins > 0 && mins < 1) return Math.max(1, Math.round(mins * 60)) + "s";
+    if (mins < 1) return "0m";
+    const h = Math.floor(mins / 60), m = Math.round(mins % 60);
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  }
+
+  function fmtHM(hours) {
+    if (hours == null || isNaN(hours)) return "—";
+    const totalMins = Math.round(Math.abs(hours) * 60);
+    const sign = hours < 0 ? "-" : "";
+    const h = Math.floor(totalMins / 60), m = totalMins % 60;
+    if (h === 0 && m === 0) return "0m";
+    if (h === 0) return `${sign}${m}m`;
+    if (m === 0) return `${sign}${h}h`;
+    return `${sign}${h}h ${m}m`;
+  }
+  let chartRef = null;
+  function chartBase(yLabel, grouped, orderedKeys) {
+    return {
+      responsive: true, maintainAspectRatio: false,
+      interaction: { intersect: false, mode: "index" },
+      plugins: {
+        legend: grouped
+          ? { display: true, position: "top", align: "end", labels: { boxWidth: 12, boxHeight: 12, padding: 14, usePointStyle: true, color: "#1F2937", font: { family: "Inter", size: 12, weight: "500" } } }
+          : { display: false },
+        tooltip: {
+          backgroundColor: "#0B1220", padding: 12, cornerRadius: 8,
+          titleFont: { family: "Inter", weight: "600", size: 13 }, bodyFont: { family: "Inter", size: 12 },
+          callbacks: {
+            title: (items) => {
+              if (!orderedKeys) return items[0].label;
+              const idx = items[0].dataIndex;
+              return fmtAUDow(orderedKeys[idx]);
+            },
+            label: (ctx) => `${grouped ? ctx.dataset.label.split(" · ")[0] + ": " : ""}${fmtHM(ctx.parsed.y)}`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#64748B", font: { family: "Inter", size: 11 }, maxRotation: 60, autoSkip: true, autoSkipPadding: 6 } },
+        y: {
+          beginAtZero: true,
+          grid: { color: "#E6E8EE", drawBorder: false },
+          ticks: { color: "#64748B", font: { family: "Inter", size: 12 }, callback: (v) => fmtHM(v) },
+          title: { display: true, text: yLabel, color: "#64748B", font: { family: "Inter", size: 12 } }
+        }
+      }
+    };
+  }
+
+  async function loadRange() {
+    const n = Number(rangePick.value);
+    const keys = lastNDateKeys(n);
+    const oldestKey = keys[keys.length - 1];
+
+    const teSnap = await getDocs(query(collection(db, "timeEntries"), where("uid", "==", user.uid)));
+    const entries = [];
+    teSnap.forEach(d => entries.push({ id: d.id, ...d.data() }));
+    const inRange = entries.filter(e => e.date >= oldestKey && e.date <= keys[0]);
+
+    let total = 0, breakMins = 0;
+    const daySet = new Set();
+    inRange.forEach(e => {
+      if (e.hoursWorked) { total += e.hoursWorked; daySet.add(e.date); }
+      if (e.breakMinutes) breakMins += e.breakMinutes;
+    });
+    document.getElementById("kpiHours").textContent = fmtHours(total);
+    document.getElementById("kpiHoursSub").textContent = `last ${n} days`;
+    document.getElementById("kpiDays").textContent = daySet.size;
+    document.getElementById("kpiDaysSub").textContent = `of ${n}`;
+    document.getElementById("kpiAvg").textContent = daySet.size > 0 ? fmtHours(total / daySet.size) : "—";
+    document.getElementById("kpiBreak").textContent = fmtMinutes(breakMins);
+
+    // KPI tooltips
+    const setTip = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+    const dayTotals = {};
+    inRange.forEach(e => { if (e.hoursWorked) dayTotals[e.date] = (dayTotals[e.date] || 0) + e.hoursWorked; });
+    const topDays = Object.entries(dayTotals).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    setTip("tipHours", topDays.length
+      ? `<span class="head">Top hours days</span><ul>${topDays.map(([k, h]) => `<li>${fmtAU(k)}<span class="right">${fmtHours(h)}</span></li>`).join("")}</ul>`
+      : `<span class="head">Top hours days</span><span class="none">No entries in this range.</span>`);
+    setTip("tipDays", daySet.size
+      ? `<span class="head">Worked days</span><ul>${[...daySet].sort().reverse().slice(0, 8).map(k => `<li>${fmtAU(k)}<span class="right">${fmtHours(dayTotals[k] || 0)}</span></li>`).join("")}</ul>`
+      : "");
+    setTip("tipAvg", daySet.size
+      ? `<span class="head">Avg over worked days</span><span class="none">${fmtHours(total / daySet.size)} per day · ${daySet.size} day(s)</span>`
+      : "");
+    const dayBreaks = {};
+    inRange.forEach(e => { if (e.breakMinutes) dayBreaks[e.date] = (dayBreaks[e.date] || 0) + e.breakMinutes; });
+    const topBreakDays = Object.entries(dayBreaks).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    setTip("tipBreak", topBreakDays.length
+      ? `<span class="head">Most break time</span><ul>${topBreakDays.map(([k, m]) => `<li>${fmtAU(k)}<span class="right">${fmtMinutes(m)}</span></li>`).join("")}</ul>`
+      : `<span class="head">Break time</span><span class="none">No breaks logged.</span>`);
+
+    // Chart (grouped: worked + break per day)
+    const ordered = [...keys].reverse();
+    const dailyData = {};
+    const breakData = {};
+    const sessionsPerDay = {};
+    ordered.forEach(k => { dailyData[k] = 0; breakData[k] = 0; sessionsPerDay[k] = 0; });
+    inRange.forEach(e => {
+      if (e.hoursWorked && dailyData[e.date] !== undefined) dailyData[e.date] += e.hoursWorked;
+      if (e.breakMinutes && breakData[e.date] !== undefined) breakData[e.date] += e.breakMinutes / 60;
+      if (sessionsPerDay[e.date] !== undefined) sessionsPerDay[e.date]++;
+    });
+    const barW = n > 90 ? 5 : n > 30 ? 10 : 16;
+    const workedTotal = Object.values(dailyData).reduce((s, v) => s + v, 0);
+    const breakTotal  = Object.values(breakData).reduce((s, v) => s + v, 0);
+    let __cs = null;
+    try { __cs = await import("../assets/chart-style.js"); }
+    catch (e) { console.error("Failed to load chart-style.js:", e); }
+    const vividChartOptions = __cs?.vividChartOptions || (() => ({ responsive: true, maintainAspectRatio: false }));
+    const chartToPieData    = __cs?.chartToPieData    || ((d) => d);
+    const vividPieOptions   = __cs?.vividPieOptions   || (() => ({ responsive: true, maintainAspectRatio: false }));
+    const makeChartToggle   = __cs?.makeChartToggle   || (() => document.createElement("span"));
+    const dailyBarData = {
+      labels: ordered.map(k => n <= 14 ? fmtAUDow(k) : fmtAUShort(k)),
+      datasets: [
+        { label: `Worked · ${fmtHM(workedTotal)}`, data: ordered.map(k => Number(dailyData[k].toFixed(2))), backgroundColor: "#14B8A6", borderColor: "#14B8A6", borderWidth: 0, borderRadius: 2, maxBarThickness: barW },
+        { label: `Break · ${fmtHM(breakTotal)}`,   data: ordered.map(k => Number(breakData[k].toFixed(2))),   backgroundColor: "#8B5CF6", borderColor: "#8B5CF6", borderWidth: 0, borderRadius: 2, maxBarThickness: barW }
+      ]
+    };
+    const dailyBarOpts = vividChartOptions({ yLabel: "Hours", titleLookup: (idx) => fmtAUDow(ordered[idx]) });
+    // Footer adds session + break context per bar
+    dailyBarOpts.plugins.tooltip.callbacks.footer = (items) => {
+      const idx = items[0].dataIndex;
+      const k = ordered[idx];
+      const ses = sessionsPerDay[k] || 0;
+      const brkMin = Math.round((breakData[k] || 0) * 60);
+      const parts = [];
+      if (ses > 0) parts.push(`${ses} session${ses === 1 ? "" : "s"}`);
+      if (brkMin > 0) parts.push(`Break: ${fmtMinutes(brkMin)}`);
+      return parts.length ? parts.join("  ·  ") : "";
+    };
+    function renderDaily(type) {
+      if (chartRef) chartRef.destroy();
+      chartRef = new Chart(document.getElementById("dailyChart"), type === "pie"
+        ? { type: "pie", data: chartToPieData(dailyBarData), options: vividPieOptions() }
+        : { type: "bar", data: dailyBarData, options: dailyBarOpts });
+    }
+    const dailyToggle = document.getElementById("dailyChartToggle");
+    if (dailyToggle && !dailyToggle.dataset.wired) {
+      dailyToggle.appendChild(makeChartToggle("bar", renderDaily));
+      dailyToggle.dataset.wired = "1";
+    }
+    renderDaily(dailyToggle?.querySelector("button.active")?.dataset.t || "bar");
+    document.getElementById("chartMeta").textContent = `${fmtAU(oldestKey)} → ${fmtAU(keys[0])}`;
+
+    // Day-by-day table — only days with entries, newest first, with sessions
+    const daysList = document.getElementById("daysList");
+    const daysWithEntries = ordered.filter(k => dailyData[k] > 0).reverse();
+    if (daysWithEntries.length === 0) {
+      daysList.classList.add("empty");
+      daysList.innerHTML = "No entries in this range.";
+    } else {
+      daysList.classList.remove("empty");
+      const entriesByDay = {};
+      inRange.forEach(e => {
+        if (!entriesByDay[e.date]) entriesByDay[e.date] = [];
+        entriesByDay[e.date].push(e);
+      });
+      daysList.innerHTML = `<table class="data">
+        <thead><tr><th>Date</th><th>Sessions</th><th>Break</th><th style="text-align:right">Hours</th></tr></thead>
+        <tbody>${daysWithEntries.map(k => {
+          const dayEntries = (entriesByDay[k] || []).slice().sort((a, c) => {
+            const as = a.clockInUTC?.toMillis?.() || 0;
+            const cs = c.clockInUTC?.toMillis?.() || 0;
+            return as - cs;
+          });
+          const segments = [];
+          dayEntries.forEach(e => entrySegments(e).forEach(s => segments.push(s)));
+          segments.sort((a, b) => a.start - b.start);
+          const sessionsHtml = `<div class="session-chips">${segments.map(s => chipHtml(s)).join("")}</div>`;
+          const breakMs = (dayBreaks[k] || 0);
+          return `<tr>
+            <td>${fmtAU(k)}<div class="muted" style="font-size:11px; margin-top:2px">${fmtDay(k)}</div></td>
+            <td>${sessionsHtml}</td>
+            <td class="muted">${breakMs > 0 ? fmtMinutes(breakMs) : "—"}</td>
+            <td style="text-align:right; font-variant-numeric: tabular-nums"><strong>${fmtHours(dailyData[k])}</strong></td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>`;
+    }
+  }
+
+  // Build chronological work/break segments from a single time entry.
+  // Each entry is split by its breaks into multiple work segments.
+  function entrySegments(e) {
+    const out = [];
+    const start = e.clockInUTC?.toDate?.();
+    const end   = e.clockOutUTC?.toDate?.();
+    if (!start) return out;
+    const breaks = (e.breaks || [])
+      .map(b => ({ start: b.startUTC?.toDate?.(), end: b.endUTC?.toDate?.(), autoClosed: b.autoClosed }))
+      .filter(b => b.start && b.end)
+      .sort((a, b) => a.start - b.start);
+    let cursor = start;
+    breaks.forEach(b => {
+      if (b.start > cursor) out.push({ kind: "work", start: cursor, end: b.start, entry: e });
+      out.push({ kind: "brk", start: b.start, end: b.end, entry: e, autoClosed: b.autoClosed });
+      cursor = b.end;
+    });
+    if (end) {
+      if (end > cursor) out.push({ kind: "work", start: cursor, end, entry: e });
+    } else {
+      out.push({ kind: "work", start: cursor, end: null, ongoing: true, entry: e });
+    }
+    return out;
+  }
+
+  function segmentTitle(s) {
+    const e = s.entry || {};
+    const sourceLabel = e.source === "auto"  ? "Auto-closed"
+                      : e.source === "admin" ? "Set by admin"
+                      : "Logged by you";
+    const lastEd = e.lastEditedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false });
+    const lastBy = e.lastEditedBy || e.editedBy || "";
+    const lines = [];
+    if (s.kind === "brk") {
+      const dur = Math.round((s.end - s.start) / 60_000);
+      lines.push(`Break · ${dur} min`);
+      lines.push(`${melTimeShort(s.start)} → ${melTimeShort(s.end)}`);
+      if (s.autoClosed) lines.push("Break auto-closed when shift was auto-closed.");
+    } else if (s.ongoing) {
+      lines.push("Still in — no clock-off yet");
+      lines.push(`Started ${melTimeShort(s.start)}`);
+    } else {
+      const dur = hoursBetween(s.start.getTime(), s.end.getTime());
+      lines.push(`Work · ${fmtHours(dur)}`);
+      lines.push(`${melTimeShort(s.start)} → ${melTimeShort(s.end)}`);
+    }
+    lines.push(`Source: ${sourceLabel}`);
+    if (lastEd) lines.push(`Last edited: ${lastEd}${lastBy ? " by " + lastBy : ""}`);
+    if (e.autoCloseNote) lines.push(`Note: ${e.autoCloseNote}`);
+    if (e.editNote) lines.push(`Edit note: ${e.editNote}`);
+    return lines.join("\n");
+  }
+
+  function chipHtml(s) {
+    const ttl = segmentTitle(s).replace(/"/g, "&quot;");
+    if (s.kind === "brk") {
+      const dur = (s.end - s.start) / 60_000;
+      return `<span class="session-chip brk" title="${ttl}">
+        <span>${melTimeShort(s.start)}</span>
+        <span class="arr">→</span>
+        <span>${melTimeShort(s.end)}</span>
+        <span class="dur">${fmtMinutes(dur)}</span>
+      </span>`;
+    }
+    if (s.ongoing) {
+      return `<span class="session-chip open" title="${ttl}">
+        <span>${melTimeShort(s.start)}</span>
+        <span class="arr">→</span>
+        <span class="to">still in</span>
+      </span>`;
+    }
+    const dur = hoursBetween(s.start.getTime(), s.end.getTime());
+    return `<span class="session-chip" title="${ttl}">
+      <span>${melTimeShort(s.start)}</span>
+      <span class="arr">→</span>
+      <span>${melTimeShort(s.end)}</span>
+      <span class="dur">${fmtHours(dur)}</span>
+    </span>`;
+  }
+
+  async function loadFixRequests() {
+    const listEl = document.getElementById("fixList");
+    const snap = await getDocs(query(collection(db, "timeEditRequests"), where("uid", "==", user.uid)));
+    const reqs = [];
+    snap.forEach(d => reqs.push({ id: d.id, ...d.data() }));
+    if (reqs.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No fix requests yet.";
+      return;
+    }
+    reqs.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Date</th><th>Description</th><th>Status</th></tr></thead>
+      <tbody>${reqs.map(r => {
+        const badge = r.status === "resolved"  ? `<span class="badge ok">Resolved</span>`
+                    : r.status === "dismissed" ? `<span class="badge off">Dismissed</span>`
+                    : `<span class="badge pending">Pending</span>`;
+        const note = r.adminNote ? `<div class="muted" style="font-size:11px; margin-top:4px">Admin: ${escapeHtml(r.adminNote)}</div>` : "";
+        return `<tr>
+          <td>${escapeHtml(r.date)}</td>
+          <td class="muted" style="font-size:13px">${escapeHtml(r.description)}${note}</td>
+          <td>${badge}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+  }
+
+  document.getElementById("requestFixBtn").addEventListener("click", () => {
+    document.getElementById("fixForm").reset();
+    document.getElementById("fixDate").value = melDateKey();
+    document.getElementById("fixErr").textContent = "";
+    document.getElementById("fixModal").classList.add("open");
+  });
+  document.getElementById("fixCancelBtn").addEventListener("click", () => document.getElementById("fixModal").classList.remove("open"));
+  document.getElementById("fixForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("fixSubmitBtn");
+    const errEl = document.getElementById("fixErr");
+    errEl.textContent = "";
+    btn.disabled = true; btn.textContent = "Submitting…";
+    try {
+      await addDoc(collection(db, "timeEditRequests"), {
+        uid: user.uid,
+        contractorName: profile.name || profile.email,
+        date: document.getElementById("fixDate").value,
+        description: document.getElementById("fixDesc").value.trim(),
+        status: "pending",
+        submittedAt: serverTimestamp()
+      });
+      document.getElementById("fixModal").classList.remove("open");
+      loadFixRequests();
+    } catch (ex) { errEl.textContent = "Failed: " + (ex.message || ex.code); }
+    finally { btn.disabled = false; btn.textContent = "Submit"; }
+  });
+
+  rangePick.addEventListener("change", () => loadRange().catch(e => console.error("loadRange:", e)));
+  loadRange().catch(e => {
+    console.error("loadRange initial:", e);
+    document.getElementById("daysList").innerHTML = `<div class="empty" style="color:var(--bad)">Could not load: ${e.message || e.code || e}</div>`;
+  });
+  loadFixRequests().catch(e => console.error("loadFixRequests:", e));
+  refreshContractorBadges(user.uid).catch(e => console.error("badges:", e));
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>

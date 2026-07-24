@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+
+<meta charset="utf-8">
+<title>Leave — HR Tool Admin</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<header class="topbar"></header>
+
+<main>
+  <!-- Team calendar -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Team calendar</h2>
+      <span class="muted" style="font-size:12px">Click any pending entry to approve / deny</span>
+    </div>
+    <div id="teamCalendar"></div>
+    <div class="cal-legend">
+      <span class="lg pending"><span class="swatch"></span>Pending</span>
+      <span class="lg approved"><span class="swatch"></span>Approved</span>
+      <span class="lg denied"><span class="swatch"></span>Denied</span>
+      <span class="lg cancelled"><span class="swatch"></span>Cancelled</span>
+      <span class="lg holiday"><span class="swatch"></span>Vic public holiday</span>
+    </div>
+  </div>
+
+  <!-- Pending queue -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Pending requests</h2>
+      <span class="muted" style="font-size:13px" id="pendingCount"></span>
+    </div>
+    <div id="pendingList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Upcoming approved -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Upcoming approved leave</h2>
+    </div>
+    <div id="upcomingList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Balances overview -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Balances</h2>
+    </div>
+    <div id="balancesList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Accrual ledger / history -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Accrual history</h2>
+      <select id="ledgerUserPick" style="min-width:220px">
+        <option value="">— pick a contractor —</option>
+      </select>
+    </div>
+    <div id="ledgerList" class="empty">Pick a contractor to view every accrual + leave event affecting their balance.</div>
+  </div>
+
+  <!-- Full leave history (all decisions logged) -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>All leave requests</h2>
+      <span class="muted" style="font-size:12px">Submitted / approved / denied dates</span>
+    </div>
+    <div id="historyList" class="empty">Loading…</div>
+  </div>
+</main>
+
+<!-- Review modal -->
+<div class="modal-backdrop" id="decisionModal">
+  <div class="modal wide">
+    <h2 id="decisionTitle">Review request</h2>
+    <div id="decisionDetails" style="margin-bottom:12px; font-size:14px"></div>
+
+    <div class="thread-section">
+      <h3>Conversation</h3>
+      <div id="threadList"><div class="thread-empty">Loading…</div></div>
+      <div class="thread-compose">
+        <textarea id="threadInput" rows="2" placeholder="Reply to the contractor (sent without approving / denying)…"></textarea>
+        <div class="row">
+          <button type="button" class="ghost" id="threadPostBtn">Post comment</button>
+        </div>
+        <div class="error" id="threadErr"></div>
+      </div>
+    </div>
+
+    <div class="thread-section">
+      <h3>Decision note <span class="muted" style="font-size:11px; text-transform:none; letter-spacing:0; font-weight:400">(saved on the request when you approve / deny)</span></h3>
+      <textarea id="decisionNote" rows="2"></textarea>
+      <div class="error" id="decisionErr"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="ghost" id="decisionCancel">Close</button>
+      <button type="button" class="danger" id="denyBtn">Deny</button>
+      <button type="button" id="approveBtn">Approve</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { subscribeToComments, addLeaveComment, renderCommentsThread } from "../assets/leave-comments.js";
+  import { fmtDay, melDateKey, fmtDateShort } from "../assets/time.js";
+  // melDateKey already imported above; no-op safeguard
+  import { computeBalance, fmtLeave } from "../assets/leave.js";
+  import { renderCalendar } from "../assets/calendar.js";
+  import { holidaysAsCalendarEntries } from "../assets/holidays.js";
+  import {
+    collection, query, where, getDocs, doc, updateDoc, serverTimestamp, orderBy, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { user, profile } = await requireRole(["admin", "viewer"]);
+  const canWrite = profile.role === "admin";
+  if (!canWrite) document.body.classList.add("viewer-mode");
+  renderAdminNav(profile, "leave");
+
+  let pendingChatUnsubs = []; // per-request comment subs (refreshed on every renderPending)
+  let upcomingChatUnsubs = [];
+  let historyChatUnsubs = [];
+  let activeThreadUnsub = null; // single thread sub used while review modal is open
+  let openReviewReqId = null;
+  let openReviewReq = null;
+
+  // Helper: subscribe to comment counts for a set of request rows in a given table.
+  // Each row must have <span class="comment-badge" data-chat="ID"><span data-count="ID"></span></span>.
+  function wireChatBadges(scopeEl, reqs, myUid) {
+    return reqs.map(r => subscribeToComments(r.id, (items) => {
+      const el = scopeEl.querySelector(`[data-count="${r.id}"]`);
+      if (!el) return;
+      el.textContent = items.length;
+      const badge = el.closest(".comment-badge");
+      if (!badge) return;
+      const hasNew = items.some(c => c.byUid && c.byUid !== myUid && c.byRole !== "admin" && c.byRole !== "viewer");
+      badge.classList.toggle("unread", items.length > 0 && hasNew);
+    }));
+  }
+  function attachChatClick(scopeEl, reqs) {
+    scopeEl.querySelectorAll("span[data-chat]").forEach(el => {
+      el.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openReview(el.dataset.chat, reqs.find(r => r.id === el.dataset.chat));
+      });
+    });
+  }
+
+  // ---- Load contractors once ----
+  const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor")));
+  const usersByUid = {};
+  usnap.forEach(d => usersByUid[d.id] = { uid: d.id, ...d.data() });
+  // Helper — true when the leave request belongs to a test account that should be hidden
+  const isTestRequest = (r) => !!usersByUid[r.uid]?.testAccount;
+
+  // ---- Pending queue (live) ----
+  function startPendingLive() {
+    onSnapshot(
+      query(collection(db, "leaveRequests"), where("status", "==", "pending")),
+      (snap) => renderPending(snap),
+      (err) => console.error("pending:", err)
+    );
+  }
+  function renderPending(snap) {
+    const listEl = document.getElementById("pendingList");
+    const reqs = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return;  // hide test accounts from queue
+      reqs.push(r);
+    });
+    reqs.sort((a, b) => (a.submittedAt?.toMillis?.() || 0) - (b.submittedAt?.toMillis?.() || 0));
+
+    document.getElementById("pendingCount").textContent = reqs.length === 0 ? "" : `${reqs.length} waiting`;
+
+    if (reqs.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No pending requests.";
+      return;
+    }
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead>
+        <tr><th>Contractor</th><th>Dates</th><th>Hours</th><th>Reason</th><th>Submitted</th><th>Chat</th><th></th></tr>
+      </thead>
+      <tbody>
+        ${reqs.map(r => {
+          const u = usersByUid[r.uid];
+          const range = r.startDate === r.endDate
+            ? fmtDay(r.startDate)
+            : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+          const halfNote = (r.halfDayStart || r.halfDayEnd) ? ` <span class="muted" style="font-size:11px">(½ day)</span>` : "";
+          const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+          return `<tr>
+            <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+            <td>${range}${halfNote}</td>
+            <td>${fmtLeave(r.hours)}</td>
+            <td class="muted" style="font-size:13px; max-width:240px">${escapeHtml(r.reason || "—")}</td>
+            <td class="muted" style="font-size:12px">${submitted}</td>
+            <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+            <td>
+              <div class="actions">
+                <button data-act="approve" data-id="${r.id}">Approve</button>
+                <button class="ghost" data-act="deny" data-id="${r.id}">Deny</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+
+    listEl.querySelectorAll("button[data-act]").forEach(btn => {
+      btn.addEventListener("click", () => openReview(btn.dataset.id, reqs.find(r => r.id === btn.dataset.id)));
+    });
+    attachChatClick(listEl, reqs);
+    pendingChatUnsubs.forEach(fn => fn?.());
+    pendingChatUnsubs = wireChatBadges(listEl, reqs, user.uid);
+  }
+
+  // ---- Review / decision modal ----
+  function openReview(id, req) {
+    if (!req) return;
+    openReviewReqId = id;
+    openReviewReq = req;
+    const u = usersByUid[req.uid];
+    const range = req.startDate === req.endDate
+      ? fmtDay(req.startDate)
+      : `${fmtDay(req.startDate)} → ${fmtDay(req.endDate)}`;
+    const status = req.status || "pending";
+    const isPending = status === "pending";
+    document.getElementById("decisionTitle").textContent = isPending ? "Review request" : `Request — ${status}`;
+    document.getElementById("decisionDetails").innerHTML = `
+      <strong>${escapeHtml(u?.name || req.requesterName)}</strong>
+      <div class="muted" style="margin-top:4px">${range} · ${fmtLeave(req.hours)}</div>
+      ${req.reason ? `<div class="muted" style="margin-top:6px; font-size:13px">"${escapeHtml(req.reason)}"</div>` : ""}
+      ${req.adminNote ? `<div class="muted" style="margin-top:6px; font-size:13px"><em>Admin: ${escapeHtml(req.adminNote)}</em></div>` : ""}
+    `;
+    document.getElementById("decisionNote").value = "";
+    document.getElementById("decisionErr").textContent = "";
+    document.getElementById("threadErr").textContent = "";
+    document.getElementById("threadInput").value = "";
+
+    // Hide decision controls if request already resolved or viewer mode
+    const approveBtn = document.getElementById("approveBtn");
+    const denyBtn    = document.getElementById("denyBtn");
+    const noteBlock  = document.getElementById("decisionNote").closest(".thread-section");
+    const showDecision = isPending && canWrite;
+    approveBtn.style.display = showDecision ? "" : "none";
+    denyBtn.style.display    = showDecision ? "" : "none";
+    if (noteBlock) noteBlock.style.display = showDecision ? "" : "none";
+
+    // Hide compose if viewer
+    const composeBox = document.querySelector("#decisionModal .thread-compose");
+    if (composeBox) composeBox.style.display = canWrite ? "" : "none";
+
+    // Open + start a live subscription on the thread
+    document.getElementById("decisionModal").classList.add("open");
+    if (activeThreadUnsub) { activeThreadUnsub(); activeThreadUnsub = null; }
+    activeThreadUnsub = subscribeToComments(id, (items) => {
+      document.getElementById("threadList").innerHTML = renderCommentsThread(items, user.uid);
+      const cont = document.querySelector("#threadList .comments-thread");
+      if (cont) cont.scrollTop = cont.scrollHeight;
+    });
+  }
+
+  function closeReview() {
+    document.getElementById("decisionModal").classList.remove("open");
+    if (activeThreadUnsub) { activeThreadUnsub(); activeThreadUnsub = null; }
+    openReviewReqId = null;
+    openReviewReq = null;
+  }
+
+  document.getElementById("decisionCancel").addEventListener("click", closeReview);
+
+  document.getElementById("threadPostBtn").addEventListener("click", async () => {
+    if (!openReviewReqId) return;
+    const input = document.getElementById("threadInput");
+    const text  = input.value.trim();
+    if (!text) return;
+    const btn = document.getElementById("threadPostBtn");
+    btn.disabled = true;
+    try {
+      await addLeaveComment(openReviewReqId, { profile, user }, text);
+      input.value = "";
+      logAudit({ profile, user }, {
+        action: "leaveRequest.comment",
+        targetType: "leaveRequest",
+        targetId: openReviewReqId,
+        targetUser: openReviewReq?.uid || null,
+        note: text.slice(0, 200)
+      });
+    } catch (ex) {
+      document.getElementById("threadErr").textContent = "Failed: " + (ex.message || ex.code);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  async function decide(act) {
+    if (!openReviewReqId || !openReviewReq) return;
+    const approveBtn = document.getElementById("approveBtn");
+    const denyBtn = document.getElementById("denyBtn");
+    approveBtn.disabled = true; denyBtn.disabled = true;
+    try {
+      const newStatus = act === "approve" ? "approved" : "denied";
+      const adminNote = document.getElementById("decisionNote").value.trim() || null;
+      await updateDoc(doc(db, "leaveRequests", openReviewReqId), {
+        status: newStatus,
+        adminNote,
+        decidedBy: profile.email,
+        decidedAt: serverTimestamp()
+      });
+      logAudit({ profile, user }, {
+        action: `leaveRequest.${act}`,
+        targetType: "leaveRequest",
+        targetId: openReviewReqId,
+        targetUser: openReviewReq.uid || null,
+        after: { status: newStatus, adminNote },
+        note: adminNote || `Marked ${newStatus}`
+      });
+      closeReview();
+      loadUpcoming();
+      loadBalances();
+      loadCalendar();
+      loadHistory();
+    } catch (ex) {
+      document.getElementById("decisionErr").textContent = "Failed: " + (ex.message || ex.code);
+    } finally {
+      approveBtn.disabled = false; denyBtn.disabled = false;
+    }
+  }
+  document.getElementById("approveBtn").addEventListener("click", () => decide("approve"));
+  document.getElementById("denyBtn").addEventListener("click", () => decide("deny"));
+
+  // ---- Upcoming approved ----
+  async function loadUpcoming() {
+    const listEl = document.getElementById("upcomingList");
+    listEl.innerHTML = `<div class="empty">Loading…</div>`;
+    const todayKey = melDateKey();
+    const snap = await getDocs(query(
+      collection(db, "leaveRequests"),
+      where("status", "==", "approved")
+    ));
+    const upcoming = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return;  // hide test accounts
+      if (r.endDate >= todayKey) upcoming.push(r);
+    });
+    upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+    if (upcoming.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "Nothing approved coming up.";
+      return;
+    }
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Dates</th><th>Hours</th><th>Reason</th><th>Chat</th></tr></thead>
+      <tbody>
+        ${upcoming.map(r => {
+          const u = usersByUid[r.uid];
+          const range = r.startDate === r.endDate
+            ? fmtDay(r.startDate)
+            : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+          return `<tr>
+            <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+            <td>${range}</td>
+            <td>${fmtLeave(r.hours)}</td>
+            <td class="muted" style="font-size:13px">${escapeHtml(r.reason || "—")}</td>
+            <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+    attachChatClick(listEl, upcoming);
+    upcomingChatUnsubs.forEach(fn => fn?.());
+    upcomingChatUnsubs = wireChatBadges(listEl, upcoming, user.uid);
+  }
+
+  // ---- Balances (per contractor) ----
+  async function loadBalances() {
+    const listEl = document.getElementById("balancesList");
+    listEl.innerHTML = `<div class="empty">Loading…</div>`;
+    const uids = Object.keys(usersByUid).filter(u => usersByUid[u].active !== false && !usersByUid[u].testAccount);
+    if (uids.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No active contractors.";
+      return;
+    }
+    const rows = await Promise.all(uids.map(async (uid) => {
+      const [teSnap, lrSnap] = await Promise.all([
+        getDocs(query(collection(db, "timeEntries"), where("uid", "==", uid))),
+        getDocs(query(collection(db, "leaveRequests"), where("uid", "==", uid), where("status", "==", "approved")))
+      ]);
+      const timeEntries = [];
+      teSnap.forEach(d => timeEntries.push(d.data()));
+      const approved = [];
+      lrSnap.forEach(d => approved.push(d.data()));
+      const b = computeBalance(timeEntries, approved, usersByUid[uid]);
+      return { user: usersByUid[uid], ...b };
+    }));
+
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Available</th><th>Accrued</th><th>Taken</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td>${escapeHtml(r.user.name || r.user.email)}</td>
+          <td><strong>${fmtLeave(r.balance)}</strong></td>
+          <td class="muted">${fmtLeave(r.accrued)}</td>
+          <td class="muted">${fmtLeave(r.taken)}</td>
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+  }
+
+  // ---- Team calendar ----
+  async function loadCalendar() {
+    const snap = await getDocs(collection(db, "leaveRequests"));
+    const entries = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (r.status === "cancelled") return; // hide cancelled from team calendar to reduce clutter
+      if (isTestRequest(r)) return; // hide test accounts from team calendar
+      const u = usersByUid[r.uid];
+      const shortName = (u?.name || r.requesterName || "?")
+        .split(" ")[0]; // first name only to fit in calendar cell
+      const submitted = r.submittedAt?.toDate?.();
+      const decided   = r.decidedAt?.toDate?.();
+      const range = r.startDate === r.endDate ? r.startDate : `${r.startDate} → ${r.endDate}`;
+      const lines = [
+        `${u?.name || r.requesterName}`,
+        `${r.status.toUpperCase()} · ${fmtLeave(r.hours)}`,
+        range,
+        submitted ? `Requested: ${fmtDateShort(submitted)}` : null,
+        (r.status === "approved" || r.status === "denied") && decided
+          ? `${r.status === "approved" ? "Approved" : "Denied"}: ${fmtDateShort(decided)}${r.decidedBy ? " by " + r.decidedBy : ""}` : null,
+        r.reason ? `Reason: ${r.reason}` : null,
+        r.adminNote ? `Admin note: ${r.adminNote}` : null
+      ].filter(Boolean);
+      entries.push({
+        id: r.id,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        status: r.status,
+        label: shortName,
+        tooltip: lines.join("\n"),
+        full: r
+      });
+    });
+    const allEntries = [...holidaysAsCalendarEntries(), ...entries];
+    renderCalendar(document.getElementById("teamCalendar"), {
+      entries: allEntries,
+      onClickEntry: (entry) => {
+        if (entry.isHoliday) return;
+        openReview(entry.id, entry.full);
+      }
+    });
+  }
+
+  async function loadHistory() {
+    const listEl = document.getElementById("historyList");
+    const snap = await getDocs(collection(db, "leaveRequests"));
+    const reqs = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return; // hide test accounts from history
+      reqs.push(r);
+    });
+    if (reqs.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No leave requests in the system yet.";
+      return;
+    }
+    reqs.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr>
+        <th>Contractor</th>
+        <th>Dates</th>
+        <th>Hours</th>
+        <th>Status</th>
+        <th>Submitted</th>
+        <th>Decided</th>
+        <th>Reason / note</th>
+        <th>Chat</th>
+      </tr></thead>
+      <tbody>${reqs.map(r => {
+        const u = usersByUid[r.uid];
+        const range = r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+        const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+        const decided = r.decidedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false });
+        const decidedTxt = decided
+          ? `<div>${decided}</div>${r.decidedBy ? `<div class="muted" style="font-size:11px">by ${escapeHtml(r.decidedBy)}</div>` : ""}`
+          : `<span class="muted">—</span>`;
+        const badge = r.status === "approved"  ? `<span class="badge ok">Approved</span>`
+                    : r.status === "denied"    ? `<span class="badge bad">Denied</span>`
+                    : r.status === "cancelled" ? `<span class="badge off">Cancelled</span>`
+                    : `<span class="badge pending">Pending</span>`;
+        const reasonHtml = r.reason
+          ? `<div class="muted" style="font-size:13px">${escapeHtml(r.reason)}</div>`
+          : `<span class="muted">—</span>`;
+        const noteHtml = r.adminNote ? `<div class="muted" style="font-size:11px; margin-top:4px"><em>Admin: ${escapeHtml(r.adminNote)}</em></div>` : "";
+        return `<tr>
+          <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+          <td>${range}</td>
+          <td>${fmtLeave(r.hours)}</td>
+          <td>${badge}</td>
+          <td class="muted" style="font-size:12px">${submitted}</td>
+          <td class="muted" style="font-size:12px">${decidedTxt}</td>
+          <td>${reasonHtml}${noteHtml}</td>
+          <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+    attachChatClick(listEl, reqs);
+    historyChatUnsubs.forEach(fn => fn?.());
+    historyChatUnsubs = wireChatBadges(listEl, reqs, user.uid);
+  }
+
+  // Populate ledger user picker (real contractors only)
+  const ledgerPick = document.getElementById("ledgerUserPick");
+  ledgerPick.innerHTML = `<option value="">— pick a contractor —</option>` +
+    Object.values(usersByUid)
+      .filter(u => u.active !== false && !u.testAccount)
+      .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+      .map(u => `<option value="${u.uid}">${escapeHtml(u.name || u.email)}</option>`)
+      .join("");
+
+  async function loadLedger() {
+    const uid = ledgerPick.value;
+    const el = document.getElementById("ledgerList");
+    if (!uid) {
+      el.classList.add("empty");
+      el.innerHTML = "Pick a contractor to view every accrual + leave event affecting their balance.";
+      return;
+    }
+    el.classList.remove("empty");
+    el.innerHTML = `<div class="empty">Loading…</div>`;
+    try {
+      const [teSnap, lrSnap] = await Promise.all([
+        getDocs(query(collection(db, "timeEntries"), where("uid", "==", uid))),
+        getDocs(query(collection(db, "leaveRequests"), where("uid", "==", uid), where("status", "==", "approved")))
+      ]);
+      const timeEntries = []; teSnap.forEach(d => timeEntries.push(d.data()));
+      const approved = []; lrSnap.forEach(d => approved.push(d.data()));
+      const { ledger, balance } = computeBalance(timeEntries, approved, usersByUid[uid]);
+
+      if (!ledger || ledger.length === 0) {
+        el.classList.add("empty");
+        el.innerHTML = "No accrual events yet — set an opening balance or wait for the first completed week.";
+        return;
+      }
+
+      el.innerHTML = `
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Event</th>
+              <th style="text-align:right">Amount</th>
+              <th style="text-align:right">Running balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ledger.map(ev => {
+              const isOpening = ev.kind === "opening";
+              const isLeave   = ev.kind === "leave";
+              const color = isLeave ? "color:#991B1B" : (isOpening ? "color:#1E40AF" : "color:#047857");
+              const sign = ev.hours >= 0 ? "+" : "−";
+              const amount = `${sign}${fmtLeave(Math.abs(ev.hours))}`;
+              return `<tr>
+                <td>${ev.date}</td>
+                <td>${escapeHtml(ev.note)}</td>
+                <td style="text-align:right; font-variant-numeric: tabular-nums; ${color}; font-weight:600">${amount}</td>
+                <td style="text-align:right; font-variant-numeric: tabular-nums; font-weight:600">${fmtLeave(ev.runningHours)}</td>
+              </tr>`;
+            }).join("")}
+            <tr style="border-top:2px solid var(--border)">
+              <td colspan="3" style="text-align:right; font-weight:600">Current balance</td>
+              <td style="text-align:right; font-variant-numeric: tabular-nums; font-weight:700; font-size:14px">${fmtLeave(balance)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    } catch (ex) {
+      el.innerHTML = `<div class="empty" style="color:var(--bad)">Could not load: ${ex.message || ex.code || ex}</div>`;
+    }
+  }
+  ledgerPick.addEventListener("change", loadLedger);
+
+  loadCalendar();
+  startPendingLive();
+  loadUpcoming();
+  loadBalances();
+  loadHistory();
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>

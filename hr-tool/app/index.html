@@ -1,0 +1,763 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script type="importmap">
+{
+  "imports": {
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js": "../assets/demo-firebase-shim.js",
+    "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js": "../assets/demo-firebase-shim.js"
+  }
+}
+</script>
+<style>
+  /* Demo: contractor iframe is 30% of the screen. Instead of blanket-zoom
+     the whole layout, force each container to fit and stack cards / nav
+     vertically so the panel reads naturally at narrow widths. */
+  html, body { min-width: 0 !important; overflow-x: hidden; }
+  body { font-size: 14px; }
+  .simple-shell { padding: 12px !important; max-width: 100% !important; }
+  .simple-header { flex-wrap: wrap !important; gap: 8px !important; padding: 10px 12px !important; }
+  .simple-header .brand-row { flex: 1 1 100%; }
+  .simple-header .simple-nav { flex: 1 1 100%; overflow-x: auto; }
+  .simple-nav a { padding: 6px 10px !important; font-size: 13px !important; }
+  .header-user { flex: 1 1 100%; justify-content: flex-end; }
+  .page-header { padding: 8px 0 !important; }
+  .page-title { font-size: 20px !important; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .card { padding: 12px !important; margin: 8px 0 !important; }
+  .stat { padding: 10px !important; }
+  .stat .value { font-size: 22px !important; }
+  .stat .label, .stat .sub { font-size: 11px !important; }
+  .shift-btn { padding: 12px !important; font-size: 14px !important; }
+  table { font-size: 12px !important; }
+  th, td { padding: 6px 4px !important; }
+  /* Any remaining wide element gets a gentle shrink as a safety net. */
+  main, .simple-shell > * { max-width: 100% !important; }
+</style>
+
+<meta charset="utf-8">
+<title>Dashboard — YOUR COMPANY HR</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body>
+<div class="simple-shell">
+
+  <header class="simple-header">
+    <div class="brand-row">
+      <div class="logo">V</div>
+      <div class="name">
+        YOUR COMPANY
+        <small>HR Portal</small>
+        <div class="brand-badges" id="brandBadges"></div>
+      </div>
+    </div>
+    <nav class="simple-nav">
+      <a class="active" href="index.html">Dashboard</a>
+      <a href="timesheets.html" data-page="timesheets">Timesheets</a>
+      <a href="leave.html" data-page="leave">Leave</a>
+      <a href="profile.html">Profile</a>
+    </nav>
+    <div class="header-user">
+      <div class="avatar" id="avatar">?</div>
+      <div>
+        <div class="name" id="who">…</div>
+        <div class="role">Contractor</div>
+      </div>
+      <button class="ghost" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title" id="greeting">Welcome</h1>
+      <div class="page-subtitle" id="todayDate">—</div>
+    </div>
+  </div>
+
+  <!-- Banner area: auto-close notice, still-in-past-window warning, etc. -->
+  <div id="bannerArea"></div>
+
+  <!-- Stat tiles -->
+  <div class="stat-grid">
+    <div class="stat brand">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <div class="label">Today's hours</div>
+      </div>
+      <div class="value" id="statToday">—</div>
+      <div class="sub">of 7h 36m target</div>
+      <div class="progress"><div id="statTodayBar" style="width:0%"></div></div>
+      <div class="tile-tip" id="tipToday"></div>
+    </div>
+    <div class="stat violet">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 0 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4z"/><path d="M6 2v3M10 2v3M14 2v3"/></svg></div>
+        <div class="label">Break time</div>
+      </div>
+      <div class="value" id="statBreak">—</div>
+      <div class="sub">today</div>
+      <div class="tile-tip" id="tipBreak"></div>
+    </div>
+    <div class="stat cyan">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9 9-5-5"/></svg></div>
+        <div class="label">Leave balance</div>
+      </div>
+      <div class="value" id="statLeave">—</div>
+      <div class="sub" id="statLeaveSub">accrued · taken</div>
+      <div class="tile-tip" id="tipLeave"></div>
+    </div>
+    <div class="stat amber">
+      <div class="stat-head">
+        <div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="17" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg></div>
+        <div class="label">Pending leave</div>
+      </div>
+      <div class="value" id="statPendingLeave">—</div>
+      <div class="sub">awaiting admin</div>
+      <div class="tile-tip" id="tipPending"></div>
+    </div>
+  </div>
+
+  <!-- Clock hero -->
+  <div class="clock-hero">
+    <div class="clock-times">
+      <div class="clock-time-block">
+        <div class="lbl">Melbourne</div>
+        <div class="val" id="melTime">—</div>
+      </div>
+      <div class="clock-time-block">
+        <div class="lbl">Your local</div>
+        <div class="val" id="localTime">—</div>
+      </div>
+    </div>
+
+    <div id="shiftControls" class="shift-controls">
+      <button id="primaryBtn" class="shift-btn start" disabled>Loading…</button>
+    </div>
+
+    <div class="shift-status" id="shiftStatus" style="display:none">
+      <div id="shiftStatusText">—</div>
+      <div class="running">⏱ <span id="shiftRunning">00:00:00</span></div>
+    </div>
+  </div>
+
+  <!-- Today's activity timeline -->
+  <div class="card">
+    <div class="toolbar"><h2>Today's activity</h2><span class="muted" style="font-size:12px">Melbourne time</span></div>
+    <div id="activityTimeline" class="empty">Loading…</div>
+  </div>
+
+  <!-- Upcoming leave preview -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Upcoming leave<span class="live-dot" title="Live"></span></h2>
+      <a href="leave.html" style="font-size:13px">Manage leave →</a>
+    </div>
+    <div id="upcomingLeave" class="empty">Loading…</div>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "../assets/firebase-init.js";
+  import { requireRole, logout } from "../assets/auth-router.js";
+  import { getInitials, escapeHtml, roleBadgesHtml } from "../assets/admin-nav.js";
+  import { refreshContractorBadges } from "../assets/contractor-nav.js";
+  import { mountAnnouncementBanners } from "../assets/announcements.js";
+  import { logAudit } from "../assets/audit.js";
+  import { melClock, localClock, melDateKey, melTimeShort, fmtHours, fmtDay, fmtDateShort, parseMelTime, MEL_TZ } from "../assets/time.js";
+  import { computeBalance, fmtLeave } from "../assets/leave.js";
+  import {
+    collection, query, where, getDocs, addDoc, doc, getDoc, updateDoc,
+    serverTimestamp, Timestamp, arrayUnion, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  const { user, profile } = await requireRole("contractor");
+  document.getElementById("who").textContent = profile.name || profile.email || "";
+  document.getElementById("avatar").textContent = getInitials(profile.name || profile.email);
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+  const __bb = document.getElementById("brandBadges");
+  if (__bb) __bb.innerHTML = roleBadgesHtml(profile);
+  mountAnnouncementBanners(user, profile);
+
+  // Greeting
+  const hr = new Date().toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour: "2-digit", hour12: false });
+  const greet = Number(hr) < 12 ? "Good morning" : Number(hr) < 17 ? "Good afternoon" : "Good evening";
+  const fname = (profile.name || profile.email || "").split(/[\s@]+/)[0] || "there";
+  document.getElementById("greeting").textContent = `${greet}, ${fname}`;
+  document.getElementById("todayDate").textContent =
+    new Date().toLocaleDateString("en-AU", { timeZone: "Australia/Melbourne", weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  // ====================================================================
+  // CLOCK + BREAK
+  // ====================================================================
+  const primaryBtn = document.getElementById("primaryBtn");
+  const shiftControls = document.getElementById("shiftControls");
+  const shiftStatus = document.getElementById("shiftStatus");
+  const shiftStatusText = document.getElementById("shiftStatusText");
+  const shiftRun = document.getElementById("shiftRunning");
+
+  let currentEntryId = profile.currentEntryId || null;
+  let currentStartMs = null;
+  let currentBreakStartMs = profile.currentBreakStartAt?.toMillis?.() || null;
+  let priorBreakMs = 0;
+  let todayHoursClosed = 0;
+  let todayBreakMinsClosed = 0;
+
+  function tickClocks() {
+    const now = new Date();
+    document.getElementById("melTime").textContent = melClock(now);
+    document.getElementById("localTime").textContent = localClock(now);
+    if (!currentEntryId) return;
+    const nowMs = now.getTime();
+    if (currentBreakStartMs) {
+      shiftRun.textContent = fmtElapsed(nowMs - currentBreakStartMs);
+    } else {
+      shiftRun.textContent = fmtElapsed(nowMs - currentStartMs - priorBreakMs);
+    }
+    const liveWorkH = currentBreakStartMs
+      ? (currentBreakStartMs - currentStartMs - priorBreakMs) / 3_600_000
+      : (nowMs - currentStartMs - priorBreakMs) / 3_600_000;
+    document.getElementById("statToday").textContent = fmtHours(todayHoursClosed + liveWorkH);
+    document.getElementById("statTodayBar").style.width = Math.min(100, ((todayHoursClosed + liveWorkH) / 7.6) * 100) + "%";
+    const liveBreakMin = currentBreakStartMs ? (nowMs - currentBreakStartMs) / 60_000 : 0;
+    document.getElementById("statBreak").textContent = fmtMinutes(todayBreakMinsClosed + priorBreakMs / 60_000 + liveBreakMin);
+  }
+  function fmtElapsed(ms) {
+    const totalSec = Math.max(0, Math.floor(ms / 1000));
+    return `${String(Math.floor(totalSec/3600)).padStart(2,"0")}:${String(Math.floor((totalSec%3600)/60)).padStart(2,"0")}:${String(totalSec%60).padStart(2,"0")}`;
+  }
+  function fmtMinutes(mins) {
+    if (mins == null || isNaN(mins)) return "—";
+    if (mins > 0 && mins < 1) return Math.max(1, Math.round(mins * 60)) + "s";
+    if (mins < 1) return "0m";
+    const h = Math.floor(mins / 60), m = Math.round(mins % 60);
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+    return `${h}h ${m}m`;
+  }
+
+  // Defensive setter — silently no-ops if the element isn't in the cached HTML.
+  function setTip(id, html) {
+    const el = document.getElementById(id);
+    if (el) el.innerHTML = html;
+  }
+
+  function renderActivityTimeline(sessions, breakSegments) {
+    // Build blocks per session so we can tag the first work block "Shift started"
+    // and (if the session is closed) the last work block "Shift ended".
+    const blocks = [];
+    sessions.forEach(s => {
+      const sessionBreaks = breakSegments
+        .filter(b => b.start >= s.start && (s.end ? b.end <= s.end : true))
+        .sort((a, b) => a.start - b.start);
+      const sessionBlocks = [];
+      let cursor = s.start;
+      sessionBreaks.forEach(b => {
+        if (b.start > cursor) sessionBlocks.push({ kind: "work", start: cursor, end: b.start });
+        sessionBlocks.push({ kind: "brk", start: b.start, end: b.end });
+        cursor = b.end;
+      });
+      if (s.end) {
+        if (s.end > cursor) sessionBlocks.push({ kind: "work", start: cursor, end: s.end });
+      } else {
+        sessionBlocks.push({ kind: "work", start: cursor, end: null, ongoing: true });
+      }
+      const workIdxs = sessionBlocks.map((b, i) => b.kind === "work" ? i : -1).filter(i => i >= 0);
+      if (workIdxs.length) sessionBlocks[workIdxs[0]].marker = "start";
+      if (s.end && workIdxs.length) sessionBlocks[workIdxs[workIdxs.length - 1]].marker = "end";
+      sessionBlocks.forEach(b => blocks.push(b));
+    });
+    // If currently on break, the last work-block ends at the break-start (already handled),
+    // and an ongoing break exists in breakSegments only after resumed — but for in-progress break,
+    // we still need to render it:
+    if (currentBreakStartMs && !breakSegments.some(b => Math.abs(b.start.getTime() - currentBreakStartMs) < 500 && b.end == null)) {
+      // Truncate last work block to currentBreakStart and add ongoing break
+      const breakNow = new Date(currentBreakStartMs);
+      if (blocks.length && blocks[blocks.length - 1].kind === "work" && blocks[blocks.length - 1].end == null) {
+        blocks[blocks.length - 1].end = breakNow;
+        blocks[blocks.length - 1].ongoing = false;
+      }
+      blocks.push({ kind: "brk", start: breakNow, end: null, ongoing: true });
+    }
+    blocks.sort((a, b) => a.start - b.start);
+
+    const el = document.getElementById("activityTimeline");
+    if (!el) return;
+    if (blocks.length === 0) {
+      el.classList.add("empty");
+      el.innerHTML = "Nothing yet today — clock in to start your day.";
+      return;
+    }
+    el.classList.remove("empty");
+    el.innerHTML = `<div class="timeline">${blocks.map(b => {
+      const startTxt = melTimeShort(b.start);
+      const endTxt   = b.end ? melTimeShort(b.end) : "now";
+      const durMs    = (b.end ? b.end.getTime() : Date.now()) - b.start.getTime();
+      const durTxt   = b.kind === "work" ? fmtHours(durMs / 3_600_000) : fmtMinutes(durMs / 60_000);
+      const label    = b.kind === "brk"
+                       ? "On break"
+                       : b.marker === "start" ? "Shift started"
+                       : b.marker === "end"   ? "Shift ended"
+                       : "Worked";
+      const cls      = b.kind === "work" ? "start" : "brk";
+      const ongoing  = b.ongoing ? ` <span class="meta">· in progress</span>` : "";
+      return `
+        <div class="timeline-row ${cls}">
+          <div class="ts">${startTxt} → ${endTxt}</div>
+          <div class="dot-col"><div class="dot"></div></div>
+          <div class="who-line">
+            <span class="act">${label}</span>
+            <span class="meta">· ${durTxt}</span>${ongoing}
+          </div>
+        </div>
+      `;
+    }).join("")}</div>`;
+  }
+
+  async function refreshTodayMetrics() {
+    const todayKey = melDateKey();
+    const snap = await getDocs(query(collection(db, "timeEntries"), where("uid", "==", user.uid), where("date", "==", todayKey)));
+    todayHoursClosed = 0; todayBreakMinsClosed = 0;
+    const sessions = [];
+    const breakSegments = [];
+    snap.forEach(d => {
+      const e = d.data();
+      const start = e.clockInUTC?.toDate?.();
+      const end   = e.clockOutUTC?.toDate?.();
+      if (start) sessions.push({ start, end, hours: e.hoursWorked });
+      (e.breaks || []).forEach(b => {
+        if (b.startUTC && b.endUTC) {
+          breakSegments.push({ start: b.startUTC.toDate?.(), end: b.endUTC.toDate?.(), minutes: b.minutes });
+        }
+      });
+      if (e.clockOutUTC) {
+        todayHoursClosed += e.hoursWorked || 0;
+        todayBreakMinsClosed += e.breakMinutes || 0;
+      } else if (e.breakMinutes) {
+        priorBreakMs = (e.breakMinutes || 0) * 60_000;
+      }
+    });
+    if (!currentEntryId) {
+      document.getElementById("statToday").textContent = fmtHours(todayHoursClosed);
+      document.getElementById("statTodayBar").style.width = Math.min(100, (todayHoursClosed / 7.6) * 100) + "%";
+      document.getElementById("statBreak").textContent = fmtMinutes(todayBreakMinsClosed);
+    }
+
+    sessions.sort((a, b) => a.start - b.start);
+    setTip("tipToday", sessions.length
+      ? `<span class="head">Today's sessions</span><ul>${sessions.map(s => {
+          const range = `${melTimeShort(s.start)} → ${s.end ? melTimeShort(s.end) : "still in"}`;
+          const dur   = s.end ? fmtHours((s.end - s.start) / 3_600_000) : "open";
+          return `<li>${range}<span class="right">${dur}</span></li>`;
+        }).join("")}</ul>`
+      : `<span class="head">Today's sessions</span><span class="none">None yet.</span>`);
+
+    breakSegments.sort((a, b) => a.start - b.start);
+    setTip("tipBreak", breakSegments.length
+      ? `<span class="head">Today's breaks</span><ul>${breakSegments.map(b => {
+          return `<li>${melTimeShort(b.start)} → ${melTimeShort(b.end)}<span class="right">${fmtMinutes(b.minutes)}</span></li>`;
+        }).join("")}</ul>`
+      : `<span class="head">Today's breaks</span><span class="none">No breaks taken today.</span>`);
+
+    renderActivityTimeline(sessions, breakSegments);
+  }
+
+  function outsideWorkingWindow() {
+    const t = new Date().toLocaleTimeString("en-AU", { timeZone: "Australia/Melbourne", hour12: false, hour: "2-digit", minute: "2-digit" });
+    const [h, m] = t.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins < (8 * 60 + 30) || mins > (16 * 60 + 30);
+  }
+
+  function renderShiftState() {
+    primaryBtn.disabled = false;
+    if (!currentEntryId) {
+      shiftControls.className = "shift-controls";
+      shiftControls.innerHTML = `<button id="primaryBtn" class="shift-btn start">Clock In</button>`;
+      attachPrimaryHandler();
+      shiftStatus.style.display = "none";
+    } else if (currentBreakStartMs) {
+      shiftControls.className = "shift-controls two";
+      shiftControls.innerHTML = `
+        <button id="primaryBtn" class="shift-btn resume">Resume Work</button>
+        <button id="secondaryBtn" class="shift-btn secondary">End Shift</button>`;
+      attachPrimaryHandler();
+      document.getElementById("secondaryBtn").addEventListener("click", endShift);
+      shiftStatusText.innerHTML = `<span class="status-pill break"><span class="dot"></span>On break</span>`;
+      shiftStatus.style.display = "flex";
+    } else {
+      shiftControls.className = "shift-controls two";
+      shiftControls.innerHTML = `
+        <button id="primaryBtn" class="shift-btn end">End Shift</button>
+        <button id="secondaryBtn" class="shift-btn break">Take Break</button>`;
+      attachPrimaryHandler();
+      document.getElementById("secondaryBtn").addEventListener("click", takeBreak);
+      shiftStatusText.innerHTML = `<span class="status-pill working"><span class="dot"></span>Working since ${melTimeShort(new Date(currentStartMs))} Melbourne</span>`;
+      shiftStatus.style.display = "flex";
+    }
+  }
+
+  function attachPrimaryHandler() {
+    document.getElementById("primaryBtn").addEventListener("click", async () => {
+      if (!currentEntryId) return clockIn();
+      if (currentBreakStartMs) return resumeWork();
+      return endShift();
+    });
+  }
+
+  async function clockIn() {
+    if (outsideWorkingWindow() && !confirm("Clock in outside the 08:30–16:30 Melbourne window?\n\nIt'll still be logged.")) return;
+    primaryBtn.disabled = true; primaryBtn.textContent = "Working…";
+    try {
+      const now = new Date();
+      const entryRef = await addDoc(collection(db, "timeEntries"), {
+        uid: user.uid, date: melDateKey(now),
+        clockInUTC: Timestamp.fromDate(now), clockOutUTC: null, hoursWorked: null,
+        breaks: [], breakMinutes: 0, source: "user", createdAt: serverTimestamp()
+      });
+      await updateDoc(doc(db, "users", user.uid), {
+        currentEntryId: entryRef.id, clockedInAt: Timestamp.fromDate(now), currentBreakStartAt: null
+      });
+      currentEntryId = entryRef.id;
+      currentStartMs = now.getTime();
+      currentBreakStartMs = null;
+      priorBreakMs = 0;
+      renderShiftState();
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); renderShiftState(); }
+  }
+  async function takeBreak() {
+    const btn = document.getElementById("secondaryBtn");
+    btn.disabled = true; btn.textContent = "Working…";
+    try {
+      const now = new Date();
+      await updateDoc(doc(db, "users", user.uid), { currentBreakStartAt: Timestamp.fromDate(now) });
+      currentBreakStartMs = now.getTime();
+      renderShiftState();
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); renderShiftState(); }
+  }
+  async function resumeWork() {
+    primaryBtn.disabled = true; primaryBtn.textContent = "Working…";
+    try {
+      const now = new Date();
+      const breakMs = now.getTime() - currentBreakStartMs;
+      const eSnap = await getDoc(doc(db, "timeEntries", currentEntryId));
+      const curMins = eSnap.data().breakMinutes || 0;
+      await updateDoc(doc(db, "timeEntries", currentEntryId), {
+        breaks: arrayUnion({ startUTC: Timestamp.fromMillis(currentBreakStartMs), endUTC: Timestamp.fromDate(now), minutes: breakMs / 60_000 }),
+        breakMinutes: curMins + breakMs / 60_000
+      });
+      await updateDoc(doc(db, "users", user.uid), { currentBreakStartAt: null });
+      priorBreakMs += breakMs;
+      currentBreakStartMs = null;
+      renderShiftState();
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); renderShiftState(); }
+  }
+  async function endShift() {
+    primaryBtn.disabled = true; primaryBtn.textContent = "Working…";
+    try {
+      const now = new Date();
+      let breakMsFinal = priorBreakMs;
+      const eSnap = await getDoc(doc(db, "timeEntries", currentEntryId));
+      let breaksArr = eSnap.data().breaks || [];
+      let breakMinsField = eSnap.data().breakMinutes || 0;
+      if (currentBreakStartMs) {
+        const breakMs = now.getTime() - currentBreakStartMs;
+        breakMsFinal += breakMs;
+        breaksArr = [...breaksArr, { startUTC: Timestamp.fromMillis(currentBreakStartMs), endUTC: Timestamp.fromDate(now), minutes: breakMs / 60_000 }];
+        breakMinsField += breakMs / 60_000;
+      }
+      const workMs = now.getTime() - currentStartMs - breakMsFinal;
+      await updateDoc(doc(db, "timeEntries", currentEntryId), {
+        clockOutUTC: Timestamp.fromDate(now), hoursWorked: workMs / 3_600_000,
+        breaks: breaksArr, breakMinutes: breakMinsField
+      });
+      await updateDoc(doc(db, "users", user.uid), { currentEntryId: null, clockedInAt: null, currentBreakStartAt: null });
+      currentEntryId = null; currentStartMs = null; currentBreakStartMs = null; priorBreakMs = 0;
+      await refreshTodayMetrics();
+      await refreshLeavePreview();
+      renderShiftState();
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); renderShiftState(); }
+  }
+
+  // ====================================================================
+  // LEAVE PREVIEW + STATS
+  // ====================================================================
+  async function refreshLeavePreview() {
+    const [teSnap, lrSnap] = await Promise.all([
+      getDocs(query(collection(db, "timeEntries"), where("uid", "==", user.uid))),
+      getDocs(query(collection(db, "leaveRequests"), where("uid", "==", user.uid)))
+    ]);
+    const timeEntries = []; teSnap.forEach(d => timeEntries.push(d.data()));
+    const allRequests = []; const approved = []; const upcoming = []; let pending = 0;
+    const todayKey = melDateKey();
+    lrSnap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      allRequests.push(r);
+      if (r.status === "approved") {
+        approved.push(r);
+        if (r.endDate >= todayKey) upcoming.push(r);
+      }
+      if (r.status === "pending") {
+        pending++;
+        if (r.endDate >= todayKey) upcoming.push(r);
+      }
+    });
+    const { opening, accrued, taken, balance } = computeBalance(timeEntries, approved, profile);
+    document.getElementById("statLeave").textContent = fmtLeave(balance);
+    document.getElementById("statLeaveSub").textContent = `accrued ${fmtLeave(accrued)} · taken ${fmtLeave(taken)}`;
+    document.getElementById("statPendingLeave").textContent = pending;
+
+    // ----- Tile tooltips -----
+    const takenRows = approved
+      .slice()
+      .sort((a, b) => b.startDate.localeCompare(a.startDate))
+      .slice(0, 8)
+      .map(r => {
+        const range = r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+        return `<li>${range}<span class="right">${fmtLeave(r.hours)}</span></li>`;
+      });
+    const accrualStartLabel = profile.accrualStartDate
+      ? ` <span style="color:#94A3B8; font-size:10px; font-weight:400">(from ${profile.accrualStartDate.split("-").reverse().join("/")})</span>`
+      : "";
+    const summaryRows = `
+      <li><span>Opening balance${accrualStartLabel}</span><span class="right">${fmtLeave(opening)}</span></li>
+      <li><span>Accrued</span><span class="right">${fmtLeave(accrued)}</span></li>
+      <li><span>Taken</span><span class="right">${fmtLeave(taken)}</span></li>
+      <li><span>Balance</span><span class="right">${fmtLeave(balance)}</span></li>`;
+    setTip("tipLeave", takenRows.length
+      ? `<span class="head">Leave balance</span><ul>${summaryRows}</ul><span class="head" style="margin-top:8px">Recent leave</span><ul>${takenRows.join("")}</ul>`
+      : `<span class="head">Leave balance</span><ul>${summaryRows}</ul>`);
+
+    const pendingRows = allRequests
+      .filter(r => r.status === "pending")
+      .sort((a, b) => a.startDate.localeCompare(b.startDate))
+      .map(r => {
+        const range = r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+        return `<li>${range}<span class="right">${fmtLeave(r.hours)}</span></li>`;
+      });
+    setTip("tipPending", pendingRows.length
+      ? `<span class="head">Awaiting admin</span><ul>${pendingRows.join("")}</ul>`
+      : `<span class="head">Awaiting admin</span><span class="none">No pending requests.</span>`);
+
+    const listEl = document.getElementById("upcomingLeave");
+    if (upcoming.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No upcoming leave. Use the Leave tab to request some.";
+      return;
+    }
+    upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Dates</th><th>Hours</th><th>Status</th></tr></thead>
+      <tbody>${upcoming.slice(0, 5).map(r => {
+        const range = r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+        const badge = r.status === "approved" ? `<span class="badge ok">Approved</span>` : `<span class="badge pending">Pending</span>`;
+        return `<tr><td>${range}</td><td>${fmtLeave(r.hours)}</td><td>${badge}</td></tr>`;
+      }).join("")}</tbody></table>`;
+  }
+
+  // ====================================================================
+  // FORGOT-TO-CLOCK-OFF DETECTION + AUTO-CLOSE
+  // ====================================================================
+  const WORK_WINDOW_END = "16:30"; // configurable later via settings
+
+  function bannerHtml({ kind, icon, title, desc, actionsHtml, dataId }) {
+    return `
+      <div class="banner ${kind}" data-banner-id="${dataId || ""}">
+        <div class="icon">${icon}</div>
+        <div class="body">
+          <div class="title">${title}</div>
+          <div class="desc">${desc}</div>
+        </div>
+        <div class="actions">${actionsHtml || ""}<button class="ghost" data-banner-dismiss>Dismiss</button></div>
+      </div>
+    `;
+  }
+
+  // Auto-close a stale shift left open from a previous Melbourne day.
+  // Close time = MIN(16:30 Mel of clock-in day, clockIn + 8h).
+  async function maybeAutoCloseStaleShift() {
+    if (!currentEntryId) return null;
+    const eSnap = await getDoc(doc(db, "timeEntries", currentEntryId));
+    if (!eSnap.exists() || eSnap.data().clockOutUTC) return null;
+
+    const e = eSnap.data();
+    const clockInDate = e.clockInUTC.toDate();
+    const clockInKey = melDateKey(clockInDate);
+    const todayKey = melDateKey();
+    if (clockInKey >= todayKey) return null; // shift is from today; nothing to auto-close
+
+    // Compute close time in UTC
+    const close1630Ms = parseMelTime(clockInKey, WORK_WINDOW_END);
+    const eightHoursLaterMs = clockInDate.getTime() + 8 * 3_600_000;
+    const closeMs = clockInDate.getTime() >= close1630Ms
+      ? eightHoursLaterMs               // started after 16:30 → cap at 8h
+      : Math.min(close1630Ms, eightHoursLaterMs);
+    const closeAt = new Date(closeMs);
+
+    // If they were also on a break when they walked away, close the break first.
+    let breaksArr = e.breaks || [];
+    let breakMinsField = e.breakMinutes || 0;
+    if (e.currentBreakStartAt || currentBreakStartMs) {
+      const breakStartMs = currentBreakStartMs || e.currentBreakStartAt?.toMillis?.();
+      if (breakStartMs && breakStartMs < closeMs) {
+        const dur = (closeMs - breakStartMs) / 60_000;
+        breaksArr = [...breaksArr, {
+          startUTC: Timestamp.fromMillis(breakStartMs),
+          endUTC: Timestamp.fromDate(closeAt),
+          minutes: dur,
+          autoClosed: true
+        }];
+        breakMinsField += dur;
+      }
+    }
+
+    const workMs = closeMs - clockInDate.getTime() - breakMinsField * 60_000;
+    const hoursWorked = Math.max(0, workMs / 3_600_000);
+
+    const autoCloseNote = `Auto-closed at ${WORK_WINDOW_END} Mel because contractor didn't clock off.`;
+    await updateDoc(doc(db, "timeEntries", currentEntryId), {
+      clockOutUTC: Timestamp.fromDate(closeAt),
+      hoursWorked,
+      breaks: breaksArr,
+      breakMinutes: breakMinsField,
+      autoClosed: true,
+      autoClosedAt: serverTimestamp(),
+      autoCloseNote,
+      source: "auto"
+    });
+    await updateDoc(doc(db, "users", user.uid), {
+      currentEntryId: null,
+      clockedInAt: null,
+      currentBreakStartAt: null
+    });
+    logAudit({ profile, user }, {
+      action: "timeEntry.autoClose",
+      targetType: "timeEntry",
+      targetId: currentEntryId,
+      targetUser: user.uid,
+      after: {
+        clockOut: melTimeShort(closeAt),
+        date: melDateKey(clockInDate),
+        hoursWorked: Number(hoursWorked.toFixed(2)),
+        breakMinutes: Math.round(breakMinsField)
+      },
+      note: autoCloseNote
+    });
+
+    // Clear local state so the rest of init treats us as clocked-out
+    currentEntryId = null;
+    currentStartMs = null;
+    currentBreakStartMs = null;
+    priorBreakMs = 0;
+
+    return { closedAt: closeAt, clockInDate, hoursWorked };
+  }
+
+  // Warn if currently clocked in and Melbourne time is past 17:30 (grace 1h)
+  function maybeWarnStillIn() {
+    if (!currentEntryId) return false;
+    const melTimeStr = new Date().toLocaleTimeString("en-AU", { timeZone: MEL_TZ, hour12: false, hour: "2-digit", minute: "2-digit" });
+    const [h, m] = melTimeStr.split(":").map(Number);
+    const mins = h * 60 + m;
+    return mins >= (17 * 60 + 30); // past 17:30 Mel
+  }
+
+  function renderBanners({ autoClosed, stillInWarn }) {
+    const area = document.getElementById("bannerArea");
+    if (!area) return;
+    const parts = [];
+
+    if (autoClosed) {
+      parts.push(bannerHtml({
+        kind: "warn",
+        icon: "⏰",
+        title: "Your shift was auto-closed",
+        desc: `You forgot to clock off after ${fmtDateShort(autoClosed.clockInDate)}. We closed it at ${melTimeShort(autoClosed.closedAt)} Melbourne · ${fmtHours(autoClosed.hoursWorked)} worked. Tell admin if the time should be different.`,
+        actionsHtml: ""
+      }));
+    }
+    if (stillInWarn) {
+      parts.push(bannerHtml({
+        kind: "alert",
+        icon: "⚠",
+        title: "You're still clocked in past working hours",
+        desc: `It's after 17:30 Melbourne. Don't forget to end your shift before signing off — if you leave it open it'll be auto-closed at 16:30 next time you open the app.`,
+        actionsHtml: `<button id="bannerEndShiftBtn">End shift now</button>`,
+        dataId: "still-in"
+      }));
+    }
+    area.innerHTML = parts.join("");
+
+    // Wire dismiss
+    area.querySelectorAll("[data-banner-dismiss]").forEach(btn => {
+      btn.addEventListener("click", () => btn.closest(".banner").remove());
+    });
+    const endNow = document.getElementById("bannerEndShiftBtn");
+    if (endNow) endNow.addEventListener("click", endShift);
+  }
+
+  // ====================================================================
+  // INITIAL LOAD
+  // ====================================================================
+  async function init() {
+    let autoClosed = null;
+
+    if (currentEntryId) {
+      const eSnap = await getDoc(doc(db, "timeEntries", currentEntryId));
+      if (eSnap.exists() && !eSnap.data().clockOutUTC) {
+        const e = eSnap.data();
+        // If clock-in is from a previous Melbourne day → auto-close
+        const clockInKey = melDateKey(e.clockInUTC.toDate());
+        if (clockInKey < melDateKey()) {
+          try { autoClosed = await maybeAutoCloseStaleShift(); }
+          catch (err) { console.error("auto-close failed:", err); }
+        } else {
+          currentStartMs = e.clockInUTC.toDate().getTime();
+          priorBreakMs = (e.breakMinutes || 0) * 60_000;
+        }
+      } else {
+        currentEntryId = null; currentStartMs = null; currentBreakStartMs = null; priorBreakMs = 0;
+        try { await updateDoc(doc(db, "users", user.uid), { currentEntryId: null, clockedInAt: null, currentBreakStartAt: null }); } catch {}
+      }
+    }
+
+    try { await refreshTodayMetrics(); } catch (e) { console.error("refreshTodayMetrics:", e); }
+    try { await refreshLeavePreview(); } catch (e) { console.error("refreshLeavePreview:", e); }
+    try { await refreshContractorBadges(user.uid); } catch (e) { console.error("badges:", e); }
+    renderShiftState();
+    renderBanners({ autoClosed, stillInWarn: maybeWarnStillIn() });
+    tickClocks();
+    setInterval(tickClocks, 1000);
+    // Re-check still-in warning each minute
+    setInterval(() => {
+      if (!document.querySelector('[data-banner-id="still-in"]') && maybeWarnStillIn()) {
+        renderBanners({ autoClosed: null, stillInWarn: true });
+      }
+    }, 60_000);
+  }
+  init().catch(e => { console.error("Init failed:", e); alert("Dashboard failed to load: " + (e.message || e.code)); });
+
+  // Live: when this contractor's own timeEntries or leaveRequests change, refresh today + preview.
+  const todayKeyForSub = melDateKey();
+  onSnapshot(
+    query(collection(db, "timeEntries"), where("uid", "==", user.uid), where("date", "==", todayKeyForSub)),
+    () => refreshTodayMetrics().catch(e => console.error("live today:", e)),
+    (err) => console.error("today sub:", err)
+  );
+  onSnapshot(
+    query(collection(db, "leaveRequests"), where("uid", "==", user.uid)),
+    () => refreshLeavePreview().catch(e => console.error("live leave:", e)),
+    (err) => console.error("leave sub:", err)
+  );
+</script>
+<script src="../../tour-hr-tool/tour.js"></script>
+</body>
+</html>
