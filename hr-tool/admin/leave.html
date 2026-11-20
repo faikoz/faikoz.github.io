@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Time off — Ironbark HR Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>
+/* Demo clock: 2026-11-20 11:30 head office time when the demo is first opened in this tab, then
+   running on. The start is remembered for the life of the tab, so the clock does not jump
+   back when you move from page to page. */
+(function () {
+  const Real = Date;
+  let t0 = 0;
+  try { t0 = Number(sessionStorage.getItem("tk.t0")) || 0; } catch (e) {}
+  if (!t0) { t0 = Real.now(); try { sessionStorage.setItem("tk.t0", String(t0)); } catch (e) {} }
+  const offset = new Real("2026-11-20T11:30:00+11:00").getTime() - t0;
+  function DemoDate(...a) {
+    if (!(this instanceof DemoDate)) return new Real(Real.now() + offset).toString();
+    return a.length ? new Real(...a) : new Real(Real.now() + offset);
+  }
+  DemoDate.prototype = Real.prototype;
+  DemoDate.now = () => Real.now() + offset;
+  DemoDate.parse = Real.parse; DemoDate.UTC = Real.UTC;
+  Object.defineProperty(DemoDate, "name", { value: "Date" });
+  window.Date = DemoDate;
+  window.__DEMO_TODAY__ = "2026-11-20";
+})();
+</script>
+<style>
+#demo-banner{position:sticky;top:0;z-index:99999;height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;background:#fef3c7;color:#92400e;padding:0 14px;font:600 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;border-bottom:1px solid #fbbf24;white-space:nowrap;overflow:hidden}
+#demo-banner a{color:#92400e;text-decoration:underline}
+#demo-role-switch{display:inline-flex;border:1.5px solid #b45309;border-radius:999px;overflow:hidden;background:#fffbeb}
+#demo-role-switch button{all:unset;cursor:pointer;padding:6px 14px;font:700 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;color:#92400e}
+#demo-role-switch button.on{background:#b45309;color:#fff}
+#demo-role-switch button:not(.on):hover{background:#fde68a}
+.sidebar{top:38px !important;height:calc(100vh - 38px) !important}
+.app-shell{min-height:calc(100vh - 38px) !important}
+/* the tool styles every <button> (one line, centred, brand colours); the opening chooser keeps its own look */
+#demo-chooser .dc-options{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#demo-chooser .dc-opt{white-space:normal !important;display:flex !important;flex-direction:column;align-items:flex-start !important;text-align:left;min-width:0;font-weight:400;font-size:inherit;transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease}
+#demo-chooser .dc-opt:active{transform:none}
+#demo-notice{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:rgba(11,18,32,.5);font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+#demo-notice .dn-card{background:#fff;color:#1e293b;max-width:460px;width:calc(100vw - 48px);padding:22px 26px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center}
+#demo-notice h3{margin:0 0 8px;font-size:17px}
+#demo-notice p{margin:0 0 16px;font-size:14px;line-height:1.5}
+#demo-notice button{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:14px;cursor:pointer}
+</style>
+<script>
+(function () {
+  var ROOT = "../";
+  window.__DEMO_LOADED__ = true;
+  window.__DEMO_ROOT__ = ROOT;
+  window.__DEMO_STORY__ = {"demo_today": "2026-11-20", "tool": "Ironbark HR Portal", "me": {"uid": "u-imogen", "name": "Imogen Clarke"}, "admin": {"uid": "u-stuart", "name": "Stuart Hargreaves"}, "pending_leave": {"id": "lr-011", "name": "Diego Marquez"}, "my_pending": "lr-005", "people": ["Imogen Clarke", "Arlo Bennett", "Diego Marquez", "Sana Qureshi", "Theo Lambert"]};
+  window.demoRole = function () { try { return sessionStorage.getItem("tk.role") || "contractor"; } catch (e) { return "contractor"; } };
+  window.demoGo = function (role, page) {
+    try { sessionStorage.setItem("tk.role", role); } catch (e) {}
+    location.href = ROOT + (page || (role === "admin" ? "admin/index.html" : "app/index.html"));
+  };
+  window.demoStartAgain = function () {
+    try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("tk.") === 0 || k.indexOf("demoMode:") === 0 || k.indexOf("tkTour") === 0) sessionStorage.removeItem(k); }); } catch (e) {}
+    location.href = ROOT + "app/index.html";
+  };
+  window.demoNotice = function (html, title) {
+    var old = document.getElementById("demo-notice"); if (old) old.remove();
+    var d = document.createElement("div"); d.id = "demo-notice";
+    d.innerHTML = "<div class='dn-card'><h3>" + (title || "Demo") + "</h3><p>" + html + "</p><button type='button'>OK</button></div>";
+    d.addEventListener("click", function (e) { if (e.target === d || e.target.tagName === "BUTTON") d.remove(); });
+    document.body.appendChild(d); d.querySelector("button").focus();
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    var role = window.demoRole();
+    document.querySelectorAll("#demo-role-switch button").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-role") === role);
+      b.addEventListener("click", function () { window.demoGo(b.getAttribute("data-role")); });
+    });
+  });
+})();
+</script>
+<link rel="stylesheet" href="../tour/demo-chooser.css">
+<script>
+window.DEMO_CHOOSER = {
+  key: "ironbark-hr-portal",
+  title: "Ironbark HR Portal",
+  blurb: "A portal for a small remote team, shown for a fictional company. It has two sides. In real use each person signs in and sees their own side only; the demo adds a switch so you can see both: the contractor starts and finishes shifts, takes breaks and asks for time off; the admin sees who is working right now, decides requests, corrects shifts and looks at the trends. Every person and record is invented."
+};
+</script>
+<script src="../tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body><div id="demo-banner"><span>Demo &middot; fully synthetic data &middot; today is <b>2026-11-20</b></span><span style="font-weight:700">Demo-only switch &rarr;</span><span id="demo-role-switch" title="Only in the demo. In the real tool each person signs in and sees their own side only."><button type="button" data-role="contractor">Contractor view</button><button type="button" data-role="admin">Admin view</button></span><a href="javascript:demoStartAgain()">Start again</a></div>
+<header class="topbar"></header>
+
+<main>
+  <!-- Everyone's time off -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Everyone's time off</h2>
+      <span class="muted" style="font-size:12px">Click any pending entry to approve / deny</span>
+    </div>
+    <div id="teamCalendar"></div>
+    <div class="cal-legend">
+      <span class="lg pending"><span class="swatch"></span>Pending</span>
+      <span class="lg approved"><span class="swatch"></span>Approved</span>
+      <span class="lg denied"><span class="swatch"></span>Denied</span>
+      <span class="lg cancelled"><span class="swatch"></span>Cancelled</span>
+      <span class="lg holiday"><span class="swatch"></span>Public holiday</span>
+    </div>
+  </div>
+
+  <!-- Pending queue -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Requests to decide</h2>
+      <span class="muted" style="font-size:13px" id="pendingCount"></span>
+    </div>
+    <div id="pendingList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Upcoming approved -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Approved and coming up</h2>
+    </div>
+    <div id="upcomingList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Balances overview -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Time-off balances</h2>
+    </div>
+    <div id="balancesList" class="empty">Loading…</div>
+  </div>
+
+  <!-- Accrual ledger / history -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>How a balance built up</h2>
+      <select id="ledgerUserPick" style="min-width:220px">
+        <option value="">— pick a contractor —</option>
+      </select>
+    </div>
+    <div id="ledgerList" class="empty">Pick a contractor to view everything that added to or took from their balance.</div>
+  </div>
+
+  <!-- Full leave history (all decisions logged) -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>All time-off requests</h2>
+      <span class="muted" style="font-size:12px">Submitted / approved / denied dates</span>
+    </div>
+    <div id="historyList" class="empty">Loading…</div>
+  </div>
+</main>
+
+<!-- Review modal -->
+<div class="modal-backdrop" id="decisionModal">
+  <div class="modal wide">
+    <h2 id="decisionTitle">Review request</h2>
+    <div id="decisionDetails" style="margin-bottom:12px; font-size:14px"></div>
+
+    <div class="thread-section">
+      <h3>Conversation</h3>
+      <div id="threadList"><div class="thread-empty">Loading…</div></div>
+      <div class="thread-compose">
+        <textarea id="threadInput" rows="2" placeholder="Reply to the contractor (sent without approving / denying)…"></textarea>
+        <div class="row">
+          <button type="button" class="ghost" id="threadPostBtn">Post comment</button>
+        </div>
+        <div class="error" id="threadErr"></div>
+      </div>
+    </div>
+
+    <div class="thread-section">
+      <h3>Decision note <span class="muted" style="font-size:11px; text-transform:none; letter-spacing:0; font-weight:400">(saved on the request when you approve / deny)</span></h3>
+      <textarea id="decisionNote" rows="2"></textarea>
+      <div class="error" id="decisionErr"></div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="ghost" id="decisionCancel">Close</button>
+      <button type="button" class="danger" id="denyBtn">Deny</button>
+      <button type="button" id="approveBtn">Approve</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { subscribeToComments, addLeaveComment, renderCommentsThread } from "../assets/leave-comments.js";
+  import { fmtDay, melDateKey, fmtDateShort } from "../assets/time.js";
+  // melDateKey already imported above; no-op safeguard
+  import { computeBalance, fmtLeave, adjustmentsFromSnap, halfDayLabel, DAILY_HOURS } from "../assets/leave.js";
+  import { renderCalendar } from "../assets/calendar.js";
+  import { holidaysAsCalendarEntries } from "../assets/holidays.js";
+  import {
+    collection, query, where, getDocs, doc, addDoc, updateDoc, serverTimestamp, orderBy, onSnapshot
+  } from "../assets/demo-firebase.js";
+
+  const { user, profile } = await requireRole(["admin", "viewer"]);
+  const canWrite = profile.role === "admin";
+  if (!canWrite) document.body.classList.add("viewer-mode");
+  renderAdminNav(profile, "leave");
+
+  let pendingChatUnsubs = []; // per-request comment subs (refreshed on every renderPending)
+  let upcomingChatUnsubs = [];
+  let historyChatUnsubs = [];
+  let activeThreadUnsub = null; // single thread sub used while review modal is open
+  let openReviewReqId = null;
+  let openReviewReq = null;
+
+  // Helper: subscribe to comment counts for a set of request rows in a given table.
+  // Each row must have <span class="comment-badge" data-chat="ID"><span data-count="ID"></span></span>.
+  function wireChatBadges(scopeEl, reqs, myUid) {
+    return reqs.map(r => subscribeToComments(r.id, (items) => {
+      const el = scopeEl.querySelector(`[data-count="${r.id}"]`);
+      if (!el) return;
+      el.textContent = items.length;
+      const badge = el.closest(".comment-badge");
+      if (!badge) return;
+      const hasNew = items.some(c => c.byUid && c.byUid !== myUid && c.byRole !== "admin" && c.byRole !== "viewer");
+      badge.classList.toggle("unread", items.length > 0 && hasNew);
+    }));
+  }
+  function attachChatClick(scopeEl, reqs) {
+    scopeEl.querySelectorAll("span[data-chat]").forEach(el => {
+      el.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        openReview(el.dataset.chat, reqs.find(r => r.id === el.dataset.chat));
+      });
+    });
+  }
+
+  // ---- Load contractors once ----
+  const usnap = await getDocs(query(collection(db, "users"), where("role", "==", "contractor")));
+  const usersByUid = {};
+  usnap.forEach(d => usersByUid[d.id] = { uid: d.id, ...d.data() });
+  // Helper — true when the leave request belongs to a test account that should be hidden
+  const isTestRequest = (r) => !!usersByUid[r.uid]?.testAccount;
+
+  // ---- Pending queue (live) ----
+  function startPendingLive() {
+    onSnapshot(
+      query(collection(db, "leaveRequests"), where("status", "==", "pending")),
+      (snap) => renderPending(snap),
+      (err) => console.error("pending:", err)
+    );
+  }
+  function renderPending(snap) {
+    const listEl = document.getElementById("pendingList");
+    const reqs = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return;  // hide test accounts from queue
+      reqs.push(r);
+    });
+    reqs.sort((a, b) => (a.submittedAt?.toMillis?.() || 0) - (b.submittedAt?.toMillis?.() || 0));
+
+    document.getElementById("pendingCount").textContent = reqs.length === 0 ? "" : `${reqs.length} waiting`;
+
+    if (reqs.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No pending requests.";
+      return;
+    }
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead>
+        <tr><th>Contractor</th><th>Dates</th><th>Hours</th><th>Reason</th><th>Submitted</th><th>Chat</th><th></th></tr>
+      </thead>
+      <tbody>
+        ${reqs.map(r => {
+          const u = usersByUid[r.uid];
+          const range = r.startDate === r.endDate
+            ? fmtDay(r.startDate)
+            : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+          const halfNote = halfChip(r);
+          const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+          return `<tr>
+            <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+            <td>${range}${halfNote}</td>
+            <td>${fmtLeave(r.hours)}</td>
+            <td class="muted" style="font-size:13px; max-width:240px">${escapeHtml(r.reason || "—")}</td>
+            <td class="muted" style="font-size:12px">${submitted}</td>
+            <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+            <td>
+              <div class="actions">
+                <button data-act="approve" data-id="${r.id}">Approve</button>
+                <button class="ghost" data-act="deny" data-id="${r.id}">Deny</button>
+              </div>
+            </td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+
+    listEl.querySelectorAll("button[data-act]").forEach(btn => {
+      btn.addEventListener("click", () => openReview(btn.dataset.id, reqs.find(r => r.id === btn.dataset.id)));
+    });
+    attachChatClick(listEl, reqs);
+    pendingChatUnsubs.forEach(fn => fn?.());
+    pendingChatUnsubs = wireChatBadges(listEl, reqs, user.uid);
+  }
+
+  // ---- Review / decision modal ----
+  function openReview(id, req) {
+    if (!req) return;
+    openReviewReqId = id;
+    openReviewReq = req;
+    const u = usersByUid[req.uid];
+    const range = req.startDate === req.endDate
+      ? fmtDay(req.startDate)
+      : `${fmtDay(req.startDate)} → ${fmtDay(req.endDate)}`;
+    const status = req.status || "pending";
+    const isPending = status === "pending";
+    document.getElementById("decisionTitle").textContent = isPending ? "Review request" : `Request — ${status}`;
+    document.getElementById("decisionDetails").innerHTML = `
+      <strong>${escapeHtml(u?.name || req.requesterName)}</strong>
+      <div class="muted" style="margin-top:4px">${range} · ${fmtLeave(req.hours)}</div>
+      ${req.reason ? `<div class="muted" style="margin-top:6px; font-size:13px">"${escapeHtml(req.reason)}"</div>` : ""}
+      ${req.adminNote ? `<div class="muted" style="margin-top:6px; font-size:13px"><em>Admin: ${escapeHtml(req.adminNote)}</em></div>` : ""}
+    `;
+    document.getElementById("decisionNote").value = "";
+    document.getElementById("decisionErr").textContent = "";
+    document.getElementById("threadErr").textContent = "";
+    document.getElementById("threadInput").value = "";
+
+    // Hide decision controls if request already resolved or viewer mode
+    const approveBtn = document.getElementById("approveBtn");
+    const denyBtn    = document.getElementById("denyBtn");
+    const noteBlock  = document.getElementById("decisionNote").closest(".thread-section");
+    const showDecision = isPending && canWrite;
+    approveBtn.style.display = showDecision ? "" : "none";
+    denyBtn.style.display    = showDecision ? "" : "none";
+    if (noteBlock) noteBlock.style.display = showDecision ? "" : "none";
+
+    // Hide compose if viewer
+    const composeBox = document.querySelector("#decisionModal .thread-compose");
+    if (composeBox) composeBox.style.display = canWrite ? "" : "none";
+
+    // Open + start a live subscription on the thread
+    document.getElementById("decisionModal").classList.add("open");
+    if (activeThreadUnsub) { activeThreadUnsub(); activeThreadUnsub = null; }
+    activeThreadUnsub = subscribeToComments(id, (items) => {
+      document.getElementById("threadList").innerHTML = renderCommentsThread(items, user.uid);
+      const cont = document.querySelector("#threadList .comments-thread");
+      if (cont) cont.scrollTop = cont.scrollHeight;
+    });
+  }
+
+  function closeReview() {
+    document.getElementById("decisionModal").classList.remove("open");
+    if (activeThreadUnsub) { activeThreadUnsub(); activeThreadUnsub = null; }
+    openReviewReqId = null;
+    openReviewReq = null;
+  }
+
+  document.getElementById("decisionCancel").addEventListener("click", closeReview);
+
+  document.getElementById("threadPostBtn").addEventListener("click", async () => {
+    if (!openReviewReqId) return;
+    const input = document.getElementById("threadInput");
+    const text  = input.value.trim();
+    if (!text) return;
+    const btn = document.getElementById("threadPostBtn");
+    btn.disabled = true;
+    try {
+      await addLeaveComment(openReviewReqId, { profile, user }, text);
+      input.value = "";
+      logAudit({ profile, user }, {
+        action: "leaveRequest.comment",
+        targetType: "leaveRequest",
+        targetId: openReviewReqId,
+        targetUser: openReviewReq?.uid || null,
+        note: text.slice(0, 200)
+      });
+    } catch (ex) {
+      document.getElementById("threadErr").textContent = "Failed: " + (ex.message || ex.code);
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  async function decide(act) {
+    if (!openReviewReqId || !openReviewReq) return;
+    const approveBtn = document.getElementById("approveBtn");
+    const denyBtn = document.getElementById("denyBtn");
+    approveBtn.disabled = true; denyBtn.disabled = true;
+    try {
+      const newStatus = act === "approve" ? "approved" : "denied";
+      const adminNote = document.getElementById("decisionNote").value.trim() || null;
+      await updateDoc(doc(db, "leaveRequests", openReviewReqId), {
+        status: newStatus,
+        adminNote,
+        decidedBy: profile.email,
+        decidedAt: serverTimestamp()
+      });
+      logAudit({ profile, user }, {
+        action: `leaveRequest.${act}`,
+        targetType: "leaveRequest",
+        targetId: openReviewReqId,
+        targetUser: openReviewReq.uid || null,
+        after: { status: newStatus, adminNote },
+        note: adminNote || `Marked ${newStatus}`
+      });
+      closeReview();
+      loadUpcoming();
+      loadBalances();
+      loadCalendar();
+      loadHistory();
+    } catch (ex) {
+      document.getElementById("decisionErr").textContent = "Failed: " + (ex.message || ex.code);
+    } finally {
+      approveBtn.disabled = false; denyBtn.disabled = false;
+    }
+  }
+  document.getElementById("approveBtn").addEventListener("click", () => decide("approve"));
+  document.getElementById("denyBtn").addEventListener("click", () => decide("deny"));
+
+  // ---- Upcoming approved ----
+  async function loadUpcoming() {
+    const listEl = document.getElementById("upcomingList");
+    listEl.innerHTML = `<div class="empty">Loading…</div>`;
+    const todayKey = melDateKey();
+    const snap = await getDocs(query(
+      collection(db, "leaveRequests"),
+      where("status", "==", "approved")
+    ));
+    const upcoming = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return;  // hide test accounts
+      if (r.endDate >= todayKey) upcoming.push(r);
+    });
+    upcoming.sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+    if (upcoming.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "Nothing approved coming up.";
+      return;
+    }
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Dates</th><th>Hours</th><th>Reason</th><th>Chat</th></tr></thead>
+      <tbody>
+        ${upcoming.map(r => {
+          const u = usersByUid[r.uid];
+          const range = r.startDate === r.endDate
+            ? fmtDay(r.startDate)
+            : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`;
+          return `<tr>
+            <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+            <td>${range}${halfChip(r)}</td>
+            <td>${fmtLeave(r.hours)}</td>
+            <td class="muted" style="font-size:13px">${escapeHtml(r.reason || "—")}</td>
+            <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>`;
+    attachChatClick(listEl, upcoming);
+    upcomingChatUnsubs.forEach(fn => fn?.());
+    upcomingChatUnsubs = wireChatBadges(listEl, upcoming, user.uid);
+  }
+
+  // ---- Balances (per contractor) ----
+  async function loadBalances() {
+    const listEl = document.getElementById("balancesList");
+    listEl.innerHTML = `<div class="empty">Loading…</div>`;
+    const uids = Object.keys(usersByUid).filter(u => usersByUid[u].active !== false && !usersByUid[u].testAccount);
+    if (uids.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No active contractors.";
+      return;
+    }
+    const rows = await Promise.all(uids.map(async (uid) => {
+      const [teSnap, lrSnap, adjSnap] = await Promise.all([
+        getDocs(query(collection(db, "timeEntries"), where("uid", "==", uid))),
+        getDocs(query(collection(db, "leaveRequests"), where("uid", "==", uid), where("status", "==", "approved"))),
+        getDocs(collection(db, "leaveLedger", uid, "entries"))
+      ]);
+      const timeEntries = [];
+      teSnap.forEach(d => timeEntries.push(d.data()));
+      const approved = [];
+      lrSnap.forEach(d => approved.push(d.data()));
+      const b = computeBalance(timeEntries, approved, usersByUid[uid], adjustmentsFromSnap(adjSnap));
+      return { user: usersByUid[uid], ...b };
+    }));
+
+    balanceCache = {};
+    rows.forEach(r => balanceCache[r.user.uid] = { name: r.user.name || r.user.email, balance: r.balance });
+
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Available</th><th>Accrued</th><th>Taken</th><th>Adjusted</th>${canWrite ? "<th></th>" : ""}</tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td>${escapeHtml(r.user.name || r.user.email)}</td>
+          <td><strong>${fmtLeave(r.balance)}</strong></td>
+          <td class="muted">${fmtLeave(r.accrued)}</td>
+          <td class="muted">${fmtLeave(r.taken)}</td>
+          <td class="muted" style="${r.adjusted ? "color:#6D28D9; font-weight:600" : ""}">${r.adjusted ? (r.adjusted > 0 ? "+" : "−") + fmtLeave(Math.abs(r.adjusted)) : "—"}</td>
+          ${canWrite ? `<td><button class="ghost" data-adjust="${r.user.uid}">Adjust…</button></td>` : ""}
+        </tr>`).join("")}
+      </tbody>
+    </table>`;
+    listEl.querySelectorAll("[data-adjust]").forEach(btn =>
+      btn.addEventListener("click", () => openAdjust(btn.dataset.adjust)));
+  }
+
+  // ---- Everyone's time off ----
+  async function loadCalendar() {
+    const snap = await getDocs(collection(db, "leaveRequests"));
+    const entries = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (r.status === "cancelled") return; // hide cancelled from team calendar to reduce clutter
+      if (isTestRequest(r)) return; // hide test accounts from team calendar
+      const u = usersByUid[r.uid];
+      const shortName = (u?.name || r.requesterName || "?")
+        .split(" ")[0]; // first name only to fit in calendar cell
+      const submitted = r.submittedAt?.toDate?.();
+      const decided   = r.decidedAt?.toDate?.();
+      const range = r.startDate === r.endDate ? r.startDate : `${r.startDate} → ${r.endDate}`;
+      const lines = [
+        `${u?.name || r.requesterName}`,
+        `${r.status.toUpperCase()} · ${fmtLeave(r.hours)}${halfDayLabel(r) ? " · " + halfDayLabel(r) : ""}`,
+        range,
+        submitted ? `Requested: ${fmtDateShort(submitted)}` : null,
+        (r.status === "approved" || r.status === "denied") && decided
+          ? `${r.status === "approved" ? "Approved" : "Denied"}: ${fmtDateShort(decided)}${r.decidedBy ? " by " + r.decidedBy : ""}` : null,
+        r.reason ? `Reason: ${r.reason}` : null,
+        r.adminNote ? `Admin note: ${r.adminNote}` : null
+      ].filter(Boolean);
+      entries.push({
+        id: r.id,
+        startDate: r.startDate,
+        endDate: r.endDate,
+        status: r.status,
+        label: shortName,
+        tooltip: lines.join("\n"),
+        full: r
+      });
+    });
+    const allEntries = [...holidaysAsCalendarEntries(), ...entries];
+    renderCalendar(document.getElementById("teamCalendar"), {
+      entries: allEntries,
+      allowSpan: true, // admin-only 2-month toggle
+      onClickEntry: (entry) => {
+        if (entry.isHoliday) return;
+        openReview(entry.id, entry.full);
+      }
+    });
+  }
+
+  async function loadHistory() {
+    const listEl = document.getElementById("historyList");
+    const snap = await getDocs(collection(db, "leaveRequests"));
+    const reqs = [];
+    snap.forEach(d => {
+      const r = { id: d.id, ...d.data() };
+      if (isTestRequest(r)) return; // hide test accounts from history
+      reqs.push(r);
+    });
+    if (reqs.length === 0) {
+      listEl.classList.add("empty");
+      listEl.innerHTML = "No time-off requests yet.";
+      return;
+    }
+    reqs.sort((a, b) => (b.submittedAt?.toMillis?.() || 0) - (a.submittedAt?.toMillis?.() || 0));
+    listEl.classList.remove("empty");
+    listEl.innerHTML = `<table class="data">
+      <thead><tr>
+        <th>Contractor</th>
+        <th>Dates</th>
+        <th>Hours</th>
+        <th>Status</th>
+        <th>Submitted</th>
+        <th>Decided</th>
+        <th>Reason / note</th>
+        <th>Chat</th>
+      </tr></thead>
+      <tbody>${reqs.map(r => {
+        const u = usersByUid[r.uid];
+        const range = (r.startDate === r.endDate ? fmtDay(r.startDate) : `${fmtDay(r.startDate)} → ${fmtDay(r.endDate)}`) + halfChip(r);
+        const submitted = r.submittedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+        const decided = r.decidedAt?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false });
+        const decidedTxt = decided
+          ? `<div>${decided}</div>${r.decidedBy ? `<div class="muted" style="font-size:11px">by ${escapeHtml(r.decidedBy)}</div>` : ""}`
+          : `<span class="muted">—</span>`;
+        const badge = r.status === "approved"  ? `<span class="badge ok">Approved</span>`
+                    : r.status === "denied"    ? `<span class="badge bad">Denied</span>`
+                    : r.status === "cancelled" ? `<span class="badge off">Cancelled</span>`
+                    : `<span class="badge pending">Pending</span>`;
+        const reasonHtml = r.reason
+          ? `<div class="muted" style="font-size:13px">${escapeHtml(r.reason)}</div>`
+          : `<span class="muted">—</span>`;
+        const noteHtml = r.adminNote ? `<div class="muted" style="font-size:11px; margin-top:4px"><em>Admin: ${escapeHtml(r.adminNote)}</em></div>` : "";
+        return `<tr>
+          <td>${escapeHtml(u?.name || r.requesterName || "—")}</td>
+          <td>${range}</td>
+          <td>${fmtLeave(r.hours)}</td>
+          <td>${badge}</td>
+          <td class="muted" style="font-size:12px">${submitted}</td>
+          <td class="muted" style="font-size:12px">${decidedTxt}</td>
+          <td>${reasonHtml}${noteHtml}</td>
+          <td><span class="comment-badge" data-chat="${r.id}" title="Open conversation">💬 <span data-count="${r.id}">…</span></span></td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+    attachChatClick(listEl, reqs);
+    historyChatUnsubs.forEach(fn => fn?.());
+    historyChatUnsubs = wireChatBadges(listEl, reqs, user.uid);
+  }
+
+  // Populate ledger user picker (real contractors only)
+  const ledgerPick = document.getElementById("ledgerUserPick");
+  ledgerPick.innerHTML = `<option value="">— pick a contractor —</option>` +
+    Object.values(usersByUid)
+      .filter(u => u.active !== false && !u.testAccount)
+      .sort((a, b) => (a.name || "").localeCompare(b.name || ""))
+      .map(u => `<option value="${u.uid}">${escapeHtml(u.name || u.email)}</option>`)
+      .join("");
+
+  async function loadLedger() {
+    const uid = ledgerPick.value;
+    const el = document.getElementById("ledgerList");
+    if (!uid) {
+      el.classList.add("empty");
+      el.innerHTML = "Pick a contractor to view everything that added to or took from their balance.";
+      return;
+    }
+    el.classList.remove("empty");
+    el.innerHTML = `<div class="empty">Loading…</div>`;
+    try {
+      const [teSnap, lrSnap, adjSnap] = await Promise.all([
+        getDocs(query(collection(db, "timeEntries"), where("uid", "==", uid))),
+        getDocs(query(collection(db, "leaveRequests"), where("uid", "==", uid), where("status", "==", "approved"))),
+        getDocs(collection(db, "leaveLedger", uid, "entries"))
+      ]);
+      const timeEntries = []; teSnap.forEach(d => timeEntries.push(d.data()));
+      const approved = []; lrSnap.forEach(d => approved.push(d.data()));
+      const { ledger, balance } = computeBalance(timeEntries, approved, usersByUid[uid], adjustmentsFromSnap(adjSnap));
+
+      if (!ledger || ledger.length === 0) {
+        el.classList.add("empty");
+        el.innerHTML = "No accrual events yet — set an opening balance or wait for the first completed week.";
+        return;
+      }
+
+      el.innerHTML = `
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Event</th>
+              <th style="text-align:right">Amount</th>
+              <th style="text-align:right">Running balance</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ledger.map(ev => {
+              const isOpening = ev.kind === "opening";
+              const isLeave   = ev.kind === "leave";
+              const isAdj     = ev.kind === "adjustment";
+              const color = isAdj ? "color:#6D28D9" : isLeave ? "color:#991B1B" : (isOpening ? "color:#1E40AF" : "color:#047857");
+              const sign = ev.hours >= 0 ? "+" : "−";
+              const amount = `${sign}${fmtLeave(Math.abs(ev.hours))}`;
+              return `<tr>
+                <td>${ev.date}</td>
+                <td>${escapeHtml(ev.note)}</td>
+                <td style="text-align:right; font-variant-numeric: tabular-nums; ${color}; font-weight:600">${amount}</td>
+                <td style="text-align:right; font-variant-numeric: tabular-nums; font-weight:600">${fmtLeave(ev.runningHours)}</td>
+              </tr>`;
+            }).join("")}
+            <tr style="border-top:2px solid var(--border)">
+              <td colspan="3" style="text-align:right; font-weight:600">Current balance</td>
+              <td style="text-align:right; font-variant-numeric: tabular-nums; font-weight:700; font-size:14px">${fmtLeave(balance)}</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+    } catch (ex) {
+      el.innerHTML = `<div class="empty" style="color:var(--bad)">Could not load: ${ex.message || ex.code || ex}</div>`;
+    }
+  }
+  ledgerPick.addEventListener("change", loadLedger);
+
+  // ---- Half-day chip (which option the contractor picked) ----
+  function halfChip(r) {
+    const label = halfDayLabel(r);
+    return label
+      ? ` <span style="display:inline-block; font-size:10.5px; font-weight:700; color:#6D28D9; background:#EDE9FE; border:1px solid #DDD6FE; border-radius:999px; padding:1px 8px; margin-left:6px; white-space:nowrap">${label}</span>`
+      : "";
+  }
+
+  // ---- Adjust balance dialog (Option B: ± hours OR set exact target) ----
+  let balanceCache = {};
+  let adjustUid = null;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="presence-backdrop" id="adjBackdrop" style="display:none">
+      <div class="presence-modal" style="max-width:470px">
+        <h3>Adjust time-off balance — <span id="adjName"></span></h3>
+        <p style="margin-bottom:6px">Current balance: <b id="adjCurrent">—</b></p>
+        <label style="font-size:12px; margin-bottom:2px">Adjustment in hours (+ adds, − removes · 1 day = ${DAILY_HOURS}h)</label>
+        <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:10px">
+          <input type="number" id="adjHours" step="0.1" placeholder="e.g. 7.6 or -3.8" style="max-width:140px">
+          <button class="ghost" data-quick="7.6">+1 day</button>
+          <button class="ghost" data-quick="-7.6">−1 day</button>
+          <button class="ghost" data-quick="3.8">+½ day</button>
+          <button class="ghost" data-quick="-3.8">−½ day</button>
+        </div>
+        <label style="font-size:12px; margin-bottom:2px">…or set the exact balance they should have (hours)</label>
+        <input type="number" id="adjTargetBal" step="0.1" placeholder="e.g. 40 — the ± is worked out for you" style="max-width:200px; margin-bottom:10px">
+        <label style="font-size:12px; margin-bottom:2px">Reason (required — shows in the history)</label>
+        <input type="text" id="adjReason" placeholder="e.g. Bonus day · Correction · Cash-out" style="margin-bottom:6px">
+        <p id="adjPreview" style="font-weight:600; color:#6D28D9; min-height:18px; margin-bottom:4px"></p>
+        <div class="row-btns">
+          <button class="ghost" id="adjCancel">Cancel</button>
+          <button id="adjSave">Save adjustment</button>
+        </div>
+      </div>
+    </div>`);
+
+  const adjBackdrop = document.getElementById("adjBackdrop");
+  const adjHours = document.getElementById("adjHours");
+  const adjTargetBal = document.getElementById("adjTargetBal");
+  const adjReason = document.getElementById("adjReason");
+
+  function adjDelta() {
+    if (adjTargetBal.value !== "") {
+      const target = Number(adjTargetBal.value);
+      if (isNaN(target)) return 0;
+      return target - (balanceCache[adjustUid]?.balance || 0);
+    }
+    return Number(adjHours.value) || 0;
+  }
+
+  function updateAdjPreview() {
+    adjHours.disabled = adjTargetBal.value !== "";
+    const delta = adjDelta();
+    const cur = balanceCache[adjustUid]?.balance || 0;
+    document.getElementById("adjPreview").textContent = delta
+      ? `Will record ${delta > 0 ? "+" : "−"}${fmtLeave(Math.abs(delta))} → new balance ${fmtLeave(cur + delta)}`
+      : "";
+  }
+
+  function openAdjust(uid) {
+    adjustUid = uid;
+    document.getElementById("adjName").textContent = balanceCache[uid]?.name || "?";
+    document.getElementById("adjCurrent").textContent = fmtLeave(balanceCache[uid]?.balance || 0);
+    adjHours.value = ""; adjTargetBal.value = ""; adjReason.value = "";
+    adjHours.disabled = false;
+    updateAdjPreview();
+    adjBackdrop.style.display = "flex";
+  }
+
+  adjHours.addEventListener("input", updateAdjPreview);
+  adjTargetBal.addEventListener("input", updateAdjPreview);
+  adjBackdrop.querySelectorAll("[data-quick]").forEach(b => b.addEventListener("click", () => {
+    adjTargetBal.value = "";
+    adjHours.value = b.dataset.quick;
+    updateAdjPreview();
+  }));
+  document.getElementById("adjCancel").addEventListener("click", () => { adjBackdrop.style.display = "none"; });
+
+  document.getElementById("adjSave").addEventListener("click", async () => {
+    if (!canWrite || !adjustUid) return;
+    const delta = Math.round(adjDelta() * 100) / 100;
+    const reason = adjReason.value.trim();
+    if (!delta) { alert("Enter an adjustment amount (or a target balance different from the current one)."); return; }
+    if (!reason) { alert("A reason is required — it shows in the accrual history."); return; }
+    const btn = document.getElementById("adjSave");
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      await addDoc(collection(db, "leaveLedger", adjustUid, "entries"), {
+        type: "adjustment",
+        hours: delta,
+        reason,
+        date: melDateKey(),
+        createdAt: serverTimestamp(),
+        createdBy: { uid: user.uid, name: profile.name || profile.email || "" }
+      });
+      logAudit({ profile, user }, {
+        action: "accrual.adjust",
+        targetType: "user",
+        targetUser: adjustUid,
+        after: { hours: delta },
+        note: `Time-off balance adjusted ${delta > 0 ? "+" : ""}${delta}h — ${reason}`
+      });
+      adjBackdrop.style.display = "none";
+      loadBalances();
+      if (ledgerPick.value === adjustUid) loadLedger();
+    } catch (ex) {
+      alert("Failed: " + (ex.message || ex.code));
+    }
+    btn.disabled = false; btn.textContent = "Save adjustment";
+  });
+
+  loadCalendar();
+  startPendingLive();
+  loadUpcoming();
+  loadBalances();
+  loadHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Activity — Ironbark HR Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>
+/* Demo clock: 2026-11-20 11:30 head office time when the demo is first opened in this tab, then
+   running on. The start is remembered for the life of the tab, so the clock does not jump
+   back when you move from page to page. */
+(function () {
+  const Real = Date;
+  let t0 = 0;
+  try { t0 = Number(sessionStorage.getItem("tk.t0")) || 0; } catch (e) {}
+  if (!t0) { t0 = Real.now(); try { sessionStorage.setItem("tk.t0", String(t0)); } catch (e) {} }
+  const offset = new Real("2026-11-20T11:30:00+11:00").getTime() - t0;
+  function DemoDate(...a) {
+    if (!(this instanceof DemoDate)) return new Real(Real.now() + offset).toString();
+    return a.length ? new Real(...a) : new Real(Real.now() + offset);
+  }
+  DemoDate.prototype = Real.prototype;
+  DemoDate.now = () => Real.now() + offset;
+  DemoDate.parse = Real.parse; DemoDate.UTC = Real.UTC;
+  Object.defineProperty(DemoDate, "name", { value: "Date" });
+  window.Date = DemoDate;
+  window.__DEMO_TODAY__ = "2026-11-20";
+})();
+</script>
+<style>
+#demo-banner{position:sticky;top:0;z-index:99999;height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;background:#fef3c7;color:#92400e;padding:0 14px;font:600 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;border-bottom:1px solid #fbbf24;white-space:nowrap;overflow:hidden}
+#demo-banner a{color:#92400e;text-decoration:underline}
+#demo-role-switch{display:inline-flex;border:1.5px solid #b45309;border-radius:999px;overflow:hidden;background:#fffbeb}
+#demo-role-switch button{all:unset;cursor:pointer;padding:6px 14px;font:700 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;color:#92400e}
+#demo-role-switch button.on{background:#b45309;color:#fff}
+#demo-role-switch button:not(.on):hover{background:#fde68a}
+.sidebar{top:38px !important;height:calc(100vh - 38px) !important}
+.app-shell{min-height:calc(100vh - 38px) !important}
+/* the tool styles every <button> (one line, centred, brand colours); the opening chooser keeps its own look */
+#demo-chooser .dc-options{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#demo-chooser .dc-opt{white-space:normal !important;display:flex !important;flex-direction:column;align-items:flex-start !important;text-align:left;min-width:0;font-weight:400;font-size:inherit;transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease}
+#demo-chooser .dc-opt:active{transform:none}
+#demo-notice{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:rgba(11,18,32,.5);font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+#demo-notice .dn-card{background:#fff;color:#1e293b;max-width:460px;width:calc(100vw - 48px);padding:22px 26px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center}
+#demo-notice h3{margin:0 0 8px;font-size:17px}
+#demo-notice p{margin:0 0 16px;font-size:14px;line-height:1.5}
+#demo-notice button{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:14px;cursor:pointer}
+</style>
+<script>
+(function () {
+  var ROOT = "../";
+  window.__DEMO_LOADED__ = true;
+  window.__DEMO_ROOT__ = ROOT;
+  window.__DEMO_STORY__ = {"demo_today": "2026-11-20", "tool": "Ironbark HR Portal", "me": {"uid": "u-imogen", "name": "Imogen Clarke"}, "admin": {"uid": "u-stuart", "name": "Stuart Hargreaves"}, "pending_leave": {"id": "lr-011", "name": "Diego Marquez"}, "my_pending": "lr-005", "people": ["Imogen Clarke", "Arlo Bennett", "Diego Marquez", "Sana Qureshi", "Theo Lambert"]};
+  window.demoRole = function () { try { return sessionStorage.getItem("tk.role") || "contractor"; } catch (e) { return "contractor"; } };
+  window.demoGo = function (role, page) {
+    try { sessionStorage.setItem("tk.role", role); } catch (e) {}
+    location.href = ROOT + (page || (role === "admin" ? "admin/index.html" : "app/index.html"));
+  };
+  window.demoStartAgain = function () {
+    try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("tk.") === 0 || k.indexOf("demoMode:") === 0 || k.indexOf("tkTour") === 0) sessionStorage.removeItem(k); }); } catch (e) {}
+    location.href = ROOT + "app/index.html";
+  };
+  window.demoNotice = function (html, title) {
+    var old = document.getElementById("demo-notice"); if (old) old.remove();
+    var d = document.createElement("div"); d.id = "demo-notice";
+    d.innerHTML = "<div class='dn-card'><h3>" + (title || "Demo") + "</h3><p>" + html + "</p><button type='button'>OK</button></div>";
+    d.addEventListener("click", function (e) { if (e.target === d || e.target.tagName === "BUTTON") d.remove(); });
+    document.body.appendChild(d); d.querySelector("button").focus();
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    var role = window.demoRole();
+    document.querySelectorAll("#demo-role-switch button").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-role") === role);
+      b.addEventListener("click", function () { window.demoGo(b.getAttribute("data-role")); });
+    });
+  });
+})();
+</script>
+<link rel="stylesheet" href="../tour/demo-chooser.css">
+<script>
+window.DEMO_CHOOSER = {
+  key: "ironbark-hr-portal",
+  title: "Ironbark HR Portal",
+  blurb: "A portal for a small remote team, shown for a fictional company. It has two sides. In real use each person signs in and sees their own side only; the demo adds a switch so you can see both: the contractor starts and finishes shifts, takes breaks and asks for time off; the admin sees who is working right now, decides requests, corrects shifts and looks at the trends. Every person and record is invented."
+};
+</script>
+<script src="../tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body><div id="demo-banner"><span>Demo &middot; fully synthetic data &middot; today is <b>2026-11-20</b></span><span style="font-weight:700">Demo-only switch &rarr;</span><span id="demo-role-switch" title="Only in the demo. In the real tool each person signs in and sees their own side only."><button type="button" data-role="contractor">Contractor view</button><button type="button" data-role="admin">Admin view</button></span><a href="javascript:demoStartAgain()">Start again</a></div>
+<header class="topbar"></header>
+
+<main>
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Activity</h1>
+      <div class="page-subtitle">Activity check — nobody on the team sees this page</div>
+    </div>
+  </div>
+
+  <!-- Master toggle + threshold -->
+  <div class="card">
+    <div class="toolbar"><h2>Activity check</h2></div>
+    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+      <label class="switch">
+        <input type="checkbox" id="secToggle" disabled>
+        <span class="slider"></span>
+      </label>
+      <div style="flex:1; min-width:240px">
+        <div style="font-weight:600" id="cfgTitle">Loading…</div>
+        <div class="muted" style="font-size:12.5px" id="cfgDesc"></div>
+      </div>
+      <div style="display:flex; align-items:end; gap:10px">
+        <div>
+          <label style="margin-bottom:2px; font-size:12px">Away after (minutes)</label>
+          <input type="number" id="thresholdInput" min="1" max="120" step="1" style="max-width:110px" disabled>
+        </div>
+        <button id="saveThresholdBtn" disabled>Save</button>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12px; margin-top:12px; line-height:1.6">
+      While ON and a contractor is on shift: no mouse/keyboard input anywhere on their computer
+      (or screen locked) for longer than the threshold is recorded as <b>AWAY</b>. Closing the app,
+      shutting the laptop or losing internet counts as away too — there are no loopholes.
+      Contractors see nothing except a one-time browser permission ("Know when you're actively
+      using this device") which they must <b>Allow</b>. Requires Chrome or Edge on their side.
+    </div>
+  </div>
+
+  <!-- Live board -->
+  <div class="card">
+    <div class="toolbar"><h2>Team status right now<span class="live-dot" title="Live"></span></h2><span class="muted" style="font-size:12px">refreshes automatically</span></div>
+    <div id="liveBoard" class="empty">Loading…</div>
+  </div>
+
+  <!-- Daily report -->
+  <div class="card">
+    <div class="toolbar">
+      <h2>Away time by day</h2>
+      <div class="day-nav">
+        <button class="ghost" id="prevDayBtn" title="Previous day">←</button>
+        <input type="date" id="reportDate">
+        <button class="ghost" id="nextDayBtn" title="Next day">→</button>
+      </div>
+    </div>
+    <div id="reportArea" class="empty">Loading…</div>
+  </div>
+</main>
+
+<script type="module">
+  import { db } from "../assets/firebase-init.js";
+  import { requireRole } from "../assets/auth-router.js";
+  import { renderAdminNav, escapeHtml } from "../assets/admin-nav.js";
+  import { logAudit } from "../assets/audit.js";
+  import { melDateKey, melTimeShort, fmtMins, fmtHours, fmtDay } from "../assets/time.js";
+  import {
+    collection, query, where, getDocs, doc, setDoc, onSnapshot, serverTimestamp
+  } from "../assets/demo-firebase.js";
+
+  const { user, profile } = await requireRole(["admin", "viewer"]);
+  renderAdminNav(profile, "security");
+  const canEdit = profile.role === "admin";
+
+  const REASON_LABEL = { idle: "No activity", locked: "Screen locked", offline: "Offline / app closed" };
+
+  let cfg = { enabled: false, thresholdMinutes: 2 };
+  let contractors = new Map();   // uid -> user doc
+  let presence = new Map();      // uid -> presence doc
+
+  // ================================================================ settings
+  const toggle = document.getElementById("secToggle");
+  const thresholdInput = document.getElementById("thresholdInput");
+  const saveBtn = document.getElementById("saveThresholdBtn");
+
+  onSnapshot(doc(db, "settings", "security"), (snap) => {
+    const d = snap.exists() ? snap.data() : {};
+    cfg = { enabled: !!d.enabled, thresholdMinutes: Math.max(1, Number(d.thresholdMinutes) || 2) };
+    toggle.checked = cfg.enabled;
+    toggle.disabled = !canEdit;
+    if (document.activeElement !== thresholdInput) thresholdInput.value = cfg.thresholdMinutes;
+    thresholdInput.disabled = !canEdit;
+    saveBtn.disabled = !canEdit;
+    document.getElementById("cfgTitle").textContent =
+      cfg.enabled ? "The activity check is ON" : "The activity check is OFF";
+    document.getElementById("cfgDesc").textContent = cfg.enabled
+      ? `Idle for ${cfg.thresholdMinutes} min+ while on shift → recorded as AWAY.`
+      : "Nothing is being recorded. Flip the switch to start.";
+    renderLive();
+  }, (e) => console.error("settings sub:", e));
+
+  toggle.addEventListener("change", async () => {
+    if (!canEdit) return;
+    const enabled = toggle.checked;
+    toggle.disabled = true;
+    try {
+      await setDoc(doc(db, "settings", "security"), {
+        enabled,
+        thresholdMinutes: cfg.thresholdMinutes,
+        updatedAt: serverTimestamp(),
+        updatedBy: { uid: user.uid, name: profile.name || profile.email || "" }
+      }, { merge: true });
+      logAudit({ profile, user }, {
+        action: enabled ? "security.enable" : "security.disable",
+        targetType: "security",
+        note: `Activity check turned ${enabled ? "ON" : "OFF"}`
+      });
+    } catch (ex) {
+      alert("Failed: " + (ex.message || ex.code));
+      toggle.checked = !enabled;
+    }
+    toggle.disabled = !canEdit;
+  });
+
+  saveBtn.addEventListener("click", async () => {
+    if (!canEdit) return;
+    const mins = Math.min(120, Math.max(1, Math.round(Number(thresholdInput.value) || 2)));
+    thresholdInput.value = mins;
+    saveBtn.disabled = true; saveBtn.textContent = "Saving…";
+    try {
+      const before = cfg.thresholdMinutes;
+      await setDoc(doc(db, "settings", "security"), {
+        thresholdMinutes: mins,
+        updatedAt: serverTimestamp(),
+        updatedBy: { uid: user.uid, name: profile.name || profile.email || "" }
+      }, { merge: true });
+      logAudit({ profile, user }, {
+        action: "security.threshold",
+        targetType: "security",
+        before: { thresholdMinutes: before },
+        after:  { thresholdMinutes: mins }
+      });
+    } catch (ex) { alert("Failed: " + (ex.message || ex.code)); }
+    saveBtn.disabled = false; saveBtn.textContent = "Save";
+  });
+
+  // ================================================================ live board
+  onSnapshot(query(collection(db, "users"), where("role", "==", "contractor")), (snap) => {
+    contractors = new Map();
+    snap.forEach(d => { const u = d.data(); if (u.active !== false) contractors.set(d.id, u); });
+    renderLive();
+  }, (e) => console.error("users sub:", e));
+
+  onSnapshot(collection(db, "presence"), (snap) => {
+    presence = new Map();
+    snap.forEach(d => presence.set(d.id, d.data()));
+    renderLive();
+  }, (e) => console.error("presence sub:", e));
+
+  function liveRow(uid, u) {
+    const p = presence.get(uid);
+    const now = Date.now();
+    const clockedIn = !!u.currentEntryId;
+    const lastSeenMs = p?.lastSeenAt?.toMillis?.() || 0;
+    const staleMs = (cfg.thresholdMinutes + 2) * 60_000;
+
+    let pill, detail = "";
+    if (!clockedIn) {
+      pill = `<span class="status-pill none"><span class="dot"></span>Off shift</span>`;
+    } else if (!cfg.enabled) {
+      pill = `<span class="status-pill working"><span class="dot"></span>On shift</span>`;
+      detail = "check switched off";
+    } else if (!lastSeenMs || (now - lastSeenMs) > staleMs) {
+      pill = `<span class="status-pill offline"><span class="dot"></span>Offline</span>`;
+      detail = lastSeenMs
+        ? `no signal since ${melTimeShort(new Date(lastSeenMs))} · ${fmtMins((now - lastSeenMs) / 60_000)}`
+        : "no signal yet — app not open or permission missing";
+    } else if (u.currentBreakStartAt) {
+      pill = `<span class="status-pill break"><span class="dot"></span>On break</span>`;
+      detail = `since ${melTimeShort(u.currentBreakStartAt.toDate())}`;
+    } else if (p?.state === "away") {
+      const sinceMs = p.awaySince?.toMillis?.() || lastSeenMs;
+      pill = `<span class="status-pill away"><span class="dot"></span>Away</span>`;
+      detail = `for ${fmtMins((now - sinceMs) / 60_000)} · since ${melTimeShort(new Date(sinceMs))}`;
+    } else {
+      pill = `<span class="status-pill working"><span class="dot"></span>Active</span>`;
+      detail = `last signal ${melTimeShort(new Date(lastSeenMs))}`;
+    }
+
+    let chips = "";
+    if (u.testAccount) chips += `<span class="track-chip">TEST</span>`;
+    if (clockedIn && cfg.enabled && p && p.tracking && p.tracking !== "ok") {
+      const label = p.tracking === "unsupported" ? "BROWSER NOT SUPPORTED"
+                  : p.tracking === "no-permission" ? "NO PERMISSION"
+                  : "TRACKING ERROR";
+      chips += `<span class="track-chip warn" title="Idle detection isn't running — only offline gaps are recorded">${label}</span>`;
+    }
+
+    return `<tr>
+      <td><b>${escapeHtml(u.name || u.email || uid)}</b>${chips}</td>
+      <td>${pill}</td>
+      <td class="muted" style="font-size:12.5px">${escapeHtml(detail)}</td>
+    </tr>`;
+  }
+
+  function renderLive() {
+    const el = document.getElementById("liveBoard");
+    if (!el) return;
+    if (contractors.size === 0) { el.classList.add("empty"); el.innerHTML = "No contractors yet."; return; }
+    el.classList.remove("empty");
+    const rows = [...contractors.entries()]
+      .sort((a, b) => (a[1].name || "").localeCompare(b[1].name || ""))
+      .map(([uid, u]) => liveRow(uid, u)).join("");
+    el.innerHTML = `<table class="data">
+      <thead><tr><th>Contractor</th><th>Status</th><th>Detail</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+  }
+  setInterval(renderLive, 15_000);
+
+  // ================================================================ daily report
+  const reportDate = document.getElementById("reportDate");
+  reportDate.value = melDateKey();
+  reportDate.addEventListener("change", () => loadReport().catch(console.error));
+  document.getElementById("prevDayBtn").addEventListener("click", () => shiftDay(-1));
+  document.getElementById("nextDayBtn").addEventListener("click", () => shiftDay(1));
+
+  function shiftDay(delta) {
+    const [y, m, d] = reportDate.value.split("-").map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d + delta));
+    reportDate.value = `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, "0")}-${String(dt.getUTCDate()).padStart(2, "0")}`;
+    loadReport().catch(console.error);
+  }
+
+  // Overlapping raw segments (two devices/tabs recording, or a segment left open
+  // by a sleeping machine) must never be counted twice. Merge them into real
+  // wall-clock periods first — the total is then always "minutes actually away".
+  function mergeSegments(raw, nowMs, shiftEndMs, windows) {
+    // Away time only counts while ON SHIFT: clip every record to the day's
+    // shift window(s). Kills leftovers from a forgotten clock-off (a tab idling
+    // all evening) without touching the stored records.
+    const items = [];
+    raw.forEach(s => {
+      const startMs = s.startUTC?.toMillis?.() || 0;
+      if (!startMs) return;
+      // An open segment can't run past the end of the shift it belongs to.
+      const rawEnd = s.endUTC?.toMillis?.() || Math.min(nowMs, shiftEndMs || nowMs);
+      const endMs = Math.max(startMs, rawEnd);
+      if (!windows || !windows.length) {
+        items.push({ id: s.id, startMs, endMs, reason: s.reason, open: !s.endUTC });
+        return;
+      }
+      for (const w of windows) {
+        const cs = Math.max(startMs, w.start), ce = Math.min(endMs, w.end);
+        if (cs < ce) items.push({ id: s.id, startMs: cs, endMs: ce, reason: s.reason, open: !s.endUTC });
+      }
+    });
+    items.sort((a, b) => a.startMs - b.startMs);
+
+    const merged = [];
+    for (const it of items) {
+      const last = merged[merged.length - 1];
+      if (last && it.startMs <= last.endMs) {
+        // Overlaps (or touches) the previous period → extend it, don't add a row.
+        last.endMs = Math.max(last.endMs, it.endMs);
+        last.open = last.open || it.open;
+        last.reasons.add(it.reason);
+        last.raws.push(it);
+      } else {
+        merged.push({ startMs: it.startMs, endMs: it.endMs, open: it.open,
+                      reasons: new Set([it.reason]), raws: [it] });
+      }
+    }
+    return merged;
+  }
+
+  function reasonText(reasons) {
+    return [...reasons].map(r => REASON_LABEL[r] || r || "—").join(" + ");
+  }
+
+  async function loadReport() {
+    const key = reportDate.value;
+    const area = document.getElementById("reportArea");
+    area.classList.add("empty"); area.innerHTML = "Loading…";
+
+    const [segSnap, teSnap] = await Promise.all([
+      getDocs(query(collection(db, "awaySegments"), where("date", "==", key))),
+      getDocs(query(collection(db, "timeEntries"), where("date", "==", key)))
+    ]);
+
+    const nowMs = Date.now();
+    const blank = () => ({ segments: [], workedH: 0, shifts: 0, openShift: false, shiftEndMs: 0, windows: [] });
+    const byUid = new Map();
+    segSnap.forEach(d => {
+      const s = d.data();
+      if (!byUid.has(s.uid)) byUid.set(s.uid, blank());
+      byUid.get(s.uid).segments.push({ id: d.id, ...s });
+    });
+    teSnap.forEach(d => {
+      const e = d.data();
+      if (!byUid.has(e.uid)) byUid.set(e.uid, blank());
+      const rec = byUid.get(e.uid);
+      rec.shifts++;
+      const inMs = e.clockInUTC?.toMillis?.() || 0;
+      const outMs = e.clockOutUTC?.toMillis?.() || 0;
+      if (outMs) {
+        rec.workedH += e.hoursWorked || 0;
+        rec.shiftEndMs = Math.max(rec.shiftEndMs, outMs);
+        if (inMs) rec.windows.push({ start: inMs, end: outMs });
+      } else if (inMs) {
+        // Shift still running — count it live instead of showing "worked 0m".
+        rec.openShift = true;
+        rec.workedH += Math.max(0, (nowMs - inMs) / 3_600_000 - (e.breakMinutes || 0) / 60);
+        rec.shiftEndMs = nowMs;
+        rec.windows.push({ start: inMs, end: nowMs });
+      }
+    });
+
+    const uids = [...byUid.keys()].filter(uid => contractors.has(uid) || byUid.get(uid).segments.length);
+    if (uids.length === 0) {
+      area.innerHTML = `No shifts or away time recorded for ${fmtDay(key)}.`;
+      return;
+    }
+
+    const blocks = uids
+      .sort((a, b) => ((contractors.get(a)?.name) || a).localeCompare((contractors.get(b)?.name) || b))
+      .map(uid => {
+        const rec = byUid.get(uid);
+        const name = contractors.get(uid)?.name || contractors.get(uid)?.email || uid;
+        const periods = mergeSegments(rec.segments, nowMs, rec.shiftEndMs, rec.windows);
+        const rawCount = rec.segments.length;
+
+        let totalAwayMin = 0;
+        const segRows = periods.map((p, i) => {
+          const mins = (p.endMs - p.startMs) / 60_000;
+          totalAwayMin += mins;
+          const ongoing = p.open && p.endMs >= nowMs - 1000;
+          const rowKey = `${uid}_${i}`;
+          const rawLine = (r) => {
+            const range = `${melTimeShort(new Date(r.startMs))} → ${r.open ? "…" : melTimeShort(new Date(r.endMs))}`;
+            return `<div class="raw-line">
+              <span>${range} · ${fmtMins((r.endMs - r.startMs) / 60_000)} · ${escapeHtml(REASON_LABEL[r.reason] || r.reason || "—")}</span>
+              ${r.open ? `<span class="track-chip warn">STILL OPEN</span>` : ""}
+            </div>`;
+          };
+          const actionCell = p.raws.length > 1
+            ? `<button class="ghost mini" data-toggle="${rowKey}">${p.raws.length} records ▾</button>`
+            : "";
+          const subRow = p.raws.length > 1
+            ? `<tr data-raws="${rowKey}" style="display:none"><td colspan="4" class="raw-cell">${p.raws.map(rawLine).join("")}</td></tr>`
+            : "";
+          return `<tr>
+            <td>${melTimeShort(new Date(p.startMs))} → ${ongoing ? "now" : melTimeShort(new Date(p.endMs))}</td>
+            <td>${fmtMins(mins)}${ongoing ? ` <span class="muted" style="font-size:11px">· ongoing</span>` : ""}</td>
+            <td class="muted" style="font-size:12px">${escapeHtml(reasonText(p.reasons))}</td>
+            <td style="text-align:right">${actionCell}</td>
+          </tr>${subRow}`;
+        }).join("");
+
+        const awayH = totalAwayMin / 60;
+        const activeH = Math.max(0, rec.workedH - awayH);
+        const summary = [
+          rec.shifts ? `on shift ${fmtHours(rec.workedH)}${rec.openShift ? " (open)" : ""}` : "no shift",
+          `active ${fmtHours(activeH)}`,
+          `<b style="color:${totalAwayMin > 0 ? "#B45309" : "#065F46"}">away ${fmtMins(totalAwayMin)}</b>`,
+          `${periods.length} period${periods.length === 1 ? "" : "s"}`
+        ].join(" · ");
+        const mergedNote = rawCount > periods.length
+          ? `<span class="muted" style="font-size:11.5px">${rawCount - periods.length} overlapping record${rawCount - periods.length === 1 ? "" : "s"} merged</span>`
+          : "";
+
+        return `<div class="report-block">
+          <div class="report-head">
+            <b style="font-size:14px">${escapeHtml(name)}</b>
+            <span class="muted" style="font-size:12.5px">${summary}</span>
+            ${mergedNote}
+          </div>
+          ${periods.length
+            ? `<table class="data away-table"><thead><tr><th>Period (head office time)</th><th>Duration</th><th>Reason</th><th></th></tr></thead><tbody>${segRows}</tbody></table>`
+            : `<div class="muted" style="font-size:12.5px">No away time recorded. 🎉</div>`}
+        </div>`;
+      });
+
+    area.classList.remove("empty");
+    area.innerHTML = blocks.join("");
+  }
+  // Expand/collapse a merged period's raw records. Attached once —
+  // loadReport() re-renders the rows but this listener survives on the parent.
+  document.getElementById("reportArea").addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button");
+    if (!btn || !btn.dataset.toggle) return;
+    const row = document.querySelector(`tr[data-raws="${btn.dataset.toggle}"]`);
+    if (row) row.style.display = row.style.display === "none" ? "" : "none";
+  });
+
+  loadReport().catch(console.error);
+  // Keep today's report fresh (live ongoing segments).
+  setInterval(() => { if (reportDate.value === melDateKey()) loadReport().catch(() => {}); }, 60_000);
+</script>
+</body>
+</html>

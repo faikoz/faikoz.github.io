@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>My account — Ironbark HR Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/styles.css">
+
+<script>
+/* Demo clock: 2026-11-20 11:30 head office time when the demo is first opened in this tab, then
+   running on. The start is remembered for the life of the tab, so the clock does not jump
+   back when you move from page to page. */
+(function () {
+  const Real = Date;
+  let t0 = 0;
+  try { t0 = Number(sessionStorage.getItem("tk.t0")) || 0; } catch (e) {}
+  if (!t0) { t0 = Real.now(); try { sessionStorage.setItem("tk.t0", String(t0)); } catch (e) {} }
+  const offset = new Real("2026-11-20T11:30:00+11:00").getTime() - t0;
+  function DemoDate(...a) {
+    if (!(this instanceof DemoDate)) return new Real(Real.now() + offset).toString();
+    return a.length ? new Real(...a) : new Real(Real.now() + offset);
+  }
+  DemoDate.prototype = Real.prototype;
+  DemoDate.now = () => Real.now() + offset;
+  DemoDate.parse = Real.parse; DemoDate.UTC = Real.UTC;
+  Object.defineProperty(DemoDate, "name", { value: "Date" });
+  window.Date = DemoDate;
+  window.__DEMO_TODAY__ = "2026-11-20";
+})();
+</script>
+<style>
+#demo-banner{position:sticky;top:0;z-index:99999;height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;background:#fef3c7;color:#92400e;padding:0 14px;font:600 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;border-bottom:1px solid #fbbf24;white-space:nowrap;overflow:hidden}
+#demo-banner a{color:#92400e;text-decoration:underline}
+#demo-role-switch{display:inline-flex;border:1.5px solid #b45309;border-radius:999px;overflow:hidden;background:#fffbeb}
+#demo-role-switch button{all:unset;cursor:pointer;padding:6px 14px;font:700 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;color:#92400e}
+#demo-role-switch button.on{background:#b45309;color:#fff}
+#demo-role-switch button:not(.on):hover{background:#fde68a}
+.sidebar{top:38px !important;height:calc(100vh - 38px) !important}
+.app-shell{min-height:calc(100vh - 38px) !important}
+/* the tool styles every <button> (one line, centred, brand colours); the opening chooser keeps its own look */
+#demo-chooser .dc-options{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#demo-chooser .dc-opt{white-space:normal !important;display:flex !important;flex-direction:column;align-items:flex-start !important;text-align:left;min-width:0;font-weight:400;font-size:inherit;transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease}
+#demo-chooser .dc-opt:active{transform:none}
+#demo-notice{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:rgba(11,18,32,.5);font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+#demo-notice .dn-card{background:#fff;color:#1e293b;max-width:460px;width:calc(100vw - 48px);padding:22px 26px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center}
+#demo-notice h3{margin:0 0 8px;font-size:17px}
+#demo-notice p{margin:0 0 16px;font-size:14px;line-height:1.5}
+#demo-notice button{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:14px;cursor:pointer}
+</style>
+<script>
+(function () {
+  var ROOT = "../";
+  window.__DEMO_LOADED__ = true;
+  window.__DEMO_ROOT__ = ROOT;
+  window.__DEMO_STORY__ = {"demo_today": "2026-11-20", "tool": "Ironbark HR Portal", "me": {"uid": "u-imogen", "name": "Imogen Clarke"}, "admin": {"uid": "u-stuart", "name": "Stuart Hargreaves"}, "pending_leave": {"id": "lr-011", "name": "Diego Marquez"}, "my_pending": "lr-005", "people": ["Imogen Clarke", "Arlo Bennett", "Diego Marquez", "Sana Qureshi", "Theo Lambert"]};
+  window.demoRole = function () { try { return sessionStorage.getItem("tk.role") || "contractor"; } catch (e) { return "contractor"; } };
+  window.demoGo = function (role, page) {
+    try { sessionStorage.setItem("tk.role", role); } catch (e) {}
+    location.href = ROOT + (page || (role === "admin" ? "admin/index.html" : "app/index.html"));
+  };
+  window.demoStartAgain = function () {
+    try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("tk.") === 0 || k.indexOf("demoMode:") === 0 || k.indexOf("tkTour") === 0) sessionStorage.removeItem(k); }); } catch (e) {}
+    location.href = ROOT + "app/index.html";
+  };
+  window.demoNotice = function (html, title) {
+    var old = document.getElementById("demo-notice"); if (old) old.remove();
+    var d = document.createElement("div"); d.id = "demo-notice";
+    d.innerHTML = "<div class='dn-card'><h3>" + (title || "Demo") + "</h3><p>" + html + "</p><button type='button'>OK</button></div>";
+    d.addEventListener("click", function (e) { if (e.target === d || e.target.tagName === "BUTTON") d.remove(); });
+    document.body.appendChild(d); d.querySelector("button").focus();
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    var role = window.demoRole();
+    document.querySelectorAll("#demo-role-switch button").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-role") === role);
+      b.addEventListener("click", function () { window.demoGo(b.getAttribute("data-role")); });
+    });
+  });
+})();
+</script>
+<link rel="stylesheet" href="../tour/demo-chooser.css">
+<script>
+window.DEMO_CHOOSER = {
+  key: "ironbark-hr-portal",
+  title: "Ironbark HR Portal",
+  blurb: "A portal for a small remote team, shown for a fictional company. It has two sides. In real use each person signs in and sees their own side only; the demo adds a switch so you can see both: the contractor starts and finishes shifts, takes breaks and asks for time off; the admin sees who is working right now, decides requests, corrects shifts and looks at the trends. Every person and record is invented."
+};
+</script>
+<script src="../tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="../tour/tour.css">
+<script src="../tour/tour.js" defer></script>
+</head>
+<body><div id="demo-banner"><span>Demo &middot; fully synthetic data &middot; today is <b>2026-11-20</b></span><span style="font-weight:700">Demo-only switch &rarr;</span><span id="demo-role-switch" title="Only in the demo. In the real tool each person signs in and sees their own side only."><button type="button" data-role="contractor">Contractor view</button><button type="button" data-role="admin">Admin view</button></span><a href="javascript:demoStartAgain()">Start again</a></div>
+<div class="simple-shell">
+
+  <header class="simple-header">
+    <div class="brand-row">
+      <div class="logo">I</div>
+      <div class="name">
+        Ironbark
+        <small>HR Portal</small>
+        <div class="brand-badges" id="brandBadges"></div>
+      </div>
+    </div>
+    <nav class="simple-nav">
+      <a href="index.html">Today</a>
+      <a href="timesheets.html" data-page="timesheets">Hours</a>
+      <a href="leave.html" data-page="leave">Time off</a>
+      <a class="active" href="profile.html">My account</a>
+    </nav>
+    <div class="header-user">
+      <div class="avatar" id="avatar">?</div>
+      <div>
+        <div class="name" id="who">…</div>
+        <div class="role">Contractor</div>
+      </div>
+      <button class="ghost" id="logoutBtn">Sign out</button>
+    </div>
+  </header>
+
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">My account</h1>
+      <div class="page-subtitle">Your details and password</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>About me</h2>
+    <div class="row" style="gap:32px; flex-wrap:wrap; padding:4px 0">
+      <div>
+        <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:600">Name</div>
+        <div style="font-size:18px; font-weight:600; margin-top:4px" id="profileName">—</div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:600">Email</div>
+        <div style="font-size:18px; margin-top:4px" id="profileEmail">—</div>
+      </div>
+      <div>
+        <div class="muted" style="font-size:12px; text-transform:uppercase; letter-spacing:.06em; font-weight:600">Start date</div>
+        <div style="font-size:18px; margin-top:4px" id="profileStart">—</div>
+      </div>
+    </div>
+    <div class="muted" style="font-size:12px; margin-top:16px">To change your name or email, ask admin.</div>
+  </div>
+
+  <div class="card">
+    <h2>What changed on my record<span class="live-dot" title="Live"></span></h2>
+    <p class="muted" style="font-size:13px; margin-top:-4px">Every change made to your data (shifts, time-off decisions, account edits)</p>
+    <div id="myHistoryList" class="empty">Loading…</div>
+  </div>
+
+  <div class="card">
+    <h2>Change password</h2>
+    <form id="pwForm" style="max-width:440px">
+      <label>Current password</label>
+      <input type="password" id="curPw" required autocomplete="current-password">
+      <label>New password</label>
+      <input type="password" id="newPw" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+      <label>Confirm new password</label>
+      <input type="password" id="confirmPw" required minlength="8" autocomplete="new-password">
+      <div style="margin-top:18px"><button type="submit" id="saveBtn">Save new password</button></div>
+      <div class="error" id="pwErr"></div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { auth, db } from "../assets/firebase-init.js";
+  import { requireRole, logout } from "../assets/auth-router.js";
+  import { getInitials, roleBadgesHtml } from "../assets/admin-nav.js";
+  import { refreshContractorBadges } from "../assets/contractor-nav.js";
+  import { mountAnnouncementBanners } from "../assets/announcements.js";
+  import { fmtAuditAction } from "../assets/audit.js";
+  import { collection, query, where, onSnapshot, orderBy, limit } from "../assets/demo-firebase.js";
+  import {
+    EmailAuthProvider, reauthenticateWithCredential, updatePassword
+  } from "../assets/demo-firebase.js";
+
+  const { user, profile } = await requireRole("contractor");
+  const { initPresence } = await import("../assets/presence.js");
+  initPresence(user, profile);
+  document.getElementById("who").textContent = profile.name || profile.email || "";
+  document.getElementById("avatar").textContent = getInitials(profile.name || profile.email);
+  document.getElementById("logoutBtn").addEventListener("click", logout);
+  const __bb = document.getElementById("brandBadges");
+  if (__bb) __bb.innerHTML = roleBadgesHtml(profile);
+  mountAnnouncementBanners(user, profile);
+
+  // ----- What changed on my record: live audit feed for this user (where targetUser == me) -----
+  onSnapshot(
+    query(collection(db, "auditLog"), where("targetUser", "==", user.uid), orderBy("at", "desc"), limit(100)),
+    (snap) => {
+      const items = [];
+      snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+      const el = document.getElementById("myHistoryList");
+      if (items.length === 0) {
+        el.classList.add("empty");
+        el.innerHTML = "Nothing changed yet.";
+        return;
+      }
+      el.classList.remove("empty");
+      el.innerHTML = `<table class="data">
+        <thead><tr><th>When</th><th>What</th><th>By</th><th>Note</th></tr></thead>
+        <tbody>${items.map(e => {
+          const when = e.at?.toDate?.()?.toLocaleString("en-AU", { timeZone: "Australia/Melbourne", hour12: false }) || "—";
+          const by = e.who?.name || e.who?.email || "system";
+          return `<tr>
+            <td class="muted" style="font-size:12px; white-space:nowrap">${when}</td>
+            <td>${fmtAuditAction(e.action)}</td>
+            <td>${escapeHtml(by)}</td>
+            <td class="muted" style="font-size:13px">${escapeHtml(e.note || "—")}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table>`;
+    },
+    (err) => console.error("history sub:", err)
+  );
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  document.getElementById("profileName").textContent  = profile.name || "—";
+  document.getElementById("profileEmail").textContent = profile.email || "—";
+  document.getElementById("profileStart").textContent = profile.startDate || "—";
+  refreshContractorBadges(user.uid).catch(e => console.error("badges:", e));
+
+  const errEl = document.getElementById("pwErr");
+  const saveBtn = document.getElementById("saveBtn");
+  document.getElementById("pwForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errEl.textContent = "";
+    errEl.style.color = "var(--bad)";
+    const cur = document.getElementById("curPw").value;
+    const a = document.getElementById("newPw").value;
+    const b = document.getElementById("confirmPw").value;
+    if (a !== b) { errEl.textContent = "New passwords don't match."; return; }
+    if (a === cur) { errEl.textContent = "New password must differ from current."; return; }
+
+    saveBtn.disabled = true; saveBtn.textContent = "Saving…";
+    try {
+      const cred = EmailAuthProvider.credential(user.email, cur);
+      await reauthenticateWithCredential(user, cred);
+      await updatePassword(user, a);
+      errEl.style.color = "var(--ok)";
+      errEl.textContent = "Password updated.";
+      document.getElementById("pwForm").reset();
+    } catch (ex) {
+      if (ex.code === "auth/wrong-password" || ex.code === "auth/invalid-credential") {
+        errEl.textContent = "Current password is incorrect.";
+      } else if (ex.code === "auth/weak-password") {
+        errEl.textContent = "New password is too weak.";
+      } else {
+        errEl.textContent = "Failed: " + (ex.message || ex.code);
+      }
+    } finally {
+      saveBtn.disabled = false; saveBtn.textContent = "Save new password";
+    }
+  });
+</script>
+</body>
+</html>

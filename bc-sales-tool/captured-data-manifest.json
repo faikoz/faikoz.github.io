@@ -1,0 +1,10 @@
+{
+  "companyInternalName": "Ironbark Tools & Fasteners Pty Ltd",
+  "totalRequests": 27,
+  "chunks": [
+    "captured-data-001.json.gz",
+    "captured-data-002.json.gz",
+    "captured-data-003.json.gz"
+  ],
+  "dateRange": null
+}

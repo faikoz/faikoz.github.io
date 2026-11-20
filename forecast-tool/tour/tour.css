@@ -1,0 +1,609 @@
+/* ============================================================
+   Custom styling for the forecast-tool guided tour.
+   Loaded automatically by tour.js — do not include separately.
+
+   Fully themed via CSS custom properties. Every visual attribute
+   of the popover, the "Take the tour" button, and the loading
+   toast reads from a --fct-* variable. Each theme block below
+   just overrides the variables — no per-theme selector explosion.
+   ============================================================ */
+
+/* ---------- Default (Classic) palette ---------- */
+:root {
+    --fct-bg:            #ffffff;
+    --fct-fg:            #2c2f4a;
+    --fct-muted:         #6b6f8f;
+    --fct-title:         #1a237e;
+    --fct-title-font:    'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --fct-body-font:     'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --fct-accent:        #1a237e;
+    --fct-accent-hover:  #283593;
+    --fct-accent-fg:     #ffffff;
+    --fct-secondary-bg:  #eceffa;
+    --fct-secondary-fg:  #1a237e;
+    --fct-border:        rgba(26, 35, 126, 0.10);
+    --fct-stage-outline: rgba(26, 35, 126, 0.35);
+    --fct-shadow:        0 24px 60px rgba(26, 35, 126, 0.20), 0 4px 14px rgba(26, 35, 126, 0.10);
+    --fct-radius:        14px;
+    --fct-close-bg:      rgba(26, 35, 126, 0.06);
+    --fct-close-fg:      #1a237e;
+    --fct-close-hover:   rgba(26, 35, 126, 0.14);
+    --fct-fab-bg:        #ffca28;
+    --fct-fab-fg:        #1a237e;
+    --fct-fab-hover:     #ffd54f;
+    --fct-fab-shadow:    0 2px 6px rgba(0, 0, 0, 0.15);
+    --fct-toast-bg:      #ffffff;
+    --fct-toast-fg:      #2c2f4a;
+    --fct-toast-accent:  #1a237e;
+    --fct-toast-shadow:  0 12px 40px rgba(26, 35, 126, 0.25);
+}
+
+/* ---------- Onyx: champagne on warm black ---------- */
+html.theme-onyx {
+    --fct-bg: #141416;
+    --fct-fg: #f5f4f1;
+    --fct-muted: #88837a;
+    --fct-title: #d4af7a;
+    --fct-title-font: 'Cormorant Garamond', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #d4af7a;
+    --fct-accent-hover: #e0bc86;
+    --fct-accent-fg: #141416;
+    --fct-secondary-bg: rgba(212, 175, 122, 0.12);
+    --fct-secondary-fg: #d4af7a;
+    --fct-border: rgba(212, 175, 122, 0.20);
+    --fct-stage-outline: rgba(212, 175, 122, 0.55);
+    --fct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4);
+    --fct-close-bg: rgba(212, 175, 122, 0.10);
+    --fct-close-fg: #d4af7a;
+    --fct-close-hover: rgba(212, 175, 122, 0.22);
+    --fct-fab-bg: #d4af7a;
+    --fct-fab-fg: #141416;
+    --fct-fab-hover: #e0bc86;
+    --fct-toast-bg: #1c1c1e;
+    --fct-toast-fg: #f5f4f1;
+    --fct-toast-accent: #d4af7a;
+    --fct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Linen: quiet-luxury cream ---------- */
+html.theme-linen {
+    --fct-bg: #f6f2ea;
+    --fct-fg: #1a1a1a;
+    --fct-muted: #6e6a60;
+    --fct-title: #1a1a1a;
+    --fct-title-font: 'Fraunces', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #5b6e3f;
+    --fct-accent-hover: #6f8250;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(91, 110, 63, 0.12);
+    --fct-secondary-fg: #3c4a2a;
+    --fct-border: rgba(45, 42, 36, 0.14);
+    --fct-stage-outline: rgba(45, 42, 36, 0.35);
+    --fct-shadow: 0 18px 50px rgba(45, 42, 36, 0.14);
+    --fct-close-bg: rgba(45, 42, 36, 0.08);
+    --fct-close-fg: #1a1a1a;
+    --fct-close-hover: rgba(45, 42, 36, 0.16);
+    --fct-fab-bg: #5b6e3f;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #6f8250;
+    --fct-toast-bg: #f6f2ea;
+    --fct-toast-fg: #1a1a1a;
+    --fct-toast-accent: #5b6e3f;
+}
+
+/* ---------- Aurora: iridescent dark tech-glass ---------- */
+html.theme-aurora {
+    --fct-bg: rgba(24, 22, 45, 0.92);
+    --fct-fg: #eaeaf2;
+    --fct-muted: #b8b6cc;
+    --fct-title: #eaeaf2;
+    --fct-title-font: 'Space Grotesk', sans-serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #b57bff;
+    --fct-accent-hover: #c78fff;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(181, 123, 255, 0.16);
+    --fct-secondary-fg: #eaeaf2;
+    --fct-border: rgba(255, 255, 255, 0.12);
+    --fct-stage-outline: rgba(181, 123, 255, 0.55);
+    --fct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 40px rgba(181, 123, 255, 0.25);
+    --fct-close-bg: rgba(255, 255, 255, 0.10);
+    --fct-close-fg: #eaeaf2;
+    --fct-close-hover: rgba(255, 255, 255, 0.20);
+    --fct-fab-bg: linear-gradient(135deg, #b57bff, #ff6b9d);
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: linear-gradient(135deg, #c78fff, #ff85af);
+    --fct-toast-bg: rgba(24, 22, 45, 0.94);
+    --fct-toast-fg: #eaeaf2;
+    --fct-toast-accent: #b57bff;
+    --fct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.55), 0 0 30px rgba(181, 123, 255, 0.3);
+}
+
+/* ---------- Atelier: brutalist black-on-white ---------- */
+html.theme-atelier {
+    --fct-bg: #ffffff;
+    --fct-fg: #000000;
+    --fct-muted: #444444;
+    --fct-title: #000000;
+    --fct-title-font: 'Space Grotesk', sans-serif;
+    --fct-body-font: 'Space Grotesk', sans-serif;
+    --fct-accent: #ff4400;
+    --fct-accent-hover: #e63d00;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: #000000;
+    --fct-secondary-fg: #ffffff;
+    --fct-border: #000000;
+    --fct-stage-outline: #ff4400;
+    --fct-shadow: 6px 6px 0 #000000;
+    --fct-radius: 0px;
+    --fct-close-bg: #000000;
+    --fct-close-fg: #ffffff;
+    --fct-close-hover: #ff4400;
+    --fct-fab-bg: #ff4400;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #e63d00;
+    --fct-fab-shadow: 3px 3px 0 #000000;
+    --fct-toast-bg: #ffffff;
+    --fct-toast-fg: #000000;
+    --fct-toast-accent: #ff4400;
+    --fct-toast-shadow: 4px 4px 0 #000000;
+}
+
+/* ---------- Concierge: sand + emerald ---------- */
+html.theme-concierge {
+    --fct-bg: #f3eee5;
+    --fct-fg: #2c2a26;
+    --fct-muted: #7a7368;
+    --fct-title: #0e4d3f;
+    --fct-title-font: 'Fraunces', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #0e4d3f;
+    --fct-accent-hover: #12604f;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(14, 77, 63, 0.12);
+    --fct-secondary-fg: #0e4d3f;
+    --fct-border: rgba(44, 42, 38, 0.14);
+    --fct-stage-outline: rgba(14, 77, 63, 0.50);
+    --fct-shadow: 0 18px 50px rgba(44, 42, 38, 0.15);
+    --fct-close-bg: rgba(44, 42, 38, 0.08);
+    --fct-close-fg: #2c2a26;
+    --fct-close-hover: rgba(44, 42, 38, 0.16);
+    --fct-fab-bg: #9c7a3c;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #b08d47;
+    --fct-toast-bg: #f3eee5;
+    --fct-toast-fg: #2c2a26;
+    --fct-toast-accent: #0e4d3f;
+}
+
+/* ---------- Marble: private-bank navy ---------- */
+html.theme-marble {
+    --fct-bg: #ffffff;
+    --fct-fg: #1c2833;
+    --fct-muted: #6a7681;
+    --fct-title: #1e3a5f;
+    --fct-title-font: 'Cormorant Garamond', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #1e3a5f;
+    --fct-accent-hover: #2a4e7d;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(30, 58, 95, 0.08);
+    --fct-secondary-fg: #1e3a5f;
+    --fct-border: rgba(28, 40, 51, 0.10);
+    --fct-stage-outline: rgba(30, 58, 95, 0.45);
+    --fct-shadow: 0 20px 50px rgba(28, 40, 51, 0.14);
+    --fct-close-bg: rgba(28, 40, 51, 0.06);
+    --fct-close-fg: #1e3a5f;
+    --fct-close-hover: rgba(28, 40, 51, 0.14);
+    --fct-fab-bg: #1e3a5f;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #2a4e7d;
+    --fct-toast-bg: #ffffff;
+    --fct-toast-fg: #1c2833;
+    --fct-toast-accent: #1e3a5f;
+}
+
+/* ---------- Velvet: opera-house burgundy + gold ---------- */
+html.theme-velvet {
+    --fct-bg: #1f0a10;
+    --fct-fg: #f0e6d2;
+    --fct-muted: rgba(240, 230, 210, 0.60);
+    --fct-title: #c9a04a;
+    --fct-title-font: 'Cormorant Garamond', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #c9a04a;
+    --fct-accent-hover: #d9b25a;
+    --fct-accent-fg: #1f0a10;
+    --fct-secondary-bg: rgba(201, 160, 74, 0.14);
+    --fct-secondary-fg: #c9a04a;
+    --fct-border: rgba(201, 160, 74, 0.24);
+    --fct-stage-outline: rgba(201, 160, 74, 0.60);
+    --fct-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.4);
+    --fct-close-bg: rgba(201, 160, 74, 0.12);
+    --fct-close-fg: #c9a04a;
+    --fct-close-hover: rgba(201, 160, 74, 0.24);
+    --fct-fab-bg: #c9a04a;
+    --fct-fab-fg: #1f0a10;
+    --fct-fab-hover: #d9b25a;
+    --fct-toast-bg: #2a1014;
+    --fct-toast-fg: #f0e6d2;
+    --fct-toast-accent: #c9a04a;
+    --fct-toast-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+/* ---------- Glacier: arctic mineral ---------- */
+html.theme-glacier {
+    --fct-bg: #f6f9fb;
+    --fct-fg: #1a2738;
+    --fct-muted: #5e7286;
+    --fct-title: #1b4f7e;
+    --fct-title-font: 'Fraunces', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #1b4f7e;
+    --fct-accent-hover: #276a9d;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(27, 79, 126, 0.10);
+    --fct-secondary-fg: #1b4f7e;
+    --fct-border: rgba(26, 39, 56, 0.10);
+    --fct-stage-outline: rgba(27, 79, 126, 0.50);
+    --fct-shadow: 0 20px 50px rgba(26, 39, 56, 0.14);
+    --fct-close-bg: rgba(26, 39, 56, 0.06);
+    --fct-close-fg: #1b4f7e;
+    --fct-close-hover: rgba(26, 39, 56, 0.14);
+    --fct-fab-bg: #1b4f7e;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #276a9d;
+    --fct-toast-bg: #f6f9fb;
+    --fct-toast-fg: #1a2738;
+    --fct-toast-accent: #1b4f7e;
+}
+
+/* ---------- Bibliotheque: reading-room claret + gilt ---------- */
+html.theme-bibliotheque {
+    --fct-bg: #f6efdd;
+    --fct-fg: #2a1c0e;
+    --fct-muted: #6e5526;
+    --fct-title: #7a1f2b;
+    --fct-title-font: 'Cormorant Garamond', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #7a1f2b;
+    --fct-accent-hover: #932639;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(122, 31, 43, 0.10);
+    --fct-secondary-fg: #7a1f2b;
+    --fct-border: rgba(42, 28, 14, 0.14);
+    --fct-stage-outline: rgba(122, 31, 43, 0.50);
+    --fct-shadow: 0 18px 50px rgba(42, 28, 14, 0.16);
+    --fct-close-bg: rgba(42, 28, 14, 0.08);
+    --fct-close-fg: #7a1f2b;
+    --fct-close-hover: rgba(42, 28, 14, 0.16);
+    --fct-fab-bg: #b8923c;
+    --fct-fab-fg: #2a1c0e;
+    --fct-fab-hover: #cca350;
+    --fct-toast-bg: #f6efdd;
+    --fct-toast-fg: #2a1c0e;
+    --fct-toast-accent: #7a1f2b;
+}
+
+/* ---------- Pavilion: sage + brushed brass ---------- */
+html.theme-pavilion {
+    --fct-bg: #f9f5ec;
+    --fct-fg: #2e3329;
+    --fct-muted: #6e7561;
+    --fct-title: #2e3329;
+    --fct-title-font: 'Fraunces', serif;
+    --fct-body-font: 'Inter', sans-serif;
+    --fct-accent: #6e7d5e;
+    --fct-accent-hover: #82936f;
+    --fct-accent-fg: #ffffff;
+    --fct-secondary-bg: rgba(110, 125, 94, 0.14);
+    --fct-secondary-fg: #2e3329;
+    --fct-border: rgba(46, 51, 41, 0.12);
+    --fct-stage-outline: rgba(110, 125, 94, 0.50);
+    --fct-shadow: 0 18px 50px rgba(46, 51, 41, 0.14);
+    --fct-close-bg: rgba(46, 51, 41, 0.08);
+    --fct-close-fg: #2e3329;
+    --fct-close-hover: rgba(46, 51, 41, 0.16);
+    --fct-fab-bg: #a88a4c;
+    --fct-fab-fg: #ffffff;
+    --fct-fab-hover: #b89c5c;
+    --fct-toast-bg: #f9f5ec;
+    --fct-toast-fg: #2e3329;
+    --fct-toast-accent: #a88a4c;
+}
+
+/* ============================================================
+   "Take the tour" button — sits in the demo header
+   ============================================================ */
+.fc-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px 8px 12px;
+    background: var(--fct-fab-bg);
+    color: var(--fct-fab-fg);
+    border: 0;
+    border-radius: 8px;
+    font: 600 13px/1.2 var(--fct-body-font);
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    box-shadow: var(--fct-fab-shadow);
+    transition: transform 0.08s, filter 0.15s;
+}
+.fc-tour-btn:hover    { background: var(--fct-fab-hover); filter: brightness(1.02); }
+.fc-tour-btn:active   { transform: translateY(1px); }
+.fc-tour-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 17px;
+    height: 17px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.14);
+    color: inherit;
+    font-size: 11px;
+    font-weight: 800;
+}
+html.theme-aurora .fc-tour-btn-icon,
+html.theme-onyx .fc-tour-btn-icon,
+html.theme-velvet .fc-tour-btn-icon {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.fc-tour-btn-floating {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 9999;
+    padding: 11px 18px;
+    font-size: 13px;
+}
+
+/* ============================================================
+   Driver.js popover — polished + fully themed
+   ============================================================ */
+.driver-popover.fc-tour-popover {
+    background: var(--fct-bg);
+    color: var(--fct-fg);
+    border-radius: var(--fct-radius);
+    box-shadow: var(--fct-shadow);
+    border: 1px solid var(--fct-border);
+    font-family: var(--fct-body-font);
+    max-width: 380px;
+    padding: 22px 24px 18px;
+    /* Aurora uses translucent backgrounds — add backdrop blur */
+    backdrop-filter: saturate(1.1) blur(6px);
+}
+
+.driver-popover.fc-tour-popover .driver-popover-title {
+    font-family: var(--fct-title-font);
+    color: var(--fct-title);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.1px;
+    line-height: 1.25;
+    margin: 0 34px 8px 0; /* leave room for the close X */
+}
+
+.driver-popover.fc-tour-popover .driver-popover-description {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--fct-fg);
+    opacity: 0.92;
+    margin-bottom: 16px;
+}
+.driver-popover.fc-tour-popover .driver-popover-description b,
+.driver-popover.fc-tour-popover .driver-popover-description strong {
+    color: var(--fct-title);
+    font-weight: 700;
+}
+
+/* Progress text — quiet, tabular */
+.driver-popover.fc-tour-popover .driver-popover-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid var(--fct-border);
+    margin-top: 6px;
+}
+.driver-popover.fc-tour-popover .driver-popover-progress-text {
+    color: var(--fct-muted);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+.driver-popover.fc-tour-popover .driver-popover-navigation-btns {
+    display: inline-flex;
+    gap: 8px;
+}
+.driver-popover.fc-tour-popover .driver-popover-next-btn,
+.driver-popover.fc-tour-popover .driver-popover-prev-btn {
+    background: var(--fct-accent);
+    color: var(--fct-accent-fg);
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font: 600 12px/1 var(--fct-body-font);
+    letter-spacing: 0.2px;
+    text-shadow: none;
+    cursor: pointer;
+    transition: filter 0.12s, transform 0.06s;
+}
+.driver-popover.fc-tour-popover .driver-popover-next-btn:hover,
+.driver-popover.fc-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--fct-accent-hover);
+    filter: brightness(1.03);
+}
+.driver-popover.fc-tour-popover .driver-popover-next-btn:active,
+.driver-popover.fc-tour-popover .driver-popover-prev-btn:active {
+    transform: translateY(1px);
+}
+.driver-popover.fc-tour-popover .driver-popover-prev-btn {
+    background: var(--fct-secondary-bg);
+    color: var(--fct-secondary-fg);
+}
+.driver-popover.fc-tour-popover .driver-popover-prev-btn:hover {
+    background: var(--fct-secondary-bg);
+    filter: brightness(0.96);
+}
+
+/* Close button — subtle circular pill, top-right */
+.driver-popover.fc-tour-popover .driver-popover-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--fct-close-bg);
+    color: var(--fct-close-fg);
+    border: 0;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.12s;
+    text-shadow: none;
+}
+.driver-popover.fc-tour-popover .driver-popover-close-btn:hover {
+    background: var(--fct-close-hover);
+}
+html.theme-atelier .driver-popover.fc-tour-popover .driver-popover-close-btn {
+    border-radius: 0;
+}
+
+/* Arrow colour — Driver.js draws a CSS-triangle border; match --fct-bg. */
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-top    { border-top-color:    var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-bottom { border-bottom-color: var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-left   { border-left-color:   var(--fct-bg); }
+.driver-popover.fc-tour-popover .driver-popover-arrow-side-right  { border-right-color:  var(--fct-bg); }
+
+/* Stage outline — subtle themed ring around the highlighted element */
+.driver-active-element {
+    outline: 2px solid var(--fct-stage-outline) !important;
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+/* ============================================================
+   Center-screen loading card — shown while Load sales is running.
+   Deliberately NOT anchored bottom-right, so the demo's own
+   #bcProgress ("Value Entries (loading)…") stays visible over
+   there and you can see which entity BC is fetching.
+   ============================================================ */
+
+/* Lift the demo's own bottom-right progress card above the Driver.js
+   stage overlay (z-index ~10000) so it stays at full brightness while
+   the tour is running — otherwise the overlay dims it into unreadable. */
+#bcProgress {
+    z-index: 100001 !important;
+}
+#fc-tour-load-toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.96);
+    opacity: 0;
+    z-index: 100000;
+    pointer-events: none;   /* click-through so the demo's UI stays reachable */
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 26px 20px 22px;
+    background: var(--fct-toast-bg);
+    color: var(--fct-toast-fg);
+    border: 1px solid var(--fct-border);
+    border-radius: 14px;
+    box-shadow: var(--fct-toast-shadow, var(--fct-shadow));
+    font-family: var(--fct-body-font);
+    font-size: 14px;
+    min-width: 320px;
+    max-width: 420px;
+    backdrop-filter: saturate(1.1) blur(8px);
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+html.theme-atelier #fc-tour-load-toast {
+    border-radius: 0;
+    border: 2px solid var(--fct-fg);
+}
+
+#fc-tour-load-toast.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.fc-tour-toast-spinner {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--fct-border);
+    border-top-color: var(--fct-toast-accent);
+    animation: fct-spin 0.9s linear infinite;
+}
+html.theme-atelier .fc-tour-toast-spinner { border-radius: 0; }
+
+.fc-tour-toast-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+.fc-tour-toast-title {
+    font-weight: 700;
+    color: var(--fct-toast-accent);
+    font-family: var(--fct-title-font);
+    letter-spacing: 0.1px;
+    font-size: 15px;
+    line-height: 1.2;
+}
+.fc-tour-toast-sub {
+    font-size: 12.5px;
+    color: var(--fct-muted);
+    line-height: 1.4;
+}
+
+@keyframes fct-spin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ---- review round 2 (2026-11-02): visible close, pulsing click target ---- */
+.driver-popover.fc-tour-popover .driver-popover-close-btn {
+    width: 28px; height: 28px; top: 10px; right: 10px;
+    background: #fff; color: #d32f2f; font-size: 20px; font-weight: 700; line-height: 1;
+    border: 2px solid #d32f2f; border-radius: 50%; opacity: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+}
+.driver-popover.fc-tour-popover .driver-popover-close-btn:hover { background: #d32f2f; color: #fff; }
+.driver-popover.fc-tour-popover .driver-popover-title { padding-right: 34px; }
+.fc-tour-pulse {
+    animation: fcTourPulse 1.1s ease-in-out infinite;
+    position: relative; z-index: 10001;
+}
+@keyframes fcTourPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(211, 47, 47, .85); }
+    70%  { box-shadow: 0 0 0 14px rgba(211, 47, 47, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+}
+
+.driver-popover.fc-tour-popover .fc-tour-sub { display:block; margin-top:6px; font-size:12px; opacity:.75; }
+
+/* --- forecast demo: button bottom-right of the header, clear of the title and the import badges --- */
+.fc-tour-btn-in-header { position: absolute !important; top: auto !important; bottom: 12px !important; right: 24px !important; left: auto !important; }
+
+/* --- the item window (z 10700) and the advanced-methods popup (z 10800) sit above Driver's default overlay;
+       lift the overlay so the dimming and the cut-out work inside those windows too (below the tool's
+       own message popup at 12000) --- */
+.driver-overlay { z-index: 11900 !important; }

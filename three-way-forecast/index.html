@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three-Way Forecast - Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>#demo-chooser h1{color:#1e3a8a !important}
+/* Month-by-month tables: all twelve months AND the Year column in view, no sideways scroll. */
+#pnlTable,#cashflowTable{font-size:11.5px;font-variant-numeric:tabular-nums;table-layout:auto}
+#pnlTable th,#pnlTable td,#cashflowTable th,#cashflowTable td{padding-left:5px !important;padding-right:5px !important;white-space:nowrap}
+#pnlTable th:first-child,#pnlTable td:first-child,#cashflowTable th:first-child,#cashflowTable td:first-child{white-space:normal;padding-left:10px !important;max-width:118px}
+#pnlTable th:last-child,#pnlTable td:last-child,#cashflowTable th:last-child,#cashflowTable td:last-child{padding-right:10px !important}
+/* Financial Position uses the same type size as the other two tables. */
+#balanceSheetTable{font-size:11.5px;font-variant-numeric:tabular-nums}
+@media (max-width:1320px){#pnlTable,#cashflowTable,#balanceSheetTable{font-size:10.5px}#pnlTable th,#pnlTable td,#cashflowTable th,#cashflowTable td{padding-left:3px !important;padding-right:3px !important}}
+</style>
+<script>
+window.__DEMO_LOADED__ = true;
+window.__DEMO_STORY__ = {"fy": "FY2027", "text": {"growth": "9.8%", "growth_round": "10%", "gm": "33.5%", "gm_change": "-1.1pp", "cogs_ratio": "66.5%", "cogs_ratio_last": "65.4%", "expense_ratio": "28.2%", "h1": "$10.81M", "h2": "$10.74M", "stronger": "H1", "tight": "Jul, Dec and Jan", "tight_list": ["Jul", "Dec", "Jan"], "loss_months": ["Jul-26", "Dec-26", "Jan-27"], "debt": "$1.48M", "debt_pct": "6.9%", "receivables": "$2.72M", "receivable_days": 46, "facility": "$0.45M"}, "low_cash_month": "Jul-26", "company": "Ironbark Tools & Fasteners Pty Ltd"};
+window.DEMO_CHOOSER = {
+  key: "ironbark-three-way-forecast",
+  title: "Three-Way Forecast",
+  blurb: "A year's budget on one page, shown for a fictional industrial hardware distributor: profit and loss month by month, the financial position by quarter, and the cash that follows from both, with the assumptions and the risks written underneath. Every figure is invented."
+};
+</script>
+<link rel="stylesheet" href="tour/demo-chooser.css">
+<script src="tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="tour/tour.css">
+<script src="tour/tour.js" defer></script>
+</head>
+<body class="bg-gray-50 min-h-screen"><div id="demo-banner" style="position:sticky;top:0;z-index:99999;background:#fef3c7;color:#92400e;padding:0.4rem 1rem;text-align:center;font-size:0.78rem;font-weight:600;border-bottom:1px solid #fbbf24;font-family:-apple-system,'Segoe UI',Roboto,sans-serif">Demo &middot; fully synthetic figures (Ironbark Tools &amp; Fasteners Pty Ltd is not a real company) &middot; <a href="javascript:(window.DemoChooser?DemoChooser.reset():location.reload())" style="color:#92400e;text-decoration:underline">Start again</a></div>
+    <div class="p-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Ironbark Tools &amp; Fasteners</h1>
+                <h2 class="text-xl text-gray-600 mb-4">Three-Way Forecast &middot; FY2027 budget</h2>
+                
+                <!-- Key Performance Summary -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4" id="kpiSummary">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-blue-700">Sales for the year</h3>
+                        <p class="text-2xl font-bold text-blue-800" id="projectedRevenue"></p>
+                        <p class="text-sm text-blue-600">+9.8% on FY2026</p>
+                    </div>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-green-700">Gross profit</h3>
+                        <p class="text-2xl font-bold text-green-800" id="grossProfit"></p>
+                        <p class="text-sm text-green-600" id="grossMargin"></p>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-purple-700">Profit after overheads</h3>
+                        <p class="text-2xl font-bold text-purple-800" id="netProfit"></p>
+                        <p class="text-sm text-purple-600" id="netProfitComparison"></p>
+                    </div>
+                    <div class="bg-orange-50 p-4 rounded-lg">
+                        <h3 class="text-sm font-semibold text-orange-700">Cash at 30 June</h3>
+                        <p class="text-2xl font-bold text-orange-800" id="yearEndCash"></p>
+                        <p class="text-sm text-orange-600" id="cashComparison"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="bg-white rounded-lg shadow-md mb-6">
+                <div class="flex border-b border-gray-200">
+                    <button onclick="showView('summary')" class="px-6 py-3 font-medium border-b-2 border-blue-500 text-blue-600 bg-blue-50" id="tab-summary">Overview</button>
+                    <button onclick="showView('pnl')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-pnl">Profit &amp; Loss</button>
+                    <button onclick="showView('balance')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-balance">Financial Position</button>
+                    <button onclick="showView('cashflow')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-cashflow">Cash</button>
+                    <button onclick="showView('charts')" class="px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50" id="tab-charts">Charts</button>
+                </div>
+            </div>
+
+            <!-- Content Views -->
+            
+            <!-- Overview -->
+            <div id="view-summary" class="space-y-6">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Overview &middot; FY2027</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold mb-3 text-gray-700">The year in four lines</h4>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Sales growth:</span>
+                                    <span class="font-medium text-green-600" id="revenueGrowth"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Gross margin:</span>
+                                    <span class="font-medium text-red-600">-1.1pp to 33.5%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Profit, change on last year:</span>
+                                    <span class="font-medium text-green-600" id="netProfitImprovement"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Overheads:</span>
+                                    <span class="font-medium">28.2% of sales</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold mb-3 text-gray-700">What stands out</h4>
+                            <ul class="text-sm space-y-2">
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Sales up 9.8% on last year, with the new Mackay depot and project work carrying most of the increase
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-green-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Cost of sales creeps up to 66.5% of sales from 65.4%, mostly imported lines and freight</li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    The two halves are close: July to December $10.81M, January to June $10.74M, with spring and autumn carrying each half
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="w-2 h-2 bg-orange-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
+                                    Jul, Dec and Jan are the lean months: sales drop, overheads do not
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- YoY Comparison -->
+                    <div class="mt-6 border-t pt-4">
+                        <h4 class="font-semibold mb-3 text-gray-700">This year against last year</h4>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-sm">
+                                <thead>
+                                    <tr class="border-b">
+                                        <th class="text-left py-2">Line</th>
+                                        <th class="text-right py-2">FY2026 actual</th>
+                                        <th class="text-right py-2">FY2027 budget</th>
+                                        <th class="text-right py-2">Difference</th>
+                                        <th class="text-right py-2">Change</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="yoyComparison">
+                                    <!-- Data populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- P&L View -->
+            <div id="view-pnl" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Profit &amp; Loss &middot; FY2027, month by month</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="pnlTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cash Flow View -->
+            <div id="view-cashflow" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Cash &middot; FY2027, month by month</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="cashflowTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+                
+                <div class="mt-6 p-4 bg-yellow-50 rounded-lg">
+                    <h4 class="font-semibold text-yellow-800 mb-2">Reading the cash line</h4>
+                    <div class="text-sm text-yellow-700 space-y-1">
+                        <p>• <strong>Debtors grow with sales:</strong> more sold on account means more cash waiting to be collected</p>
+                        <p>• <strong>The lean months:</strong> Jul, Dec and Jan take cash out; the low point is Jul-26</p>
+                        <p>• <strong>Room to invest:</strong> spring and autumn build the cash that pays for stock and new lines</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Balance Sheet View -->
+            <div id="view-balance" class="bg-white rounded-lg shadow-md p-6" style="display: none;">
+                <h3 class="text-xl font-bold mb-4">Financial Position &middot; FY2027, by quarter</h3>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm" id="balanceSheetTable">
+                        <!-- Table populated by JavaScript -->
+                    </table>
+                </div>
+                
+                <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-800 mb-2">Assets</h4>
+                        <p class="text-sm text-blue-700" id="assetGrowthAnalysis">
+                            <!-- Analysis populated by JavaScript -->
+                        </p>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-semibold text-green-800 mb-2">Owners' equity</h4>
+                        <p class="text-sm text-green-700" id="equityPosition">
+                            <!-- Analysis populated by JavaScript -->
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts View -->
+            <div id="view-charts" class="space-y-6" style="display: none;">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Sales, cost of sales and gross profit by month</h3>
+                    <div style="position: relative; height: 400px; width: 100%;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-bold mb-4">Cash in the bank and profit for the month</h3>
+                    <div style="position: relative; height: 300px; width: 100%;">
+                        <canvas id="cashFlowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Assumptions and Risks -->
+            <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                <h3 class="text-xl font-bold mb-4">What the forecast rests on</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold mb-3 text-green-700">Assumptions</h4>
+                        <ul class="text-sm space-y-2">
+                            <li>• Sales grow about 10%: a full year of the Mackay depot, plus a mid-year price rise</li>
+                            <li>• Cost of sales at 66.5% of sales (65.4% last year); two supplier agreements are up for renewal</li>
+                            <li>• Overheads stay close to flat in dollars, so they fall as a share of sales</li>
+                            <li>• No large purchases: only vehicle and forklift replacements already scheduled</li>
+                            <li>• The bank rate stays where it is for the year</li>
+                            <li>• Stock and debtors grow in line with sales, no faster</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold mb-3 text-red-700">What could go wrong</h4>
+                        <ul class="text-sm space-y-2">
+                            <li>• Cash is thin in Jul, Dec and Jan</li>
+                            <li>• Bank lending of $1.48M (6.9% of sales) has to be serviced whatever the month</li>
+                            <li>• A weaker dollar lifts the cost of the imported ranges</li>
+                            <li>• Building and mining both slow at the same time</li>
+                            <li>• Debtors of $2.72M (about 46 days of sales) drifting later</li>
+                            <li>• Discounting to hold project work eats the margin</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gray-100 rounded-lg">
+                    <p class="text-sm text-gray-700">
+                        <strong>Suggested next step:</strong> arrange a $0.45M overdraft to cover the lean months, and chase debtors a week earlier so less of it is needed.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Financial Data
+        const lastYear = {
+            revenue: 19624380,
+            cogs: 12834350,
+            grossProfit: 6790030,
+            otherIncome: 138420,
+            totalExpenses: 5948900,
+            netProfit: 979550,
+            cash: 412650,
+            totalAssets: 9861240,
+            totalLiabilities: 5628910,
+            equity: 4232330
+        };
+
+        const monthlyBudgetData = {
+            months: ['Jul-26', 'Aug-26', 'Sep-26', 'Oct-26', 'Nov-26', 'Dec-26', 'Jan-27', 'Feb-27', 'Mar-27', 'Apr-27', 'May-27', 'Jun-27'],
+            revenue: [1520751, 1816903, 1861026, 2023650, 2104318, 1481001, 1226513, 1755211, 1964186, 1961780, 2032237, 1799876],
+            cogs: [1028014, 1192486, 1228210, 1340913, 1386283, 1005828, 825013, 1168323, 1301117, 1300449, 1343596, 1199048],
+            grossProfit: [492737, 624417, 632816, 682737, 718035, 475173, 401500, 586888, 663069, 661331, 688641, 600828],
+            expenses: [514764, 505752, 518022, 489542, 527434, 493649, 513648, 492608, 495342, 497322, 541229, 495781],
+            netProfit: [-22027, 118665, 114794, 193195, 190601, -18476, -112148, 94280, 167727, 164009, 147412, 105047]
+        };
+
+        // Utility functions
+        const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-AU', {
+                style: 'currency',
+                currency: 'AUD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(value);
+        };
+
+        const formatPercentage = (value) => {
+            return (value * 100).toFixed(1) + '%';
+        };
+
+        // Calculate derived data
+        const calculateCashFlow = () => {
+            let runningCash = lastYear.cash;
+            return monthlyBudgetData.months.map((month, index) => {
+                const netCashFlow = monthlyBudgetData.netProfit[index] + (198600 / 12);
+                runningCash += netCashFlow;
+                return {
+                    month,
+                    netProfit: monthlyBudgetData.netProfit[index],
+                    depreciation: 198600 / 12,
+                    cashFlow: netCashFlow,
+                    cumulativeCash: runningCash
+                };
+            });
+        };
+
+        const calculateBalanceSheet = () => {
+            let runningEquity = lastYear.equity;
+            let runningAssets = lastYear.totalAssets;
+            
+            return monthlyBudgetData.months.map((month, index) => {
+                runningEquity += monthlyBudgetData.netProfit[index];
+                runningAssets += monthlyBudgetData.netProfit[index] * 0.3;
+                
+                return {
+                    month,
+                    totalAssets: runningAssets,
+                    totalLiabilities: runningAssets - runningEquity,
+                    equity: runningEquity,
+                    workingCapital: runningAssets * 0.6 - (runningAssets - runningEquity) * 0.5
+                };
+            });
+        };
+
+        const cashFlowData = calculateCashFlow();
+        const balanceSheetData = calculateBalanceSheet();
+
+        // Calculate annual totals
+        const annualTotals = {
+            revenue: monthlyBudgetData.revenue.reduce((a, b) => a + b, 0),
+            cogs: monthlyBudgetData.cogs.reduce((a, b) => a + b, 0),
+            grossProfit: monthlyBudgetData.grossProfit.reduce((a, b) => a + b, 0),
+            expenses: monthlyBudgetData.expenses.reduce((a, b) => a + b, 0),
+            netProfit: monthlyBudgetData.netProfit.reduce((a, b) => a + b, 0)
+        };
+
+        // View management
+        let currentView = 'summary';
+
+        function showView(viewName) {
+            // Hide all views
+            const views = ['summary', 'pnl', 'balance', 'cashflow', 'charts'];
+            views.forEach(view => {
+                const element = document.getElementById(`view-${view}`);
+                if (element) {
+                    element.style.display = 'none';
+                }
+                
+                // Update tab styling
+                const tab = document.getElementById(`tab-${view}`);
+                if (tab) {
+                    tab.className = 'px-6 py-3 font-medium text-gray-600 hover:text-gray-800 hover:bg-gray-50';
+                }
+            });
+
+            // Show selected view
+            const selectedView = document.getElementById(`view-${viewName}`);
+            if (selectedView) {
+                selectedView.style.display = viewName === 'charts' ? 'block' : 'block';
+            }
+
+            // Update selected tab styling
+            const selectedTab = document.getElementById(`tab-${viewName}`);
+            if (selectedTab) {
+                selectedTab.className = 'px-6 py-3 font-medium border-b-2 border-blue-500 text-blue-600 bg-blue-50';
+            }
+
+            currentView = viewName;
+
+            // Initialize specific view content
+            if (viewName === 'pnl') {
+                populatePnLTable();
+            } else if (viewName === 'cashflow') {
+                populateCashflowTable();
+            } else if (viewName === 'balance') {
+                populateBalanceSheetTable();
+            } else if (viewName === 'charts') {
+                // Delay chart initialization to ensure the view is visible
+                setTimeout(() => {
+                    initializeCharts();
+                }, 100);
+            }
+        }
+
+        // Populate KPI Summary
+        function populateKPISummary() {
+            document.getElementById('projectedRevenue').textContent = formatCurrency(annualTotals.revenue);
+            document.getElementById('grossProfit').textContent = formatCurrency(annualTotals.grossProfit);
+            document.getElementById('grossMargin').textContent = formatPercentage(annualTotals.grossProfit / annualTotals.revenue) + ' margin';
+            document.getElementById('netProfit').textContent = formatCurrency(annualTotals.netProfit);
+            document.getElementById('netProfitComparison').textContent = `${formatCurrency(lastYear.netProfit)} last year`;
+            document.getElementById('yearEndCash').textContent = formatCurrency(cashFlowData[11].cumulativeCash);
+            document.getElementById('cashComparison').textContent = `from ${formatCurrency(lastYear.cash)} at the start`;
+            
+            // Summary page specific elements
+            document.getElementById('revenueGrowth').textContent = `+9.8% (${formatCurrency(annualTotals.revenue - lastYear.revenue)})`;
+            document.getElementById('netProfitImprovement').textContent = formatCurrency(annualTotals.netProfit - lastYear.netProfit);
+        }
+
+        // Populate YoY Comparison Table
+        function populateYoYComparison() {
+            const tbody = document.getElementById('yoyComparison');
+            const comparisons = [
+                {
+                    metric: 'Sales',
+                    actual: lastYear.revenue,
+                    budget: annualTotals.revenue,
+                    isPositive: true
+                },
+                {
+                    metric: 'Gross profit',
+                    actual: lastYear.grossProfit,
+                    budget: annualTotals.grossProfit,
+                    isPositive: true
+                },
+                {
+                    metric: 'Profit',
+                    actual: lastYear.netProfit,
+                    budget: annualTotals.netProfit,
+                    isPositive: true
+                }
+            ];
+
+            tbody.innerHTML = comparisons.map(comp => {
+                const variance = comp.budget - comp.actual;
+                const percentChange = Math.abs(comp.actual) > 0 ? (variance / Math.abs(comp.actual) * 100).toFixed(1) : '0.0';
+                const colorClass = comp.isPositive && variance > 0 || !comp.isPositive && variance < 0 ? 'text-green-600' : 'text-red-600';
+                const sign = variance >= 0 ? '+' : '';
+                
+                return `
+                    <tr class="border-b">
+                        <td class="py-2 font-medium">${comp.metric}</td>
+                        <td class="text-right py-2">${formatCurrency(comp.actual)}</td>
+                        <td class="text-right py-2">${formatCurrency(comp.budget)}</td>
+                        <td class="text-right py-2 ${colorClass}">${formatCurrency(variance)}</td>
+                        <td class="text-right py-2 ${colorClass}">${sign}${percentChange}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Populate P&L Table
+        function populatePnLTable() {
+            const table = document.getElementById('pnlTable');
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Line</th>
+                        ${monthlyBudgetData.months.map(month => `<th class="text-right py-3 px-2 font-semibold">${month}</th>`).join('')}
+                        <th class="text-right py-3 px-4 font-semibold bg-blue-100">Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-blue-700">SALES</td>
+                        ${monthlyBudgetData.revenue.map(rev => `<td class="text-right py-3 px-2">${formatCurrency(rev)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-blue-50">${formatCurrency(annualTotals.revenue)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-red-700">COST OF SALES</td>
+                        ${monthlyBudgetData.cogs.map(cog => `<td class="text-right py-3 px-2">(${formatCurrency(cog)})</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-red-50">(${formatCurrency(annualTotals.cogs)})</td>
+                    </tr>
+                    <tr class="border-b bg-green-50">
+                        <td class="py-3 px-4 font-bold text-green-700">GROSS PROFIT</td>
+                        ${monthlyBudgetData.grossProfit.map(gp => `<td class="text-right py-3 px-2 font-semibold">${formatCurrency(gp)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-green-100">${formatCurrency(annualTotals.grossProfit)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Gross profit %</td>
+                        ${monthlyBudgetData.grossProfit.map((gp, i) => `<td class="text-right py-3 px-2">${formatPercentage(gp / monthlyBudgetData.revenue[i])}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatPercentage(annualTotals.grossProfit / annualTotals.revenue)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium text-orange-700">OVERHEADS</td>
+                        ${monthlyBudgetData.expenses.map(exp => `<td class="text-right py-3 px-2">(${formatCurrency(exp)})</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-orange-50">(${formatCurrency(annualTotals.expenses)})</td>
+                    </tr>
+                    <tr class="border-b bg-purple-50">
+                        <td class="py-3 px-4 font-bold text-purple-700">PROFIT</td>
+                        ${monthlyBudgetData.netProfit.map(np => `<td class="text-right py-3 px-2 font-semibold ${np >= 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(np)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-purple-100 text-green-700">${formatCurrency(annualTotals.netProfit)}</td>
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-medium">Profit %</td>
+                        ${monthlyBudgetData.netProfit.map((np, i) => `<td class="text-right py-3 px-2 ${np >= 0 ? 'text-green-600' : 'text-red-600'}">${formatPercentage(np / monthlyBudgetData.revenue[i])}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatPercentage(annualTotals.netProfit / annualTotals.revenue)}</td>
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+        }
+
+        // Populate Cash Flow Table
+        function populateCashflowTable() {
+            const table = document.getElementById('cashflowTable');
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Line</th>
+                        ${monthlyBudgetData.months.map(month => `<th class="text-right py-3 px-2 font-semibold">${month}</th>`).join('')}
+                        <th class="text-right py-3 px-4 font-semibold bg-blue-100">Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Profit for the month</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 ${cf.netProfit >= 0 ? 'text-green-700' : 'text-red-700'}">${formatCurrency(cf.netProfit)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(annualTotals.netProfit)}</td>
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Add back depreciation</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2">${formatCurrency(cf.depreciation)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(198600)}</td>
+                    </tr>
+                    <tr class="border-b bg-blue-50">
+                        <td class="py-3 px-4 font-bold">Cash from trading</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 font-semibold">${formatCurrency(cf.cashFlow)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(annualTotals.netProfit + 198600)}</td>
+                    </tr>
+                    <tr class="bg-gray-50">
+                        <td class="py-3 px-4 font-bold">Cash in the bank</td>
+                        ${cashFlowData.map(cf => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(cf.cumulativeCash)}</td>`).join('')}
+                        <td class="text-right py-3 px-4 font-bold bg-blue-100">${formatCurrency(cashFlowData[11].cumulativeCash)}</td>
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+        }
+
+        // Populate Balance Sheet Table
+        function populateBalanceSheetTable() {
+            const table = document.getElementById('balanceSheetTable');
+            const quarterlyData = [2, 5, 8, 11]; // Sep, Dec, Mar, Jun indices
+            
+            let html = `
+                <thead>
+                    <tr class="bg-gray-100">
+                        <th class="text-left py-3 px-4 font-semibold">Line</th>
+                        <th class="text-right py-3 px-4 font-semibold">Jun-26 actual</th>
+                        ${quarterlyData.map(i => `<th class="text-right py-3 px-2 font-semibold">${monthlyBudgetData.months[i]}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b bg-blue-50">
+                        <td class="py-3 px-4 font-bold">TOTAL ASSETS</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(lastYear.totalAssets)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].totalAssets)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Current assets (est.)</td>
+                        <td class="text-right py-3 px-4">${formatCurrency(lastYear.totalAssets * 0.94)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].totalAssets * 0.94)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b">
+                        <td class="py-3 px-4 font-medium">Long-term assets (est.)</td>
+                        <td class="text-right py-3 px-4">${formatCurrency(lastYear.totalAssets * 0.06)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].totalAssets * 0.06)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b bg-red-50">
+                        <td class="py-3 px-4 font-bold">TOTAL LIABILITIES</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(lastYear.totalLiabilities)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].totalLiabilities)}</td>`).join('')}
+                    </tr>
+                    <tr class="border-b bg-green-50">
+                        <td class="py-3 px-4 font-bold">TOTAL EQUITY</td>
+                        <td class="text-right py-3 px-4 font-bold">${formatCurrency(lastYear.equity)}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2 font-bold">${formatCurrency(balanceSheetData[i].equity)}</td>`).join('')}
+                    </tr>
+                    <tr>
+                        <td class="py-3 px-4 font-medium">Working capital</td>
+                        <td class="text-right py-3 px-4">${formatCurrency((lastYear.totalAssets * 0.94) - (lastYear.totalLiabilities * 0.5))}</td>
+                        ${quarterlyData.map(i => `<td class="text-right py-3 px-2">${formatCurrency(balanceSheetData[i].workingCapital)}</td>`).join('')}
+                    </tr>
+                </tbody>
+            `;
+            
+            table.innerHTML = html;
+
+            // Update analysis text
+            const assetGrowth = (balanceSheetData[11].totalAssets - lastYear.totalAssets) / lastYear.totalAssets;
+            document.getElementById('assetGrowthAnalysis').textContent = 
+                `Assets grow by ${formatPercentage(assetGrowth)} over the year, from profit kept in the business and more stock and debtors.`;
+            
+            document.getElementById('equityPosition').textContent = 
+                `Owners' equity moves from ${formatCurrency(lastYear.equity)} to ${formatCurrency(balanceSheetData[11].equity)}, which is the first thing a lender looks at.`;
+        }
+
+        // Chart instances to prevent multiple initializations
+        let revenueChart = null;
+        let cashFlowChart = null;
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Destroy existing charts if they exist
+            if (revenueChart) {
+                revenueChart.destroy();
+            }
+            if (cashFlowChart) {
+                cashFlowChart.destroy();
+            }
+
+            // Revenue and Profitability Chart
+            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(revenueCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthlyBudgetData.months,
+                    datasets: [
+                        {
+                            label: 'Sales',
+                            data: monthlyBudgetData.revenue.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#3B82F6',
+                            borderColor: '#3B82F6',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Cost of sales', 
+                            data: monthlyBudgetData.cogs.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#EF4444',
+                            borderColor: '#EF4444',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Gross Profit',
+                            data: monthlyBudgetData.grossProfit.map(v => Math.round(v / 1000)),
+                            backgroundColor: '#10B981',
+                            borderColor: '#10B981',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const y = context.parsed.y; return context.dataset.label + ': ' + (y < 0 ? '-$' : '$') + Math.abs(y).toLocaleString('en-AU') + 'k';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Thousands of dollars'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cash Flow Chart
+            const cashFlowCtx = document.getElementById('cashFlowChart').getContext('2d');
+            cashFlowChart = new Chart(cashFlowCtx, {
+                type: 'line',
+                data: {
+                    labels: monthlyBudgetData.months,
+                    datasets: [
+                        {
+                            label: 'Cash in the bank',
+                            data: cashFlowData.map(cf => Math.round(cf.cumulativeCash / 1000)),
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Profit for the month',
+                            data: monthlyBudgetData.netProfit.map(v => Math.round(v / 1000)),
+                            borderColor: '#8B5CF6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const y = context.parsed.y; return context.dataset.label + ': ' + (y < 0 ? '-$' : '$') + Math.abs(y).toLocaleString('en-AU') + 'k';
+                                }
+                            }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Month'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Thousands of dollars'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            populateKPISummary();
+            populateYoYComparison();
+            showView('summary'); // Show summary by default
+        });
+    </script>
+
+</body>
+</html>

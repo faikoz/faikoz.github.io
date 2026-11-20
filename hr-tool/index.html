@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ironbark HR Portal</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+
+<script>
+/* Demo clock: 2026-11-20 11:30 head office time when the demo is first opened in this tab, then
+   running on. The start is remembered for the life of the tab, so the clock does not jump
+   back when you move from page to page. */
+(function () {
+  const Real = Date;
+  let t0 = 0;
+  try { t0 = Number(sessionStorage.getItem("tk.t0")) || 0; } catch (e) {}
+  if (!t0) { t0 = Real.now(); try { sessionStorage.setItem("tk.t0", String(t0)); } catch (e) {} }
+  const offset = new Real("2026-11-20T11:30:00+11:00").getTime() - t0;
+  function DemoDate(...a) {
+    if (!(this instanceof DemoDate)) return new Real(Real.now() + offset).toString();
+    return a.length ? new Real(...a) : new Real(Real.now() + offset);
+  }
+  DemoDate.prototype = Real.prototype;
+  DemoDate.now = () => Real.now() + offset;
+  DemoDate.parse = Real.parse; DemoDate.UTC = Real.UTC;
+  Object.defineProperty(DemoDate, "name", { value: "Date" });
+  window.Date = DemoDate;
+  window.__DEMO_TODAY__ = "2026-11-20";
+})();
+</script>
+<style>
+#demo-banner{position:sticky;top:0;z-index:99999;height:38px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:10px;background:#fef3c7;color:#92400e;padding:0 14px;font:600 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;border-bottom:1px solid #fbbf24;white-space:nowrap;overflow:hidden}
+#demo-banner a{color:#92400e;text-decoration:underline}
+#demo-role-switch{display:inline-flex;border:1.5px solid #b45309;border-radius:999px;overflow:hidden;background:#fffbeb}
+#demo-role-switch button{all:unset;cursor:pointer;padding:6px 14px;font:700 12.5px/1 -apple-system,'Segoe UI',Roboto,sans-serif;color:#92400e}
+#demo-role-switch button.on{background:#b45309;color:#fff}
+#demo-role-switch button:not(.on):hover{background:#fde68a}
+.sidebar{top:38px !important;height:calc(100vh - 38px) !important}
+.app-shell{min-height:calc(100vh - 38px) !important}
+/* the tool styles every <button> (one line, centred, brand colours); the opening chooser keeps its own look */
+#demo-chooser .dc-options{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#demo-chooser .dc-opt{white-space:normal !important;display:flex !important;flex-direction:column;align-items:flex-start !important;text-align:left;min-width:0;font-weight:400;font-size:inherit;transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease}
+#demo-chooser .dc-opt:active{transform:none}
+#demo-notice{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:rgba(11,18,32,.5);font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+#demo-notice .dn-card{background:#fff;color:#1e293b;max-width:460px;width:calc(100vw - 48px);padding:22px 26px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center}
+#demo-notice h3{margin:0 0 8px;font-size:17px}
+#demo-notice p{margin:0 0 16px;font-size:14px;line-height:1.5}
+#demo-notice button{background:#0f766e;color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:14px;cursor:pointer}
+</style>
+<script>
+(function () {
+  var ROOT = "./";
+  window.__DEMO_LOADED__ = true;
+  window.__DEMO_ROOT__ = ROOT;
+  window.__DEMO_STORY__ = {"demo_today": "2026-11-20", "tool": "Ironbark HR Portal", "me": {"uid": "u-imogen", "name": "Imogen Clarke"}, "admin": {"uid": "u-stuart", "name": "Stuart Hargreaves"}, "pending_leave": {"id": "lr-011", "name": "Diego Marquez"}, "my_pending": "lr-005", "people": ["Imogen Clarke", "Arlo Bennett", "Diego Marquez", "Sana Qureshi", "Theo Lambert"]};
+  window.demoRole = function () { try { return sessionStorage.getItem("tk.role") || "contractor"; } catch (e) { return "contractor"; } };
+  window.demoGo = function (role, page) {
+    try { sessionStorage.setItem("tk.role", role); } catch (e) {}
+    location.href = ROOT + (page || (role === "admin" ? "admin/index.html" : "app/index.html"));
+  };
+  window.demoStartAgain = function () {
+    try { Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("tk.") === 0 || k.indexOf("demoMode:") === 0 || k.indexOf("tkTour") === 0) sessionStorage.removeItem(k); }); } catch (e) {}
+    location.href = ROOT + "app/index.html";
+  };
+  window.demoNotice = function (html, title) {
+    var old = document.getElementById("demo-notice"); if (old) old.remove();
+    var d = document.createElement("div"); d.id = "demo-notice";
+    d.innerHTML = "<div class='dn-card'><h3>" + (title || "Demo") + "</h3><p>" + html + "</p><button type='button'>OK</button></div>";
+    d.addEventListener("click", function (e) { if (e.target === d || e.target.tagName === "BUTTON") d.remove(); });
+    document.body.appendChild(d); d.querySelector("button").focus();
+  };
+  document.addEventListener("DOMContentLoaded", function () {
+    var role = window.demoRole();
+    document.querySelectorAll("#demo-role-switch button").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-role") === role);
+      b.addEventListener("click", function () { window.demoGo(b.getAttribute("data-role")); });
+    });
+  });
+})();
+</script>
+<link rel="stylesheet" href="./tour/demo-chooser.css">
+<script>
+window.DEMO_CHOOSER = {
+  key: "ironbark-hr-portal",
+  title: "Ironbark HR Portal",
+  blurb: "A portal for a small remote team, shown for a fictional company. It has two sides. In real use each person signs in and sees their own side only; the demo adds a switch so you can see both: the contractor starts and finishes shifts, takes breaks and asks for time off; the admin sees who is working right now, decides requests, corrects shifts and looks at the trends. Every person and record is invented."
+};
+</script>
+<script src="./tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="./tour/tour.css">
+<script src="./tour/tour.js" defer></script>
+</head>
+<body><div id="demo-banner"><span>Demo &middot; fully synthetic data &middot; today is <b>2026-11-20</b></span><span style="font-weight:700">Demo-only switch &rarr;</span><span id="demo-role-switch" title="Only in the demo. In the real tool each person signs in and sees their own side only."><button type="button" data-role="contractor">Contractor view</button><button type="button" data-role="admin">Admin view</button></span><a href="javascript:demoStartAgain()">Start again</a></div>
+<div class="login-shell">
+  <div class="login-card">
+    <div class="brand-row">
+      <div class="logo">I</div>
+      <div>
+        <h1>Ironbark HR Portal</h1>
+        <p class="sub">Loading…</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module">
+  import { auth, db } from "./assets/firebase-init.js";
+  import { onAuthStateChanged } from "./assets/demo-firebase.js";
+  import { doc, getDoc } from "./assets/demo-firebase.js";
+  const BASE = location.pathname.replace(/index\.html$/, "");
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { location.replace(BASE + "login.html"); return; }
+    const snap = await getDoc(doc(db, "users", user.uid));
+    const role = snap.exists() ? snap.data().role : null;
+    location.replace(BASE + (role === "admin" ? "admin/" : "app/"));
+  });
+</script>
+</body>
+</html>

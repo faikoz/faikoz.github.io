@@ -1,0 +1,60 @@
+/* Demo chooser — shared across all faikoz.com demos. Sits above every
+   demo's own overlays (loading overlay 99998, banner 99999). */
+#demo-chooser {
+  position: fixed; inset: 0; z-index: 100000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px;
+  background: rgba(10, 14, 32, 0.62);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  animation: dc-fade .22s ease-out;
+}
+#demo-chooser.closing { opacity: 0; transition: opacity .2s ease-in; }
+@keyframes dc-fade { from { opacity: 0; } to { opacity: 1; } }
+#demo-chooser .dc-card {
+  width: min(680px, 100%);
+  background: #ffffff; color: #1f2340;
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  padding: clamp(22px, 4vw, 40px);
+  animation: dc-pop .26s cubic-bezier(.2, .9, .3, 1.2);
+}
+@keyframes dc-pop { from { transform: translateY(14px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+#demo-chooser .dc-kicker {
+  display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: #92400e; background: #fef3c7; border: 1px solid #fbbf24; border-radius: 999px; padding: 3px 10px;
+}
+#demo-chooser h1 { margin: 12px 0 6px; font-size: clamp(22px, 3vw, 30px); line-height: 1.15; color: #1a237e; }
+#demo-chooser .dc-blurb { margin: 0 0 18px; color: #5b5f7e; font-size: 14px; line-height: 1.5; }
+#demo-chooser .dc-question { margin: 0 0 12px; font-weight: 600; font-size: 15px; }
+#demo-chooser .dc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 560px) { #demo-chooser .dc-options { grid-template-columns: 1fr; } }
+#demo-chooser .dc-opt {
+  text-align: left; cursor: pointer; border-radius: 14px; padding: 18px 18px 16px;
+  border: 2px solid #e3e6f3; background: #f7f8fc; color: inherit; font: inherit;
+  display: flex; flex-direction: column; gap: 6px;
+  transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+#demo-chooser .dc-opt:hover, #demo-chooser .dc-opt:focus-visible {
+  transform: translateY(-2px); border-color: #1a237e; background: #ffffff;
+  box-shadow: 0 10px 28px rgba(26, 35, 126, 0.16); outline: none;
+}
+#demo-chooser .dc-opt-tour { border-color: #fbbf24; background: #fffbeb; }
+#demo-chooser .dc-opt-tour:hover, #demo-chooser .dc-opt-tour:focus-visible { border-color: #f59e0b; background: #fff7d6; }
+#demo-chooser .dc-opt-icon { font-size: 22px; line-height: 1; color: #1a237e; }
+#demo-chooser .dc-opt-tour .dc-opt-icon { color: #b45309; }
+#demo-chooser .dc-opt-title { font-size: 17px; font-weight: 700; }
+#demo-chooser .dc-opt-desc { font-size: 13px; line-height: 1.45; color: #5b5f7e; }
+
+/* small toast while free-roam mode loads the whole dataset */
+#demo-chooser-toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 100000;
+  background: #1a237e; color: #fff; font: 600 13px/1.3 -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding: 10px 16px; border-radius: 999px; box-shadow: 0 12px 30px rgba(0,0,0,.3);
+  display: flex; align-items: center; gap: 10px; white-space: nowrap; max-width: calc(100vw - 32px);
+}
+#demo-chooser-toast .dc-spin {
+  width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); border-top-color: #ffca28;
+  animation: dc-spin .8s linear infinite; flex: none;
+}
+@keyframes dc-spin { to { transform: rotate(360deg); } }

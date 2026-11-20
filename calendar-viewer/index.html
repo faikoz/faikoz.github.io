@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<script>
+/* Demo calendar: the page believes today is 2026-11-20 (Melbourne, 11:30) and the clock ticks on
+   from there, so "today", the red now-line and the Coming up list read the same whenever the
+   demo is opened. Dates in the data are fixed. */
+(function () {
+  const Real = Date;
+  const offset = new Real("2026-11-20T11:30:00+11:00").getTime() - Real.now();
+  function DemoDate(...a) {
+    if (!(this instanceof DemoDate)) return new Real(Real.now() + offset).toString();
+    return a.length ? new Real(...a) : new Real(Real.now() + offset);
+  }
+  DemoDate.prototype = Real.prototype;
+  DemoDate.now = () => Real.now() + offset;
+  DemoDate.parse = Real.parse; DemoDate.UTC = Real.UTC;
+  Object.defineProperty(DemoDate, "name", { value: "Date" });
+  window.Date = DemoDate;
+  window.__DEMO_TODAY__ = "2026-11-20";
+})();
+</script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team Calendar</title>
+
+  <!-- FullCalendar (free, CDN) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css"
+    rel="stylesheet"
+  />
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+  <!-- Firebase (modular, via CDN) -->
+  <script type="module">
+    import { initializeApp } from "./demo-firebase.js";
+    import {
+      getFirestore,
+      collection,
+      doc,
+      onSnapshot,
+      query,
+      orderBy,
+      where,
+      getDocs,
+    } from "./demo-firebase.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      sendSignInLinkToEmail,
+      isSignInWithEmailLink,
+      signInWithEmailLink,
+      signInWithEmailAndPassword,
+      signOut,
+    } from "./demo-firebase.js";
+
+    import { firebaseConfig } from "./demo-firebase.js";
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // ---------- Access control ----------
+    // Only Ironbark staff may view. Staff sign in with an emailed link; the
+    // admin signs in with email + password. Firestore rules enforce the same
+    // domain check server-side, so this is the front door, not the lock.
+    const STAFF_EMAIL_RE = /^[^\s@]+@ironbarktools\.example$/i;
+    const EMAIL_STORAGE_KEY = "calendarViewerEmailForSignIn";
+    let appStarted = false; // Firestore listeners attach once, after sign-in
+
+    function isStaffEmail(email) {
+      return STAFF_EMAIL_RE.test((email || "").trim());
+    }
+
+    function setAuthMsg(text, kind) {
+      const el = document.getElementById("auth-msg");
+      if (!el) return;
+      el.textContent = text || "";
+      el.className = "auth-msg" + (kind ? " " + kind : "");
+    }
+
+    function showGate(show) {
+      document.getElementById("auth-gate").style.display = show ? "flex" : "none";
+      document.querySelector("main").style.display = show ? "none" : "";
+      document.querySelector("footer").style.display = show ? "none" : "";
+    }
+
+    function friendlyAuthError(err) {
+      const code = (err && err.code) || "";
+      if (code === "auth/operation-not-allowed")
+        return "Email link sign-in is not enabled in Firebase yet.";
+      if (code === "auth/invalid-action-code" || code === "auth/expired-action-code")
+        return "That sign-in link has expired or was already used. Request a new one.";
+      if (code === "auth/invalid-email") return "That email address is not valid.";
+      if (code === "auth/wrong-password" || code === "auth/invalid-credential" || code === "auth/user-not-found")
+        return "Email or password is incorrect.";
+      if (code === "auth/too-many-requests")
+        return "Too many attempts. Wait a few minutes and try again.";
+      return (err && err.message) || "Sign-in failed.";
+    }
+
+    // Complete an emailed-link sign-in if the page was opened from one.
+    async function completeEmailLinkSignIn() {
+      if (!isSignInWithEmailLink(auth, window.location.href)) return;
+      let email = null;
+      try { email = window.localStorage.getItem(EMAIL_STORAGE_KEY); } catch (_) {}
+      if (!email) {
+        // Link opened in a different browser than the one that requested it.
+        email = window.prompt("Confirm your Ironbark email address to finish signing in:");
+      }
+      if (!email) {
+        setAuthMsg("Sign-in cancelled. Request a new link below.", "err");
+        return;
+      }
+      try {
+        setAuthMsg("Signing you in…");
+        await signInWithEmailLink(auth, email.trim(), window.location.href);
+        try { window.localStorage.removeItem(EMAIL_STORAGE_KEY); } catch (_) {}
+        // Strip the one-time code from the address bar.
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (err) {
+        setAuthMsg(friendlyAuthError(err), "err");
+      }
+    }
+
+    function wireAuthForms() {
+      const linkForm = document.getElementById("auth-link-form");
+      const emailInput = document.getElementById("auth-email");
+      const adminToggle = document.getElementById("auth-admin-toggle");
+      const adminForm = document.getElementById("auth-admin-form");
+      const signOutBtn = document.getElementById("sign-out-btn");
+
+      linkForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = emailInput.value.trim();
+        if (!isStaffEmail(email)) {
+          setAuthMsg("Ironbark staff only. Use your @ironbarktools.example address.", "err");
+          return;
+        }
+        const btn = linkForm.querySelector("button");
+        btn.disabled = true;
+        setAuthMsg("Sending your sign-in link…");
+        try {
+          await sendSignInLinkToEmail(auth, email, {
+            url: window.location.origin + window.location.pathname,
+            handleCodeInApp: true,
+          });
+          try { window.localStorage.setItem(EMAIL_STORAGE_KEY, email); } catch (_) {}
+          setAuthMsg(`Link sent to ${email}. Open it from your inbox to sign in. Check junk if it does not arrive.`, "ok");
+        } catch (err) {
+          setAuthMsg(friendlyAuthError(err), "err");
+        } finally {
+          btn.disabled = false;
+        }
+      });
+
+      adminToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        const open = adminForm.style.display !== "none";
+        adminForm.style.display = open ? "none" : "";
+        linkForm.style.display = open ? "" : "none";
+        adminToggle.textContent = open ? "Admin sign in with password" : "Back to staff sign-in";
+        setAuthMsg("");
+      });
+
+      adminForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("auth-admin-email").value.trim();
+        const password = document.getElementById("auth-admin-password").value;
+        setAuthMsg("Signing in…");
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+        } catch (err) {
+          setAuthMsg(friendlyAuthError(err), "err");
+        }
+      });
+
+      signOutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        signOut(auth);
+      });
+    }
+
+    // Gate: show the sign-in screen until a Ironbark account is signed in.
+    function watchAuth(startApp) {
+      onAuthStateChanged(auth, async (user) => {
+        const userInfo = document.getElementById("user-info");
+        if (user && isStaffEmail(user.email)) {
+          userInfo.querySelector("span").textContent = user.email;
+          userInfo.style.display = "";
+          showGate(false);
+          if (!appStarted) {
+            appStarted = true;
+            startApp();
+          }
+        } else {
+          if (user) {
+            // Signed in with a non-Ironbark address: rules would deny every
+            // read anyway, so drop the session and say why.
+            await signOut(auth);
+            setAuthMsg("Ironbark staff only. That address is not allowed.", "err");
+          }
+          userInfo.style.display = "none";
+          showGate(true);
+          document.getElementById("status").textContent = "Sign in to see the diary";
+        }
+      });
+    }
+
+    // Default settings — overridden by admin config from Firestore
+    let settings = {
+      pageTitle: "Team Calendar",
+      defaultView: "dayGridMonth",
+      showUpcoming: true,
+      upcomingCount: 10,
+      hiddenCalendars: [],
+      calendarColors: {},
+    };
+
+    let calendar = null;
+    let allEvents = []; // live window of events from Firestore (see LIVE_* below)
+
+    // The live listener only covers a window around today. Firestore holds
+    // every appointment since the tool started, so anything outside the
+    // window is fetched once, on demand:
+    //  - extraEvents: months the user navigated to (keyed by event id)
+    //  - history for a customer when their popup opens
+    const LIVE_BACK_DAYS = 14;
+    const LIVE_AHEAD_DAYS = 28;
+    let liveFromIso = null, liveToIso = null;
+    const extraEvents = new Map();
+    const loadedRanges = new Set();
+    const historyCache = new Map(); // custNo -> { at, events }
+    const HISTORY_CACHE_MS = 5 * 60 * 1000;
+    let rerender = () => {}; // set to renderEvents once the app starts
+
+    // Live window + on-demand extras, deduped (live wins).
+    function visibleEvents() {
+      if (extraEvents.size === 0) return allEvents;
+      const liveIds = new Set(allEvents.map((e) => e.id));
+      const out = allEvents.slice();
+      for (const e of extraEvents.values()) if (!liveIds.has(e.id)) out.push(e);
+      return out;
+    }
+
+    function startOfDay(d) {
+      return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
+    // Fetch events for a date range once if any part of it lies outside the
+    // live window. Called when the calendar view changes.
+    async function ensureRangeLoaded(start, end) {
+      if (!liveFromIso || !start || !end) return;
+      const fromIso = start.toISOString();
+      const toIso = end.toISOString();
+      if (fromIso >= liveFromIso && toIso <= liveToIso) return; // fully live
+      const key = fromIso.slice(0, 10) + "|" + toIso.slice(0, 10);
+      if (loadedRanges.has(key)) return;
+      loadedRanges.add(key);
+      try {
+        const snap = await getDocs(query(
+          collection(db, "events"),
+          where("start", ">=", fromIso),
+          where("start", "<", toIso)
+        ));
+        snap.forEach((d) => extraEvents.set(d.id, { id: d.id, ...d.data() }));
+        rerender();
+      } catch (err) {
+        loadedRanges.delete(key);
+        console.error("Could not load events for range", key, err);
+      }
+    }
+
+    // Every appointment ever synced for a customer, oldest first.
+    // One Firestore read per appointment, only when a popup opens.
+    async function fetchCustomerHistory(custNo) {
+      const cached = historyCache.get(custNo);
+      if (cached && Date.now() - cached.at < HISTORY_CACHE_MS) return cached.events;
+      const snap = await getDocs(query(
+        collection(db, "events"),
+        where("customerNo", "==", custNo)
+      ));
+      const byId = new Map();
+      snap.forEach((d) => byId.set(d.id, { id: d.id, ...d.data() }));
+      // Live window is fresher than the one-off query; let it win.
+      for (const e of allEvents) {
+        if (extractCustomerNo(e.title) === custNo) byId.set(e.id, e);
+      }
+      const events = [...byId.values()].sort((a, b) => new Date(a.start) - new Date(b.start));
+      historyCache.set(custNo, { at: Date.now(), events });
+      return events;
+    }
+
+    // Calendar filter toggles — both ON by default
+    let showProjects = true;
+    let showTrade = true;
+
+    // Per-column source toggles inside the modal — both ON by default
+    // (consolidated OLD + Erp totals are shown).
+    const toggleState = {
+      projects: { old: true, erp: true },
+      trade: { old: true, erp: true },
+    };
+    let currentModalEvent = null;
+    let currentModalCustomer = null; // customer no. when opened from the search box
+    let currentModalFromSearch = false;
+
+    // Flat list of every customer we have stats for (OLD + Erp, both
+    // project types), rebuilt whenever a stats doc changes. Used by the
+    // header search box.
+    let customerIndex = [];
+
+    const PROJECTS_CALENDAR = "Project Estimating";
+    const TRADE_CALENDAR = "Trade Quoting";
+
+    // Project stats — loaded from Firestore, keyed by customer number
+    // Kept separate so the modal can show Projects vs Trade distinctly,
+    // and within each, OLD history (Excel upload) vs Erp live (BC pull).
+    let projectsStats = {};
+    let tradeStats = {};
+    let projectsStatsErp = {};
+    let tradeStatsErp = {};
+
+    // Manual customer name overrides — use these instead of whatever is in
+    // the Excel file. Useful for trade accounts where the row data has a
+    // personal contact name instead of the proper account name.
+    const CUSTOMER_NAME_OVERRIDES = {};   // DEMO: none for this company
+
+    // OLD → Erp customer-number aliases. Event titles use the OLD customer
+    // number, but the same customer may have a different number in Erp.
+    // When looking up Erp stats, we use the aliased number if one exists.
+    const OLD_TO_ERP_CUST_NO = {};   // DEMO: customer numbers did not change between the two systems
+    function erpKey(oldNo) {
+      return OLD_TO_ERP_CUST_NO[oldNo] || oldNo;
+    }
+    const ERP_TO_OLD_CUST_NO = Object.fromEntries(
+      Object.entries(OLD_TO_ERP_CUST_NO).map(([old, erp]) => [erp, old])
+    );
+    // Canonical (OLD-style) customer number for any key found in a stats map.
+    function oldKey(anyNo) {
+      return ERP_TO_OLD_CUST_NO[anyNo] || anyNo;
+    }
+
+    // Customer number = the first part of a title written "10008 | Customer | visit | quote no"
+    function extractCustomerNo(title) {
+      if (!title) return null;
+      const eq = title.indexOf("|");
+      if (eq < 0) return null;
+      const prefix = title.slice(0, eq).trim();
+      // Only accept if the prefix looks like a customer number (1-10 chars, no spaces)
+      if (!prefix || /\s/.test(prefix) || prefix.length > 10) return null;
+      return prefix;
+    }
+
+    function formatMoney(v) {
+      return "$" + (v || 0).toLocaleString("en-AU", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      });
+    }
+
+    function hasStats(customerNo) {
+      const wKey = erpKey(customerNo);
+      return !!(
+        projectsStats[customerNo] ||
+        tradeStats[customerNo] ||
+        projectsStatsErp[wKey] ||
+        tradeStatsErp[wKey]
+      );
+    }
+
+    function getCustomerName(customerNo) {
+      if (CUSTOMER_NAME_OVERRIDES[customerNo]) {
+        return CUSTOMER_NAME_OVERRIDES[customerNo];
+      }
+      const wKey = erpKey(customerNo);
+      const candidates = [
+        projectsStatsErp[wKey],
+        tradeStatsErp[wKey],
+        projectsStats[customerNo],
+        tradeStats[customerNo],
+      ];
+      for (const c of candidates) {
+        if (c && c.name) return c.name;
+      }
+      return "Customer #" + customerNo;
+    }
+
+    // Build one "project type" block (Projects or Trade).
+    // sourceLabel is shown as a small header above the totals so the user
+    // can tell which source the numbers came from (OLD / Erp).
+    function buildProjectBlock(stats, sourceLabel) {
+      if (!stats) return "";
+      const section = (label, bucket, colorClass) => {
+        const entries = Object.entries(bucket || {}).filter(([, v]) => v.c > 0);
+        if (entries.length === 0) return "";
+        let html = `<div class="modal-section ${colorClass}"><div class="modal-section-label">${escapeHtml(label)}</div>`;
+        for (const [campaign, v] of entries) {
+          html += `<div class="modal-row"><span class="modal-row-name">${escapeHtml(campaign)}</span><span class="modal-row-vals">${v.c} · ${escapeHtml(formatMoney(v.v))}</span></div>`;
+        }
+        html += "</div>";
+        return html;
+      };
+      let html = "";
+      if (sourceLabel) {
+        html += `<div class="modal-source-tag">${escapeHtml(sourceLabel)}</div>`;
+      }
+      html += `<div class="modal-total">Total: <strong>${stats.totalCount}</strong> quotes · <strong>${escapeHtml(formatMoney(stats.totalValue))}</strong></div>`;
+      html += section("Won", stats.won, "m-won");
+      html += section("Lost", stats.lost, "m-lost");
+      html += section("Still open", stats.follow, "m-follow");
+      html += section("Other", stats.other, "m-other");
+      return html;
+    }
+
+    // Sum OLD + Erp (or whichever are toggled on) into a single stats
+    // object so the modal shows one consolidated total per project type.
+    function consolidateStats(uploadStats, erpStats, projectType) {
+      const state = toggleState[projectType];
+      const sources = [];
+      if (state.old && uploadStats) sources.push(uploadStats);
+      if (state.erp && erpStats) sources.push(erpStats);
+      if (sources.length === 0) return null;
+      if (sources.length === 1) return sources[0];
+
+      const merged = {
+        name: sources[0].name,
+        totalCount: 0,
+        totalValue: 0,
+        won: {},
+        lost: {},
+        follow: {},
+        other: {},
+      };
+      for (const s of sources) {
+        merged.totalCount += s.totalCount || 0;
+        merged.totalValue += s.totalValue || 0;
+        for (const bucket of ["won", "lost", "follow", "other"]) {
+          for (const [campaign, v] of Object.entries(s[bucket] || {})) {
+            if (!merged[bucket][campaign]) merged[bucket][campaign] = { c: 0, v: 0 };
+            merged[bucket][campaign].c += v.c;
+            merged[bucket][campaign].v += v.v;
+          }
+        }
+      }
+      return merged;
+    }
+
+    // Render one project type column: OLD/Erp toggle pills at the top
+    // (only shown when both sources have data for this customer), then a
+    // single consolidated block beneath.
+    function buildProjectColumn(uploadStats, erpStats, projectType) {
+      const hasOld = !!uploadStats;
+      const hasErp = !!erpStats;
+      let html = "";
+
+      if (hasOld && hasErp) {
+        const state = toggleState[projectType];
+        html += `<div class="source-toggles">
+          <button type="button" class="src-toggle ${state.old ? "active" : ""}" data-proj="${projectType}" data-src="old">Old system</button>
+          <button type="button" class="src-toggle ${state.erp ? "active" : ""}" data-proj="${projectType}" data-src="erp">ERP</button>
+        </div>`;
+      }
+
+      const merged = consolidateStats(uploadStats, erpStats, projectType);
+      if (!merged) {
+        html += `<p class="muted" style="padding:10px 0;">Nothing selected. Turn on Old system or ERP above.</p>`;
+        return html;
+      }
+      html += buildProjectBlock(merged, null);
+      return html;
+    }
+
+    // Open the modal with full event + customer stats
+    function openEventModal(event) {
+      currentModalEvent = event;
+      const overlay = document.getElementById("modal-overlay");
+      const body = document.getElementById("modal-body");
+      const p = event.extendedProps;
+      const start = event.start ? event.start.toLocaleString() : "";
+      const end = event.end ? event.end.toLocaleString() : "";
+
+      let html = `<button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('show')">×</button>`;
+      html += `<h2 class="modal-title">${escapeHtml(event.title)}</h2>`;
+      html += `<div class="modal-meta">`;
+      if (start) html += `<div><span class="modal-meta-label">Start:</span> ${escapeHtml(start)}</div>`;
+      if (end) html += `<div><span class="modal-meta-label">End:</span> ${escapeHtml(end)}</div>`;
+      if (p.calendarName) html += `<div><span class="modal-meta-label">Team:</span> ${escapeHtml(p.calendarName)}</div>`;
+      if (p.location) html += `<div><span class="modal-meta-label">Location:</span> ${escapeHtml(p.location)}</div>`;
+      html += `</div>`;
+
+      const custNo = extractCustomerNo(event.title);
+      html += buildCustomerStatsHtml(custNo, true);
+      if (custNo) html += buildAppointmentsHtml([], true);
+
+      body.innerHTML = html;
+      overlay.classList.add("show");
+
+      wireSourceToggles(body);
+      if (custNo) fillAppointments(body, custNo);
+    }
+
+    // Customer name/number header + Projects/Trade stats columns.
+    // Shared by the event modal and the search-box customer modal.
+    // withHeader=false when the modal title already shows the customer.
+    function buildCustomerStatsHtml(custNo, withHeader) {
+      if (!custNo || !hasStats(custNo)) return "";
+      let html = "";
+      if (withHeader) {
+        const name = getCustomerName(custNo);
+        html += `<div class="modal-customer"><div class="modal-customer-name">${escapeHtml(name)}</div><div class="modal-customer-id">#${escapeHtml(custNo)}</div></div>`;
+      }
+
+      const wKey = erpKey(custNo);
+      const cUp = projectsStats[custNo];
+      const cWi = projectsStatsErp[wKey];
+      const rUp = tradeStats[custNo];
+      const rWi = tradeStatsErp[wKey];
+      const hasC = cUp || cWi;
+      const hasR = rUp || rWi;
+
+      if (hasC && hasR) {
+        html += `<div class="modal-columns">`;
+        html += `<div class="modal-column"><h3 class="modal-col-title comm">Project quotes</h3>${buildProjectColumn(cUp, cWi, "projects")}</div>`;
+        html += `<div class="modal-column"><h3 class="modal-col-title res">Trade quotes</h3>${buildProjectColumn(rUp, rWi, "trade")}</div>`;
+        html += `</div>`;
+      } else if (hasC) {
+        html += `<h3 class="modal-col-title comm">Project quotes</h3>${buildProjectColumn(cUp, cWi, "projects")}`;
+      } else if (hasR) {
+        html += `<h3 class="modal-col-title res">Trade quotes</h3>${buildProjectColumn(rUp, rWi, "trade")}`;
+      }
+      return html;
+    }
+
+    // Wire up OLD/Erp toggle pills (must be attached after innerHTML
+    // so the new buttons exist). Re-opens whichever modal is current.
+    function wireSourceToggles(body) {
+      body.querySelectorAll(".src-toggle").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const proj = btn.dataset.proj;
+          const src = btn.dataset.src;
+          if (toggleState[proj] && (src === "old" || src === "erp")) {
+            toggleState[proj][src] = !toggleState[proj][src];
+            if (currentModalEvent) openEventModal(currentModalEvent);
+            else if (currentModalCustomer) openCustomerModal(currentModalCustomer, { fromSearch: currentModalFromSearch });
+          }
+        });
+      });
+    }
+
+    // Events for a customer already in the browser (live window + loaded
+    // months), oldest first. Shown immediately while the full history loads.
+    function eventsForCustomer(custNo) {
+      return visibleEvents()
+        .filter((e) => extractCustomerNo(e.title) === custNo)
+        .sort((a, b) => new Date(a.start) - new Date(b.start));
+    }
+
+    // Appointment list block. `loading` = full history still being fetched.
+    function buildAppointmentsHtml(evs, loading) {
+      let html = `<div class="modal-appts" id="modal-appts"><h3>Bookings (${evs.length})${loading ? ' <span class="muted" style="font-weight:normal;">· loading history…</span>' : ""}</h3>`;
+      if (evs.length === 0) {
+        html += `<p class="muted" style="margin:0;">${loading ? "Looking up earlier bookings…" : "No bookings in the diary for this customer."}</p></div>`;
+        return html;
+      }
+      const now = new Date();
+      html += `<div class="modal-appts-list">`;
+      for (const e of evs) {
+        const start = new Date(e.start);
+        const past = start < now;
+        const when = e.isAllDay
+          ? start.toLocaleDateString()
+          : start.toLocaleString([], { dateStyle: "short", timeStyle: "short" });
+        let calClass = "";
+        if (e.calendarName === PROJECTS_CALENDAR) calClass = "comm";
+        else if (e.calendarName === TRADE_CALENDAR) calClass = "res";
+        const calShort = e.calendarName === PROJECTS_CALENDAR ? "Projects"
+          : e.calendarName === TRADE_CALENDAR ? "Trade"
+          : (e.calendarName || "");
+        html += `<div class="modal-appt ${past ? "past" : ""}" data-start="${escapeHtml(e.start)}" title="Go to this day">
+          <span class="modal-appt-when">${escapeHtml(when)}</span>
+          <span class="modal-appt-title">${escapeHtml(e.title || "(no title)")}</span>
+          ${calShort ? `<span class="modal-appt-cal ${calClass}">${escapeHtml(calShort)}</span>` : ""}
+        </div>`;
+      }
+      html += `</div><p class="muted" style="margin:6px 0 0;">Click a booking to go to that day.</p></div>`;
+      return html;
+    }
+
+    // Clicking an appointment jumps the calendar to its date. The month is
+    // fetched on arrival if it is outside the live window (see datesSet).
+    function wireAppointmentClicks(container) {
+      container.querySelectorAll(".modal-appt").forEach((row) => {
+        row.addEventListener("click", () => {
+          const start = row.dataset.start;
+          if (calendar && start) {
+            calendar.gotoDate(new Date(start));
+            document.getElementById("modal-overlay").classList.remove("show");
+          }
+        });
+      });
+    }
+
+    // Render the appointment block now from what is in memory, then replace
+    // it with the full history once the one-off query returns.
+    function fillAppointments(body, custNo) {
+      const render = (evs, loading) => {
+        const block = body.querySelector("#modal-appts");
+        if (!block) return;
+        block.outerHTML = buildAppointmentsHtml(evs, loading);
+        wireAppointmentClicks(body);
+      };
+      render(eventsForCustomer(custNo), true);
+      fetchCustomerHistory(custNo)
+        .then((evs) => render(evs, false))
+        .catch((err) => {
+          console.error("Could not load history for", custNo, err);
+          render(eventsForCustomer(custNo), false);
+        });
+    }
+
+    // Open the modal for a customer picked from the header search box.
+    function openCustomerModal(custNo, opts = {}) {
+      currentModalEvent = null;
+      currentModalCustomer = custNo;
+      currentModalFromSearch = !!opts.fromSearch;
+      const overlay = document.getElementById("modal-overlay");
+      const body = document.getElementById("modal-body");
+
+      let html = `<button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('show')">×</button>`;
+      if (opts.fromSearch) {
+        html += `<button type="button" class="modal-back" id="modal-back-to-search">← Back to the lookup</button>`;
+      }
+      html += `<h2 class="modal-title">${escapeHtml(getCustomerName(custNo))}</h2>`;
+      html += `<div class="modal-meta"><div><span class="modal-meta-label">Account:</span> ${escapeHtml(custNo)}`;
+      const wKey = erpKey(custNo);
+      if (wKey !== custNo) html += ` <span class="muted">(ERP ${escapeHtml(wKey)})</span>`;
+      html += `</div></div>`;
+
+      if (hasStats(custNo)) {
+        html += buildCustomerStatsHtml(custNo, false);
+      } else {
+        html += `<p class="muted">No quote history on file for this customer.</p>`;
+      }
+      html += buildAppointmentsHtml([], true);
+
+      body.innerHTML = html;
+      overlay.classList.add("show");
+      wireSourceToggles(body);
+
+      const back = body.querySelector("#modal-back-to-search");
+      if (back) back.addEventListener("click", openSearchModal);
+
+      fillAppointments(body, custNo);
+    }
+
+    // ---- Header customer search ----
+    function buildCustomerIndex() {
+      const ids = new Set();
+      Object.keys(projectsStats).forEach((k) => ids.add(k));
+      Object.keys(tradeStats).forEach((k) => ids.add(k));
+      Object.keys(projectsStatsErp).forEach((k) => ids.add(oldKey(k)));
+      Object.keys(tradeStatsErp).forEach((k) => ids.add(oldKey(k)));
+      customerIndex = [...ids].map((no) => {
+        const name = getCustomerName(no);
+        const alt = erpKey(no);
+        return {
+          no,
+          name,
+          noL: no.toLowerCase(),
+          altL: alt !== no ? alt.toLowerCase() : "",
+          nameL: name.toLowerCase(),
+        };
+      });
+      customerIndex.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    function searchCustomers(raw) {
+      const q = (raw || "").trim().toLowerCase();
+      if (!q) return [];
+      const rank = (c) => {
+        if (c.noL === q || c.altL === q) return 0;
+        if (c.noL.startsWith(q) || (c.altL && c.altL.startsWith(q))) return 1;
+        if (c.nameL.startsWith(q)) return 2;
+        if (c.nameL.includes(q)) return 3;
+        return -1;
+      };
+      return customerIndex
+        .map((c) => ({ c, r: rank(c) }))
+        .filter((x) => x.r >= 0)
+        .sort((a, b) => a.r - b.r || a.c.name.localeCompare(b.c.name))
+        .slice(0, 30)
+        .map((x) => x.c);
+    }
+
+    // Remembered between openings so "Back to search" restores the list.
+    let lastSearchQuery = "";
+
+    // Popup with a search bar. Arrow keys move the highlight, Enter or a
+    // click opens the highlighted customer's stats popup.
+    function openSearchModal() {
+      currentModalEvent = null;
+      currentModalCustomer = null;
+      const overlay = document.getElementById("modal-overlay");
+      const body = document.getElementById("modal-body");
+
+      body.innerHTML = `
+        <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('show')">×</button>
+        <h2 class="modal-title">Customer lookup</h2>
+        <input id="cust-search-input" class="cust-search-input" type="search"
+               placeholder="Account number or part of a name…" autocomplete="off" spellcheck="false" aria-label="Customer lookup" />
+        <div id="cust-search-results" class="cust-search-results"></div>
+        <p class="muted cust-search-hint">↑ ↓ to move · Enter to open · Esc to close</p>`;
+      overlay.classList.add("show");
+
+      const input = body.querySelector("#cust-search-input");
+      const results = body.querySelector("#cust-search-results");
+      let matches = [];
+      let active = -1;
+
+      function pick(i) {
+        const m = matches[i];
+        if (!m) return;
+        lastSearchQuery = input.value;
+        openCustomerModal(m.no, { fromSearch: true });
+      }
+
+      function highlight() {
+        results.querySelectorAll(".cust-result").forEach((el, i) => {
+          const on = i === active;
+          el.classList.toggle("active", on);
+          if (on) el.scrollIntoView({ block: "nearest" });
+        });
+      }
+
+      function render() {
+        const q = input.value.trim();
+        lastSearchQuery = input.value;
+        if (!q) {
+          matches = [];
+          active = -1;
+          results.innerHTML = `<div class="cust-result-empty">${customerIndex.length} customers on file. Start typing.</div>`;
+          return;
+        }
+        matches = searchCustomers(q);
+        active = matches.length ? 0 : -1;
+        if (matches.length === 0) {
+          results.innerHTML = customerIndex.length
+            ? `<div class="cust-result-empty">No customer matches "${escapeHtml(q)}"</div>`
+            : `<div class="cust-result-empty">Customer data still loading…</div>`;
+          return;
+        }
+        results.innerHTML = matches
+          .map((m, i) => `<div class="cust-result ${i === active ? "active" : ""}" data-i="${i}">
+              <span class="cust-result-no">${escapeHtml(m.no)}</span>
+              <span class="cust-result-name">${escapeHtml(m.name)}</span>
+            </div>`)
+          .join("");
+      }
+
+      input.addEventListener("input", render);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" && matches.length) {
+          e.preventDefault();
+          active = (active + 1) % matches.length;
+          highlight();
+        } else if (e.key === "ArrowUp" && matches.length) {
+          e.preventDefault();
+          active = (active - 1 + matches.length) % matches.length;
+          highlight();
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          if (active >= 0) pick(active);
+        }
+      });
+      results.addEventListener("mousemove", (e) => {
+        const row = e.target.closest(".cust-result");
+        if (row && Number(row.dataset.i) !== active) {
+          active = Number(row.dataset.i);
+          highlight();
+        }
+      });
+      results.addEventListener("click", (e) => {
+        const row = e.target.closest(".cust-result");
+        if (row) pick(Number(row.dataset.i));
+      });
+
+      input.value = lastSearchQuery;
+      render();
+      input.focus();
+      input.select();
+    }
+
+    // Holiday keywords — events matching these get a distinct color
+    const HOLIDAY_KEYWORDS = [
+      "easter", "christmas", "new year", "anzac", "australia day",
+      "queen's birthday", "king's birthday", "good friday", "boxing day",
+      "melbourne cup", "holiday", "public holiday", "bank holiday",
+      "labour day", "labor day", "may day", "spring bank", "mother's day",
+      "father's day", "remembrance", "reconciliation",
+    ];
+    const HOLIDAY_COLOR = "#f59e0b"; // amber/orange — stands out from green
+
+    function isHoliday(event) {
+      const title = (event.title || "").toLowerCase();
+      const calName = (event.calendarName || "").toLowerCase();
+      if (calName.includes("holiday")) return true;
+      const isLetter = (c) => c !== undefined && c.toLowerCase() !== c.toUpperCase();
+      const hasWord = (kw) => {
+        for (let i = title.indexOf(kw); i !== -1; i = title.indexOf(kw, i + 1)) {
+          if (!isLetter(title[i - 1]) && !isLetter(title[i + kw.length])) return true;
+        }
+        return false;
+      };
+      return HOLIDAY_KEYWORDS.some(hasWord);
+    }
+
+    // Wait for DOM, then gate everything behind sign-in. Firestore listeners
+    // only attach once a Ironbark account is signed in (startApp below).
+    window.addEventListener("DOMContentLoaded", async () => {
+      wireAuthForms();
+      await completeEmailLinkSignIn();
+      watchAuth(startApp);
+    });
+
+    function startApp() {
+      const calendarEl = document.getElementById("calendar");
+      const listEl = document.getElementById("upcoming");
+      const statusEl = document.getElementById("status");
+      const titleEl = document.getElementById("page-title");
+      const sidebarEl = document.getElementById("sidebar");
+
+      // Listen for settings changes
+      onSnapshot(doc(db, "config", "settings"), (snap) => {
+        if (snap.exists()) {
+          settings = { ...settings, ...snap.data() };
+        }
+        applySettings();
+      });
+
+      // Listen for projects project stats (OLD / Excel upload)
+      onSnapshot(doc(db, "config", "projects_stats"), (snap) => {
+        projectsStats = snap.exists() ? (snap.data().customers || {}) : {};
+        buildCustomerIndex();
+      });
+      // Listen for trade project stats (OLD / Excel upload)
+      onSnapshot(doc(db, "config", "trade_stats"), (snap) => {
+        tradeStats = snap.exists() ? (snap.data().customers || {}) : {};
+        buildCustomerIndex();
+      });
+      // Listen for projects project stats (Erp live pull)
+      onSnapshot(doc(db, "config", "projects_stats_erp"), (snap) => {
+        projectsStatsErp = snap.exists() ? (snap.data().customers || {}) : {};
+        buildCustomerIndex();
+      });
+      // Listen for trade project stats (Erp live pull)
+      onSnapshot(doc(db, "config", "trade_stats_erp"), (snap) => {
+        tradeStatsErp = snap.exists() ? (snap.data().customers || {}) : {};
+        buildCustomerIndex();
+      });
+
+      function applySettings() {
+        // Title
+        titleEl.textContent = settings.pageTitle || "Team Calendar";
+        document.title = settings.pageTitle || "Team Calendar";
+
+        // Sidebar visibility
+        sidebarEl.style.display = settings.showUpcoming === false ? "none" : "";
+
+        // Init or update calendar view
+        if (!calendar) {
+          calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: settings.defaultView || "dayGridMonth",
+            eventTimeFormat: { hour: "numeric", minute: "2-digit", omitZeroMinute: true, meridiem: "lowercase" },
+            customButtons: {
+              findCustomer: {
+                text: "🔍 Customer lookup",
+                click: openSearchModal,
+              },
+              toggleProjects: {
+                text: "Projects",
+                click: function () {
+                  showProjects = !showProjects;
+                  const btn = document.querySelector(".fc-toggleProjects-button");
+                  if (btn) btn.classList.toggle("toggle-off", !showProjects);
+                  renderEvents();
+                },
+              },
+              toggleTrade: {
+                text: "Trade",
+                click: function () {
+                  showTrade = !showTrade;
+                  const btn = document.querySelector(".fc-toggleTrade-button");
+                  if (btn) btn.classList.toggle("toggle-off", !showTrade);
+                  renderEvents();
+                },
+              },
+            },
+            headerToolbar: {
+              left: "prev,next today findCustomer",
+              center: "title toggleProjects,toggleTrade",
+              right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
+            },
+            height: "100%",
+            // Business hours: Mon-Fri 8:30am - 4:30pm
+            businessHours: {
+              daysOfWeek: [1, 2, 3, 4, 5], // Mon=1, Fri=5
+              startTime: "08:30",
+              endTime: "16:30",
+            },
+            slotMinTime: "06:00",   // show from 6am (some buffer before work)
+            slotMaxTime: "20:00",   // show until 8pm
+            nowIndicator: true,     // red line showing current time
+            weekends: true,         // show weekends but they'll be faded
+            slotEventOverlap: false, // overlapping events split into columns, no overlap
+            events: [],
+            // Fetch months outside the live window once when navigated to
+            datesSet: (info) => {
+              ensureRangeLoaded(info.start, info.end);
+            },
+            eventDidMount: (info) => {
+              // Force background color on the element and all children
+              // to defeat FullCalendar's internal semi-transparent overlays
+              const bg = info.event.backgroundColor;
+              if (bg) {
+                info.el.style.setProperty("background-color", bg, "important");
+                info.el.style.setProperty("border-color", bg, "important");
+                const children = info.el.querySelectorAll("*");
+                children.forEach((child) => {
+                  child.style.setProperty("background-color", "transparent", "important");
+                });
+              }
+            },
+            eventMouseEnter: (info) => {
+              // Remove any existing tooltip
+              const old = document.getElementById("fc-tooltip");
+              if (old) old.remove();
+
+              const p = info.event.extendedProps;
+              const start = info.event.start
+                ? info.event.start.toLocaleString()
+                : "";
+              const end = info.event.end
+                ? info.event.end.toLocaleString()
+                : "";
+
+              let html = `<div class="tt-title">${escapeHtml(info.event.title)}</div>`;
+              if (start) html += `<div class="tt-row"><span class="tt-label">Start</span><span>${escapeHtml(start)}</span></div>`;
+              if (end) html += `<div class="tt-row"><span class="tt-label">End</span><span>${escapeHtml(end)}</span></div>`;
+              if (p.calendarName) html += `<div class="tt-row"><span class="tt-label">Team</span><span>${escapeHtml(p.calendarName)}</span></div>`;
+              if (p.location) html += `<div class="tt-row"><span class="tt-label">Location</span><span>${escapeHtml(p.location)}</span></div>`;
+
+              // Hint that clicking opens project stats
+              const custNo = extractCustomerNo(info.event.title);
+              if (custNo && hasStats(custNo)) {
+                const name = getCustomerName(custNo);
+                html += `<div class="tt-hint">Click for the quote history of ${escapeHtml(name)} →</div>`;
+              }
+
+              const tooltip = document.createElement("div");
+              tooltip.id = "fc-tooltip";
+              tooltip.className = "event-tooltip";
+              tooltip.innerHTML = html;
+              document.body.appendChild(tooltip);
+
+              // Position below the event element
+              const rect = info.el.getBoundingClientRect();
+              tooltip.style.left = rect.left + "px";
+              tooltip.style.top = rect.bottom + 6 + window.scrollY + "px";
+
+              // Keep on screen
+              requestAnimationFrame(() => {
+                const tr = tooltip.getBoundingClientRect();
+                if (tr.right > window.innerWidth) {
+                  tooltip.style.left = (window.innerWidth - tr.width - 8) + "px";
+                }
+                if (tr.bottom > window.innerHeight + window.scrollY) {
+                  tooltip.style.top = (rect.top + window.scrollY - tr.height - 6) + "px";
+                }
+              });
+            },
+            eventMouseLeave: () => {
+              const tooltip = document.getElementById("fc-tooltip");
+              if (tooltip) tooltip.remove();
+            },
+            eventClick: (info) => {
+              info.jsEvent.preventDefault();
+              // Remove any hover tooltip first
+              const tooltip = document.getElementById("fc-tooltip");
+              if (tooltip) tooltip.remove();
+              openEventModal(info.event);
+            },
+          });
+          calendar.render();
+        }
+
+        // Re-render events with current filter/colors
+        renderEvents();
+      }
+
+      rerender = () => renderEvents();
+      function renderEvents() {
+        if (!calendar) return;
+
+        const hidden = new Set(settings.hiddenCalendars || []);
+        const colors = settings.calendarColors || {};
+
+        // Show events from visible calendars + always show holidays regardless
+        const filtered = visibleEvents().filter((e) => {
+          // Always show holidays
+          if (isHoliday(e)) return true;
+          // Admin panel visibility
+          if (hidden.has(e.calendarId)) return false;
+          // Projects/Trade toggle
+          if (e.calendarName === PROJECTS_CALENDAR && !showProjects) return false;
+          if (e.calendarName === TRADE_CALENDAR && !showTrade) return false;
+          // Hide Projects/Trade events without a customer number
+          if (
+            (e.calendarName === PROJECTS_CALENDAR || e.calendarName === TRADE_CALENDAR) &&
+            !extractCustomerNo(e.title)
+          ) return false;
+          return true;
+        });
+
+        // Update calendar
+        calendar.removeAllEvents();
+        filtered.forEach((d) => {
+          const holiday = isHoliday(d);
+          let bg;
+          if (holiday) {
+            bg = HOLIDAY_COLOR;
+          } else if (d.calendarName === PROJECTS_CALENDAR) {
+            bg = "#a9d18e";
+          } else if (d.calendarName === TRADE_CALENDAR) {
+            bg = "#f4b183";
+          } else {
+            bg = colors[d.calendarId] || d.color || "#94a3b8";
+          }
+          calendar.addEvent({
+            id: d.id,
+            title: d.title || "(no title)",
+            start: d.start,
+            end: d.end,
+            allDay: d.isAllDay || false,
+            backgroundColor: bg,
+            borderColor: bg,
+            extendedProps: {
+              calendarName: d.calendarName,
+              location: d.location,
+            },
+          });
+        });
+
+        // Update upcoming list
+        const listEl = document.getElementById("upcoming");
+        const now = new Date();
+        const upcoming = filtered
+          .filter((d) => new Date(d.start) >= now)
+          .slice(0, settings.upcomingCount || 10);
+
+        listEl.innerHTML = "";
+        upcoming.forEach((e) => {
+          const li = document.createElement("li");
+          const when = new Date(e.start).toLocaleString();
+          li.innerHTML = `<strong>${escapeHtml(
+            e.title || "(no title)"
+          )}</strong><br><span class="muted">${when}${
+            e.calendarName ? " &middot; " + escapeHtml(e.calendarName) : ""
+          }${e.location ? " &middot; " + escapeHtml(e.location) : ""}</span>`;
+          listEl.appendChild(li);
+        });
+
+        const statusEl = document.getElementById("status");
+        statusEl.textContent = `${filtered.length} booking${
+          filtered.length === 1 ? "" : "s"
+        } on screen · up to date`;
+      }
+
+      // Live listener on a window around today. History outside it stays in
+      // Firestore and is fetched on demand (customer popup, month navigation).
+      const today = startOfDay(new Date());
+      const liveFrom = new Date(today); liveFrom.setDate(liveFrom.getDate() - LIVE_BACK_DAYS);
+      const liveTo = new Date(today); liveTo.setDate(liveTo.getDate() + LIVE_AHEAD_DAYS + 1);
+      liveFromIso = liveFrom.toISOString();
+      liveToIso = liveTo.toISOString();
+      const q = query(
+        collection(db, "events"),
+        where("start", ">=", liveFromIso),
+        where("start", "<", liveToIso),
+        orderBy("start", "asc")
+      );
+      onSnapshot(
+        q,
+        (snap) => {
+          allEvents = [];
+          snap.forEach((d) => {
+            allEvents.push({ id: d.id, ...d.data() });
+          });
+          renderEvents();
+        },
+        (err) => {
+          document.getElementById("status").textContent =
+            "Error loading events: " + err.message;
+          console.error(err);
+        }
+      );
+    }
+
+    // DEMO: what the guided tour needs from inside this module
+    window.__demoCal = {
+      get calendar() { return calendar; },
+      openSearchModal, openCustomerModal, openEventModal,
+      events: () => visibleEvents(),
+      customerNoOf: extractCustomerNo,
+    };
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      }[c]));
+    }
+  </script>
+
+  <link rel="stylesheet" href="./styles.css?v=4" />
+
+<style>
+#demo-notice{position:fixed;inset:0;z-index:100001;display:flex;align-items:center;justify-content:center;background:rgba(15,23,42,.5);font-family:-apple-system,'Segoe UI',Roboto,sans-serif}
+#demo-notice .dn-card{background:#fff;color:#1e293b;max-width:460px;width:calc(100vw - 48px);padding:22px 26px 18px;border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.35);text-align:center}
+#demo-notice h3{margin:0 0 8px;font-size:17px;color:#0f172a}
+#demo-notice p{margin:0 0 16px;font-size:14px;line-height:1.5}
+#demo-notice button{background:#2563eb;color:#fff;border:none;border-radius:8px;padding:8px 22px;font-size:14px;cursor:pointer}
+#demo-chooser h1{color:#0f172a !important}
+/* month view: the time stays on one line beside a long title */
+.fc-daygrid-event .fc-daygrid-event-dot{display:none !important}
+.fc-daygrid-event .fc-event-time{flex:0 0 auto;min-width:4.5em;margin:0 7px 0 2px !important;text-align:right;white-space:nowrap !important;overflow:visible !important;font-weight:600;font-size:0.9em}
+</style>
+<script>
+(function () {
+  window.__DEMO_LOADED__ = true;      // nothing to pre-load: the chooser may run straight away
+  window.__DEMO_STORY__ = {"demo_today": "2026-11-20", "events": 888, "customers_with_history": 293, "hero": {"no": "10008", "name": "Westgate Construction Group Pty Ltd", "appointments": 13, "next_id": "ev00886", "next_start": "2026-11-23T23:00:00.000Z", "next_title": "10008 | Westgate Construction Group | Account review | Q-8326"}, "cal_a": {"id": "cal-projects", "name": "Project Estimating", "short": "Projects"}, "cal_b": {"id": "cal-trade", "name": "Trade Quoting", "short": "Trade"}, "erp_from": "2025-07-01"};
+  // the page is built without page scroll; keep it at the top whatever asks for a scroll
+  document.addEventListener("scroll", function () {
+    var b = document.body, h = document.documentElement;
+    if (b && b.scrollTop) b.scrollTop = 0;
+    if (h && h.scrollTop) h.scrollTop = 0;
+  }, true);
+  window.demoNotice = function (html, title) {
+    const old = document.getElementById("demo-notice"); if (old) old.remove();
+    const d = document.createElement("div"); d.id = "demo-notice";
+    d.innerHTML = "<div class='dn-card'><h3>" + (title || "Demo") + "</h3><p>" + html + "</p><button type='button'>OK</button></div>";
+    const close = () => d.remove();
+    d.addEventListener("click", e => { if (e.target === d || e.target.tagName === "BUTTON") close(); });
+    document.body.appendChild(d); d.querySelector("button").focus();
+  };
+})();
+</script>
+
+<link rel="stylesheet" href="tour/demo-chooser.css">
+<script>
+window.DEMO_CHOOSER = {
+  key: "ironbark-team-calendar",
+  title: "Team Calendar",
+  blurb: "A read-only view of two teams' diaries that anyone in the business can open, shown for a fictional industrial hardware distributor. Click a booking and the customer's whole quote history is there: what was won, what was lost and what is still open, with every earlier visit underneath. Every customer and booking is invented."
+};
+</script>
+<script src="tour/demo-chooser.js" defer></script>
+<link rel="stylesheet" href="tour/tour.css">
+<script src="tour/tour.js" defer></script>
+</head>
+<body><div id="demo-banner" style="flex-shrink:0;z-index:99999;background:#fef3c7;color:#92400e;padding:0.4rem 1rem;text-align:center;font-size:0.78rem;font-weight:600;border-bottom:1px solid #fbbf24;font-family:-apple-system,'Segoe UI',Roboto,sans-serif">Demo &middot; fully synthetic data (Ironbark Tools &amp; Fasteners Pty Ltd is not a real company) &middot; demo calendar: today is <b>2026-11-20</b> &middot; <a href="javascript:(window.DemoChooser?DemoChooser.reset():location.reload())" style="color:#92400e;text-decoration:underline">Start again</a></div>
+  <header>
+    <div>
+      <h1 id="page-title">Team Calendar</h1>
+      <p id="status" class="muted">Loading…</p>
+    </div>
+    <div id="user-info" class="muted" style="display:none">
+      <span></span> · <a href="#" id="sign-out-btn">Sign out</a>
+    </div>
+  </header>
+
+  <!-- Sign-in gate: shown until a Ironbark account is signed in -->
+  <div id="auth-gate" class="auth-gate" style="display:none">
+    <div class="auth-card">
+      <h2>Team Calendar</h2>
+      <p class="muted">Staff only. Enter your Ironbark email and we'll send you a sign-in link.</p>
+      <form id="auth-link-form" autocomplete="on">
+        <input type="email" id="auth-email" placeholder="you@ironbarktools.example" required autocomplete="email" />
+        <button type="submit">Send me a sign-in link</button>
+      </form>
+      <form id="auth-admin-form" style="display:none" autocomplete="on">
+        <input type="email" id="auth-admin-email" placeholder="admin email" required autocomplete="username" />
+        <input type="password" id="auth-admin-password" placeholder="password" required autocomplete="current-password" />
+        <button type="submit">Sign in</button>
+      </form>
+      <p id="auth-msg" class="auth-msg"></p>
+      <a href="#" id="auth-admin-toggle" class="auth-admin-toggle">Admin sign in with password</a>
+    </div>
+  </div>
+
+  <main style="display:none">
+    <section id="calendar-wrap">
+      <div id="calendar"></div>
+    </section>
+
+    <aside id="sidebar">
+      <h2>Coming up</h2>
+      <ul id="upcoming"></ul>
+    </aside>
+  </main>
+
+  <footer style="display:none">
+    <p class="muted">
+      View only. Bookings are made in each team's own diary and appear here by themselves.
+    </p>
+  </footer>
+
+  <!-- Click-to-open event detail modal -->
+  <div id="modal-overlay" class="modal-overlay">
+    <div class="modal" id="modal-body"></div>
+  </div>
+
+  <script>
+    // Close modal on backdrop click
+    document.getElementById("modal-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "modal-overlay") {
+        document.getElementById("modal-overlay").classList.remove("show");
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        document.getElementById("modal-overlay").classList.remove("show");
+      }
+    });
+  </script>
+</body>
+</html>
